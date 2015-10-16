@@ -1,10 +1,9 @@
+using System;
+using RabbitMQ.Client;
+using RabbitMQ.Client.Framing.Impl;
+
 namespace Carrot.Messaging
 {
-    using System;
-
-    using RabbitMQ.Client;
-    using RabbitMQ.Client.Framing.Impl;
-
     public class AmqpChannel : IDisposable
     {
         private readonly IConnection _connection;
@@ -12,8 +11,8 @@ namespace Carrot.Messaging
 
         private AmqpChannel(IConnection connection, IModel model)
         {
-            this._connection = connection;
-            this._model = model;
+            _connection = connection;
+            _model = model;
         }
 
         public static AmqpChannel New(String endpointUrl)
@@ -30,7 +29,7 @@ namespace Carrot.Messaging
 
         public MessageQueue Bind(String name, String exchange, String routingKey)
         {
-            return MessageQueue.New(this._model, name, exchange, routingKey);
+            return MessageQueue.New(_model, name, exchange, routingKey);
         }
 
         private static IModel CreateModel(IConnection connection)
@@ -42,11 +41,11 @@ namespace Carrot.Messaging
 
         public void Dispose()
         {
-            if (this._model != null)
-                this._model.Dispose();
+            if (_model != null)
+                _model.Dispose();
 
-            if (this._connection != null)
-                this._connection.Dispose();
+            if (_connection != null)
+                _connection.Dispose();
         }
     }
 }

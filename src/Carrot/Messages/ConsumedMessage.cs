@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Carrot.Extensions;
 using Carrot.Messaging;
 
 namespace Carrot.Messages
@@ -19,9 +20,26 @@ namespace Carrot.Messages
             _content = content;
         }
 
+        internal interface IConsumingResult { }
+
         internal override Object Content
         {
             get { return _content; }
+        }
+
+        private static IAggregateConsumingResult AggregateResult(Task<IConsumingResult[]> task)
+        {
+            return task.Result.OfType<Failure>().Any()
+                ? Messages.Failure.Build(task.Result)
+                : new Messages.Success();
+        }
+
+        private static IConsumingResult ConsumingResult(Task task)
+        {
+            if (task.Exception != null)
+                return new Failure(task.Exception.GetBaseException());
+
+            return new Success();
         }
 
         private Boolean Match(Type type)
@@ -32,40 +50,23 @@ namespace Carrot.Messages
         internal override Task<IAggregateConsumingResult> Consume(IDictionary<Type, IConsumer> subscriptions)
         {
             return Task.WhenAll(subscriptions.Where(_ => Match(_.Key))
-                                             .Select(_ => new ConsumerWrapper(_.Value).Consume(this)))
-                       .ContinueWith(_ => _.Result
-                                           .OfType<ConsumerWrapper.Failure>()
-                                           .Any() ? Failure.Build(_.Result) : (IAggregateConsumingResult)new Success());
+                                             .Select(_ => Task<Task>.Factory
+                                                                    .StartNew(_.Value.Consume, this)
+                                                                    .Unwrap()
+                                                                    .ContinueWith<IConsumingResult>(ConsumingResult)))
+                       .ContinueWith<IAggregateConsumingResult>(AggregateResult);
         }
-    }
 
-    public interface IAggregateConsumingResult
-    {
-    }
-
-    public class Failure : IAggregateConsumingResult
-    {
-        private readonly Exception[] _exceptions;
-
-        protected Failure(params Exception[] exceptions)
+        internal class Failure : IConsumingResult
         {
-            _exceptions = exceptions;
+            internal readonly Exception Exception;
+
+            internal Failure(Exception exception)
+            {
+                Exception = exception;
+            }
         }
 
-        public Exception[] Exceptions
-        {
-            get { return _exceptions ?? new Exception[] { }; }
-        }
-
-        internal static IAggregateConsumingResult Build(ConsumerWrapper.IConsumingResult[] results)
-        {
-            return new Failure(results.OfType<ConsumerWrapper.Failure>()
-                                      .Select(_ => _.Exception)
-                                      .ToArray());
-        }
-    }
-
-    public class Success : IAggregateConsumingResult
-    {
+        internal class Success : IConsumingResult { }
     }
 }

@@ -1,7 +1,7 @@
+using System;
+
 namespace Carrot.Messaging
 {
-    using System;
-
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
     public class MessageBindingAttribute : Attribute
     {
@@ -9,12 +9,12 @@ namespace Carrot.Messaging
 
         public MessageBindingAttribute(String messageType)
         {
-            this._messageType = messageType;
+            _messageType = messageType;
         }
 
         public String MessageType
         {
-            get { return this._messageType; }
+            get { return _messageType; }
         }
     }
 }

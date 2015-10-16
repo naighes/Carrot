@@ -1,8 +1,8 @@
+using System;
+using System.Text;
+
 namespace Carrot.Serialization
 {
-    using System;
-    using System.Text;
-
     public class NullSerializer : ISerializer
     {
         public static readonly ISerializer Instance = new NullSerializer();

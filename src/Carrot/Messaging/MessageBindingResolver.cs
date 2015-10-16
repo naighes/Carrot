@@ -1,17 +1,17 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+
 namespace Carrot.Messaging
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Reflection;
-
-    public class AppDomainAssembliesResolver : IMessageTypeResolver
+    public class MessageBindingResolver : IMessageTypeResolver
     {
         private readonly IDictionary<String, Type> _internalMap;
 
-        public AppDomainAssembliesResolver(params Assembly[] assemblies)
+        public MessageBindingResolver(params Assembly[] assemblies)
         {
-            this._internalMap = assemblies.SelectMany(_ => _.GetTypes())
+            _internalMap = assemblies.SelectMany(_ => _.GetTypes())
                                      .Where(_ => _.GetCustomAttribute<MessageBindingAttribute>(false) != null)
                                      .ToDictionary(_ => _.GetCustomAttribute<MessageBindingAttribute>(false)
                                                          .MessageType,
@@ -23,8 +23,8 @@ namespace Carrot.Messaging
             if (source == null)
                 throw new ArgumentNullException("source");
 
-            return this._internalMap.ContainsKey(source)
-                       ? new MessageType(source, this._internalMap[source])
+            return _internalMap.ContainsKey(source)
+                       ? new MessageType(source, _internalMap[source])
                        : EmptyMessageType.Instance;
         }
     }
