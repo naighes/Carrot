@@ -1,7 +1,7 @@
-using System;
-
-namespace TowerBridge.Common.Infrastructure.Messaging
+namespace Carrot.Messaging
 {
+    using System;
+
     public class MessageType : IEquatable<MessageType>
     {
         public readonly String RawName;
@@ -9,8 +9,8 @@ namespace TowerBridge.Common.Infrastructure.Messaging
 
         internal MessageType(String rawName, Type runtimeType)
         {
-            RawName = rawName;
-            RuntimeType = runtimeType;
+            this.RawName = rawName;
+            this.RuntimeType = runtimeType;
         }
 
         public static Boolean operator ==(MessageType left, MessageType right)
@@ -31,7 +31,7 @@ namespace TowerBridge.Common.Infrastructure.Messaging
             if (ReferenceEquals(this, other))
                 return true;
 
-            return String.Equals(RawName, other.RawName);
+            return String.Equals(this.RawName, other.RawName);
         }
 
         public override Boolean Equals(Object obj)
@@ -43,12 +43,12 @@ namespace TowerBridge.Common.Infrastructure.Messaging
                 return true;
 
             var other = obj as MessageType;
-            return other != null && Equals(other);
+            return other != null && this.Equals(other);
         }
 
         public override Int32 GetHashCode()
         {
-            return RawName != null ? RawName.GetHashCode() : 0;
+            return this.RawName != null ? this.RawName.GetHashCode() : 0;
         }
     }
 }

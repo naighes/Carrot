@@ -1,8 +1,8 @@
-using System;
-using System.Collections.Generic;
-
-namespace TowerBridge.Common.Infrastructure.Messaging
+namespace Carrot.Messaging
 {
+    using System;
+    using System.Collections.Generic;
+
     public class SubscriptionConfiguration
     {
         private readonly IDictionary<Type, IConsumer> _subscriptions = new Dictionary<Type, IConsumer>();
@@ -14,7 +14,7 @@ namespace TowerBridge.Common.Infrastructure.Messaging
 
         public void Consume<TMessage>(Consumer<TMessage> consumer) where TMessage : class
         {
-            _subscriptions.Add(typeof(TMessage), consumer);
+            this._subscriptions.Add(typeof(TMessage), consumer);
         }
     }
 }

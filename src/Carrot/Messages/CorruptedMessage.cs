@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using TowerBridge.Common.Infrastructure.Messaging;
+using Carrot.Messaging;
 
-namespace TowerBridge.Common.Infrastructure.Messages
+namespace Carrot.Messages
 {
     public class CorruptedMessage : ConsumedMessageBase
     {

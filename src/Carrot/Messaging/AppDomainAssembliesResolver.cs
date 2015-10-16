@@ -1,17 +1,17 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-
-namespace TowerBridge.Common.Infrastructure.Messaging
+namespace Carrot.Messaging
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Reflection;
+
     public class AppDomainAssembliesResolver : IMessageTypeResolver
     {
         private readonly IDictionary<String, Type> _internalMap;
 
         public AppDomainAssembliesResolver(params Assembly[] assemblies)
         {
-            _internalMap = assemblies.SelectMany(_ => _.GetTypes())
+            this._internalMap = assemblies.SelectMany(_ => _.GetTypes())
                                      .Where(_ => _.GetCustomAttribute<MessageBindingAttribute>(false) != null)
                                      .ToDictionary(_ => _.GetCustomAttribute<MessageBindingAttribute>(false)
                                                          .MessageType,
@@ -23,8 +23,8 @@ namespace TowerBridge.Common.Infrastructure.Messaging
             if (source == null)
                 throw new ArgumentNullException("source");
 
-            return _internalMap.ContainsKey(source)
-                       ? new MessageType(source, _internalMap[source])
+            return this._internalMap.ContainsKey(source)
+                       ? new MessageType(source, this._internalMap[source])
                        : EmptyMessageType.Instance;
         }
     }

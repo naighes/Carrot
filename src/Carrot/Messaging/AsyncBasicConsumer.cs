@@ -1,14 +1,12 @@
 using System;
 using System.Text;
+using Carrot.Messages;
+using Carrot.Serialization;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
-using TowerBridge.Common.Infrastructure.Messages;
-using TowerBridge.Common.Infrastructure.Serialization;
 
-namespace TowerBridge.Common.Infrastructure.Messaging
+namespace Carrot.Messaging
 {
-    using System.Threading.Tasks;
-
     public class AsyncBasicConsumer : DefaultBasicConsumer
     {
         private readonly IMessageTypeResolver _resolver;

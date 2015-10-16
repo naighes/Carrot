@@ -1,22 +1,22 @@
-using System;
-using System.Collections.Generic;
-
-namespace TowerBridge.Common.Infrastructure.Serialization
+namespace Carrot.Serialization
 {
+    using System;
+    using System.Collections.Generic;
+
     public class SerializerFactory : ISerializerFactory
     {
         private readonly IDictionary<String, ISerializer> _serializers;
 
         public SerializerFactory(IDictionary<String, ISerializer> serializers = null)
         {
-            _serializers = serializers ?? new Dictionary<String, ISerializer> { { "application/json", new JsonSerializer() } };
+            this._serializers = serializers ?? new Dictionary<String, ISerializer> { { "application/json", new JsonSerializer() } };
         }
 
         public ISerializer Create(String contentType)
         {
-            return !_serializers.ContainsKey(contentType)
+            return !this._serializers.ContainsKey(contentType)
                        ? NullSerializer.Instance
-                       : _serializers[contentType];
+                       : this._serializers[contentType];
         }
     }
 }

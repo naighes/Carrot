@@ -1,16 +1,17 @@
-using System;
-using System.Threading.Tasks;
-using TowerBridge.Common.Infrastructure.Messaging;
-
-namespace TowerBridge.Common.Infrastructure.Messages
+namespace Carrot.Messages
 {
+    using System;
+    using System.Threading.Tasks;
+
+    using Carrot.Messaging;
+
     internal class ConsumerWrapper
     {
         private readonly IConsumer _consumer;
 
         internal ConsumerWrapper(IConsumer consumer)
         {
-            _consumer = consumer;
+            this._consumer = consumer;
         }
 
         internal interface IConsumingResult
@@ -19,7 +20,7 @@ namespace TowerBridge.Common.Infrastructure.Messages
 
         internal Task<IConsumingResult> Consume(ConsumedMessageBase message)
         {
-            return _consumer.Consume(message)
+            return this._consumer.Consume(message)
                             .ContinueWith<IConsumingResult>(_ =>
                                                             {
                                                                 if (_.Exception != null)
@@ -35,7 +36,7 @@ namespace TowerBridge.Common.Infrastructure.Messages
 
             internal Failure(Exception exception)
             {
-                Exception = exception;
+                this.Exception = exception;
             }
         }
 

@@ -2,7 +2,7 @@ using System;
 using System.Text;
 using Newtonsoft.Json;
 
-namespace TowerBridge.Common.Infrastructure.Serialization
+namespace Carrot.Serialization
 {
     public class JsonSerializer : ISerializer
     {

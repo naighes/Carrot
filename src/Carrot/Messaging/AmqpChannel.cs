@@ -1,9 +1,10 @@
-using System;
-using RabbitMQ.Client;
-using RabbitMQ.Client.Framing.Impl;
-
-namespace TowerBridge.Common.Infrastructure.Messaging
+namespace Carrot.Messaging
 {
+    using System;
+
+    using RabbitMQ.Client;
+    using RabbitMQ.Client.Framing.Impl;
+
     public class AmqpChannel : IDisposable
     {
         private readonly IConnection _connection;
@@ -11,8 +12,8 @@ namespace TowerBridge.Common.Infrastructure.Messaging
 
         private AmqpChannel(IConnection connection, IModel model)
         {
-            _connection = connection;
-            _model = model;
+            this._connection = connection;
+            this._model = model;
         }
 
         public static AmqpChannel New(String endpointUrl)
@@ -29,7 +30,7 @@ namespace TowerBridge.Common.Infrastructure.Messaging
 
         public MessageQueue Bind(String name, String exchange, String routingKey)
         {
-            return MessageQueue.New(_model, name, exchange, routingKey);
+            return MessageQueue.New(this._model, name, exchange, routingKey);
         }
 
         private static IModel CreateModel(IConnection connection)
@@ -41,11 +42,11 @@ namespace TowerBridge.Common.Infrastructure.Messaging
 
         public void Dispose()
         {
-            if (_model != null)
-                _model.Dispose();
+            if (this._model != null)
+                this._model.Dispose();
 
-            if (_connection != null)
-                _connection.Dispose();
+            if (this._connection != null)
+                this._connection.Dispose();
         }
     }
 }

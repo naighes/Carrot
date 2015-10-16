@@ -1,7 +1,7 @@
-using System;
-
-namespace TowerBridge.Common.Infrastructure.Serialization
+namespace Carrot.Serialization
 {
+    using System;
+
     public interface ISerializerFactory
     {
         ISerializer Create(String contentType);

@@ -1,4 +1,4 @@
-namespace TowerBridge.Common.Infrastructure.Messaging
+namespace Carrot.Messaging
 {
     public class EmptyMessageType : MessageType
     {

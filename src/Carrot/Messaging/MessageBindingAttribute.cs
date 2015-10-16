@@ -1,7 +1,7 @@
-using System;
-
-namespace TowerBridge.Common.Infrastructure.Messaging
+namespace Carrot.Messaging
 {
+    using System;
+
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
     public class MessageBindingAttribute : Attribute
     {
@@ -9,12 +9,12 @@ namespace TowerBridge.Common.Infrastructure.Messaging
 
         public MessageBindingAttribute(String messageType)
         {
-            _messageType = messageType;
+            this._messageType = messageType;
         }
 
         public String MessageType
         {
-            get { return _messageType; }
+            get { return this._messageType; }
         }
     }
 }

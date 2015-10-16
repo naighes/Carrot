@@ -1,10 +1,12 @@
-using System;
-using System.Collections.Generic;
-using RabbitMQ.Client;
-using TowerBridge.Common.Infrastructure.Serialization;
-
-namespace TowerBridge.Common.Infrastructure.Messaging
+namespace Carrot.Messaging
 {
+    using System;
+    using System.Collections.Generic;
+
+    using Carrot.Serialization;
+
+    using RabbitMQ.Client;
+
     public class MessageQueue
     {
         private readonly String _name;
@@ -12,8 +14,8 @@ namespace TowerBridge.Common.Infrastructure.Messaging
 
         private MessageQueue(String name, IModel model)
         {
-            _name = name;
-            _model = model;
+            this._name = name;
+            this._model = model;
         }
 
         public static MessageQueue New(IModel model,
@@ -31,9 +33,9 @@ namespace TowerBridge.Common.Infrastructure.Messaging
         {
             var configuration = new SubscriptionConfiguration();
             configure(configuration);
-            _model.BasicConsume(_name, 
+            this._model.BasicConsume(this._name, 
                                 false, 
-                                new AsyncBasicConsumer(_model,
+                                new AsyncBasicConsumer(this._model,
                                                        new AppDomainAssembliesResolver(typeof(Object).Assembly), // TODO
                                                        new SerializerFactory(),
                                                        configuration));
