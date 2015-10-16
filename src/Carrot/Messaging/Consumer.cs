@@ -19,26 +19,27 @@ namespace Carrot.Messaging
             if (!(message is ConsumedMessage)) 
                 throw _errorMap[message.GetType()]();
 
-            return Consume(Message<TMessage>.Build(message));
+            return Consume(message.As<TMessage>());
         }
     }
 
     public class Message<TMessage> where TMessage : class
     {
         private readonly TMessage _content;
+        private readonly HeaderCollection _headers;
 
-        private Message(TMessage content)
+        internal Message(TMessage content, HeaderCollection headers)
         {
             _content = content;
+            _headers = headers;
         }
 
-        public static Message<TMessage> Build(ConsumedMessageBase message)
+        public class HeaderCollection : Dictionary<String, Object>
         {
-            var content = message.Content as TMessage;
-
-            // TODO: check is proper type.
-
-            return new Message<TMessage>(content);
+            public String MessageId
+            {
+                get { return this["id"] as String; }
+            }
         }
     }
 }

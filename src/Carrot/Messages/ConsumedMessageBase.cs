@@ -18,8 +18,25 @@ namespace Carrot.Messages
             Redelivered = redelivered;
         }
 
-        public abstract Object Content { get; }
+        internal abstract Object Content { get; }
 
         internal abstract Task<IAggregateConsumingResult> Consume(IDictionary<Type, IConsumer> subscriptions);
+
+        internal Message<TMessage> As<TMessage>() where TMessage : class
+        {
+            var content = Content as TMessage;
+
+            // TODO: check is proper type.
+
+            return new Message<TMessage>(content, FillHeaders<TMessage>());
+        }
+
+        private Message<TMessage>.HeaderCollection FillHeaders<TMessage>() where TMessage : class
+        {
+            return new Message<TMessage>.HeaderCollection
+                       {
+                           { "message_id", MessageId }
+                       };
+        }
     }
 }

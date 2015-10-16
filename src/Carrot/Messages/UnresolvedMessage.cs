@@ -12,7 +12,7 @@ namespace Carrot.Messages
         {
         }
 
-        public override Object Content
+        internal override Object Content
         {
             get { return null; }
         }
