@@ -30,6 +30,10 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Newtonsoft.Json, Version=7.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.7.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="RabbitMQ.Client, Version=3.5.6.0, Culture=neutral, PublicKeyToken=89e7d7c5feba84ce, processorArchitecture=MSIL">
       <HintPath>..\packages\RabbitMQ.Client.3.5.6\lib\net40\RabbitMQ.Client.dll</HintPath>
       <Private>True</Private>
@@ -43,7 +47,29 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Messages\ConsumedMessage.cs" />
+    <Compile Include="Messages\ConsumedMessageBase.cs" />
+    <Compile Include="Messages\ConsumerWrapper.cs" />
+    <Compile Include="Messages\CorruptedMessage.cs" />
+    <Compile Include="Messages\UnresolvedMessage.cs" />
+    <Compile Include="Messages\UnsupportedMessage.cs" />
+    <Compile Include="Messaging\AmqpChannel.cs" />
+    <Compile Include="Messaging\AppDomainAssembliesResolver.cs" />
+    <Compile Include="Messaging\AsyncBasicConsumer.cs" />
+    <Compile Include="Messaging\Consumer.cs" />
+    <Compile Include="Messaging\EmptyMessageType.cs" />
+    <Compile Include="Messaging\IConsumer.cs" />
+    <Compile Include="Messaging\IMessageTypeResolver.cs" />
+    <Compile Include="Messaging\MessageBindingAttribute.cs" />
+    <Compile Include="Messaging\MessageQueue.cs" />
+    <Compile Include="Messaging\MessageType.cs" />
+    <Compile Include="Messaging\SubscriptionConfiguration.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Serialization\ISerializer.cs" />
+    <Compile Include="Serialization\ISerializerFactory.cs" />
+    <Compile Include="Serialization\JsonSerializer.cs" />
+    <Compile Include="Serialization\NullSerializer.cs" />
+    <Compile Include="Serialization\SerializerFactory.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

@@ -3,10 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using RabbitMQ.Client;
+using RabbitMQ.Client.Framing.Impl;
 
 namespace Carrot.Tests
 {
-    public class Class1
+    class MyClass
     {
+        void Main()
+        {
+        }
     }
 }
