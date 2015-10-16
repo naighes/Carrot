@@ -6,8 +6,6 @@ using Carrot.Messaging;
 
 namespace Carrot.Messages
 {
-    using System.Collections.Generic;
-
     public class ConsumedMessage : ConsumedMessageBase
     {
         private readonly Object _content;
@@ -30,11 +28,8 @@ namespace Carrot.Messages
 
         private static IAggregateConsumingResult AggregateResult(Task<IConsumingResult[]> task)
         {
-            var a = task.Result;
-            var b = a.OfType<Failure>();
-            var c = b.Any();
-            return c
-                ? Messages.Failure.Build(a)
+            return task.Result.OfType<Failure>().Any()
+                ? Messages.Failure.Build(task.Result)
                 : new Messages.Success();
         }
 

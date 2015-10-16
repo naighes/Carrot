@@ -7,6 +7,7 @@ namespace Carrot.Messaging
 {
     public abstract class Consumer<TMessage> : IConsumer where TMessage : class
     {
+        // TODO
         private readonly IDictionary<Type, Func<Exception>> _errorMap = new Dictionary<Type, Func<Exception>>
                                                                             {
                                                                                 { typeof(UnresolvedMessage), () => new Exception("message cannot be resolved") }

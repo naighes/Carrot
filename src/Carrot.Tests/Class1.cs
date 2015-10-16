@@ -1,6 +1,6 @@
 ﻿using System;
-using System.Threading.Tasks;
 using System.Linq;
+using System.Threading.Tasks;
 using Carrot.Messages;
 using Carrot.Messaging;
 using Xunit;
@@ -26,6 +26,16 @@ namespace Carrot.Tests
 
     public class Consuming
     {
+        [Fact]
+        public void NestedConsumerConsumingSuccesfully()
+        {
+            var configuration = new SubscriptionConfiguration();
+            configuration.Consumes(new FakeConsumer(_ => Task.Factory.StartNew(() => { })));
+            var result = new ConsumedMessage(new Foo(), null, 0, false).ConsumeAsync(configuration)
+                                                                       .Result;
+            Assert.IsType<Success>(result);
+        }
+
         [Fact]
         public void NestedConsumerThrows()
         {
