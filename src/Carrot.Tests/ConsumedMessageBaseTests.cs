@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Carrot.Messages;
@@ -7,24 +7,7 @@ using Xunit;
 
 namespace Carrot.Tests
 {
-    public class FakeConsumer : Consumer<Foo>
-    {
-        private readonly Func<Message<Foo>, Task> _func;
-
-        public FakeConsumer(Func<Message<Foo>, Task> func)
-        {
-            _func = func;
-        }
-
-        public override Task Consume(Message<Foo> message)
-        {
-            return _func(message);
-        }
-    }
-
-    public class Foo { }
-
-    public class Consuming
+    public class ConsumedMessageBaseTests
     {
         [Fact]
         public void NestedConsumerConsumingSuccesfully()
@@ -78,6 +61,23 @@ namespace Carrot.Tests
             var actual = Assert.IsType<UnsupportedMessageFailure>(result);
             Assert.Equal(0, actual.Exceptions.Length);
         }
+
+        public class FakeConsumer : Consumer<Foo>
+        {
+            private readonly Func<Message<Foo>, Task> _func;
+
+            public FakeConsumer(Func<Message<Foo>, Task> func)
+            {
+                _func = func;
+            }
+
+            public override Task Consume(Message<Foo> message)
+            {
+                return _func(message);
+            }
+        }
+
+        public class Foo { }
 
         internal class FakeMessage : ConsumedMessage
         {

@@ -22,5 +22,7 @@ namespace Carrot.Messaging
 
             return Consume(message.As<TMessage>());
         }
+
+        public virtual void OnError(Exception exception) { }
     }
 }
