@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Threading.Tasks;
+using System.Linq;
 using Carrot.Messages;
 using Carrot.Messaging;
 using Xunit;
 
 namespace Carrot.Tests
 {
-    using System.Linq;
-
     public class FakeConsumer : Consumer<Foo>
     {
         private readonly Func<Message<Foo>, Task> _func;
@@ -23,11 +22,9 @@ namespace Carrot.Tests
         }
     }
 
-    public class Foo
-    {
-    }
+    public class Foo { }
 
-    public class OuterConsumerTests
+    public class Consuming
     {
         [Fact]
         public void NestedConsumerThrows()
@@ -43,6 +40,33 @@ namespace Carrot.Tests
                          actual.Exceptions
                                .First()
                                .Message);
+        }
+
+        [Fact]
+        public void OnCorruptedMessage()
+        {
+            var result = new CorruptedMessage(null, 0, false).ConsumeAsync(null)
+                                                             .Result;
+            var actual = Assert.IsType<CorruptedMessageFailure>(result);
+            Assert.Equal(0, actual.Exceptions.Length);
+        }
+
+        [Fact]
+        public void OnUnresolvedMessage()
+        {
+            var result = new UnresolvedMessage(null, 0, false).ConsumeAsync(null)
+                                                              .Result;
+            var actual = Assert.IsType<UnresolvedMessageFailure>(result);
+            Assert.Equal(0, actual.Exceptions.Length);
+        }
+
+        [Fact]
+        public void OnUnsupportedMessage()
+        {
+            var result = new UnsupportedMessage(null, 0, false).ConsumeAsync(null)
+                                                               .Result;
+            var actual = Assert.IsType<UnsupportedMessageFailure>(result);
+            Assert.Equal(0, actual.Exceptions.Length);
         }
 
         internal class FakeMessage : ConsumedMessage
