@@ -6,9 +6,9 @@ namespace Carrot.Tests
 {
     public class SampleConsumer : Consumer<Foo>
     {
-        public override Task Consume(Foo message)
+        public override Task Consume(Message<Foo> message)
         {
-            return null;
+            throw new NotImplementedException();
         }
     }
 

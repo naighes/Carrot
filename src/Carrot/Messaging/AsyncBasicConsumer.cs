@@ -53,13 +53,6 @@ namespace Carrot.Messaging
             var message = ReadMessage(e);
 
             message.Consume(_configuration.Subscriptions);
-            //Task.WhenAll(_configuration.Subscriptions(message).Process(message, Model))
-            //    .ContinueWith(_ =>
-            //                  {
-            // TODO: on error -> 
-            //      redelivered -> DDQ      -> ack
-            //      else        -> retry    -> nack
-            //});
         }
 
         private ConsumedMessageBase ReadMessage(BasicDeliverEventArgs args)
