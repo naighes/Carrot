@@ -28,6 +28,7 @@ namespace Carrot.Messages
 
         private static IAggregateConsumingResult AggregateResult(Task<IConsumingResult[]> task)
         {
+            // TODO: should check for empty result. It means somethong went wrong.
             return task.Result.OfType<Failure>().Any()
                 ? Messages.Failure.Build(task.Result)
                 : new Messages.Success();

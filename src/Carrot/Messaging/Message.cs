@@ -19,11 +19,16 @@ namespace Carrot.Messaging
             get { return _content; }
         }
 
+        public HeaderCollection Headers
+        {
+            get { return _headers; }
+        }
+
         public class HeaderCollection : Dictionary<String, Object>
         {
             public String MessageId
             {
-                get { return this["id"] as String; }
+                get { return this["message_id"] as String; }
             }
         }
     }

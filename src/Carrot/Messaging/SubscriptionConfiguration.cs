@@ -16,7 +16,8 @@ namespace Carrot.Messaging
 
         internal IDictionary<Type, IConsumer> FindSubscriptions(ConsumedMessageBase message)
         {
-            return _subscriptions.Where(_ => message.Match(_.Key)).ToDictionary(_ => _.Key, _ => _.Value);
+            return _subscriptions.Where(_ => message.Match(_.Key))
+                                 .ToDictionary(_ => _.Key, _ => _.Value);
         }
     }
 }

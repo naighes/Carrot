@@ -69,7 +69,10 @@ namespace Carrot.Tests
 
     internal class FakeConsumedMessage : ConsumedMessage
     {
-        internal FakeConsumedMessage(Object content, String messageId, UInt64 deliveryTag, Boolean redelivered)
+        internal FakeConsumedMessage(Object content, 
+                                     String messageId, 
+                                     UInt64 deliveryTag, 
+                                     Boolean redelivered)
             : base(content, messageId, deliveryTag, redelivered)
         {
         }
