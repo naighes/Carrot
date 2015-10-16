@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using Carrot.Messaging;
 
@@ -20,7 +19,7 @@ namespace Carrot.Messages
 
         internal abstract Object Content { get; }
 
-        internal abstract Task<IAggregateConsumingResult> Consume(IDictionary<Type, IConsumer> subscriptions);
+        internal abstract Task<IAggregateConsumingResult> ConsumeAsync(SubscriptionConfiguration configuration);
 
         internal Message<TMessage> As<TMessage>() where TMessage : class
         {
@@ -38,5 +37,7 @@ namespace Carrot.Messages
                            { "message_id", MessageId }
                        };
         }
+
+        internal abstract Boolean Match(Type type);
     }
 }

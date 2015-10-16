@@ -52,7 +52,7 @@ namespace Carrot.Messaging
 
             var message = ReadMessage(e);
 
-            message.Consume(_configuration.Subscriptions);
+            message.ConsumeAsync(_configuration);
         }
 
         private ConsumedMessageBase ReadMessage(BasicDeliverEventArgs args)

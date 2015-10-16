@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Carrot.Extensions;
@@ -7,6 +6,8 @@ using Carrot.Messaging;
 
 namespace Carrot.Messages
 {
+    using System.Collections.Generic;
+
     public class ConsumedMessage : ConsumedMessageBase
     {
         private readonly Object _content;
@@ -29,8 +30,11 @@ namespace Carrot.Messages
 
         private static IAggregateConsumingResult AggregateResult(Task<IConsumingResult[]> task)
         {
-            return task.Result.OfType<Failure>().Any()
-                ? Messages.Failure.Build(task.Result)
+            var a = task.Result;
+            var b = a.OfType<Failure>();
+            var c = b.Any();
+            return c
+                ? Messages.Failure.Build(a)
                 : new Messages.Success();
         }
 
@@ -42,14 +46,14 @@ namespace Carrot.Messages
             return new Success();
         }
 
-        private Boolean Match(Type type)
+        internal override Boolean Match(Type type)
         {
             return Content != null && type.IsInstanceOfType(Content);
         }
 
-        internal override Task<IAggregateConsumingResult> Consume(IDictionary<Type, IConsumer> subscriptions)
+        internal override Task<IAggregateConsumingResult> ConsumeAsync(SubscriptionConfiguration configuration)
         {
-            return Task.WhenAll(subscriptions.Where(_ => Match(_.Key))
+            return Task.WhenAll(configuration.FindSubscriptions(this)
                                              .Select(_ => Task<Task>.Factory
                                                                     .StartNew(_.Value.Consume, this)
                                                                     .Unwrap()

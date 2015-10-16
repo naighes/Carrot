@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using Carrot.Messaging;
 
@@ -17,9 +16,14 @@ namespace Carrot.Messages
             get { return null; }
         }
 
-        internal override Task<IAggregateConsumingResult> Consume(IDictionary<Type, IConsumer> subscriptions)
+        internal override Task<IAggregateConsumingResult> ConsumeAsync(SubscriptionConfiguration configuration)
         {
             return Task.FromResult((IAggregateConsumingResult)new UnresolvedMessageFailure());
+        }
+
+        internal override Boolean Match(Type type)
+        {
+            return false;
         }
     }
 
