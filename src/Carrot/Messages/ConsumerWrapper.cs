@@ -1,17 +1,16 @@
+using System;
+using System.Threading.Tasks;
+using Carrot.Messaging;
+
 namespace Carrot.Messages
 {
-    using System;
-    using System.Threading.Tasks;
-
-    using Carrot.Messaging;
-
     internal class ConsumerWrapper
     {
         private readonly IConsumer _consumer;
 
         internal ConsumerWrapper(IConsumer consumer)
         {
-            this._consumer = consumer;
+            _consumer = consumer;
         }
 
         internal interface IConsumingResult
@@ -20,7 +19,7 @@ namespace Carrot.Messages
 
         internal Task<IConsumingResult> Consume(ConsumedMessageBase message)
         {
-            return this._consumer.Consume(message)
+            return _consumer.Consume(message)
                             .ContinueWith<IConsumingResult>(_ =>
                                                             {
                                                                 if (_.Exception != null)
@@ -36,7 +35,7 @@ namespace Carrot.Messages
 
             internal Failure(Exception exception)
             {
-                this.Exception = exception;
+                Exception = exception;
             }
         }
 

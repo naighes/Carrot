@@ -19,7 +19,7 @@ namespace Carrot.Messages
             _content = content;
         }
 
-        public Object Content
+        public override Object Content
         {
             get { return _content; }
         }

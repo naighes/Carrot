@@ -18,6 +18,8 @@ namespace Carrot.Messages
             Redelivered = redelivered;
         }
 
+        public abstract Object Content { get; }
+
         internal abstract Task<IAggregateConsumingResult> Consume(IDictionary<Type, IConsumer> subscriptions);
     }
 }

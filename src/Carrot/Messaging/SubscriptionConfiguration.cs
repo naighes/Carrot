@@ -1,20 +1,20 @@
+using System;
+using System.Collections.Generic;
+
 namespace Carrot.Messaging
 {
-    using System;
-    using System.Collections.Generic;
-
     public class SubscriptionConfiguration
     {
         private readonly IDictionary<Type, IConsumer> _subscriptions = new Dictionary<Type, IConsumer>();
 
         internal IDictionary<Type, IConsumer> Subscriptions
         {
-            get { return this._subscriptions; }
+            get { return _subscriptions; }
         }
 
         public void Consume<TMessage>(Consumer<TMessage> consumer) where TMessage : class
         {
-            this._subscriptions.Add(typeof(TMessage), consumer);
+            _subscriptions.Add(typeof(TMessage), consumer);
         }
     }
 }

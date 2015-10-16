@@ -101,8 +101,8 @@ namespace Carrot.Messaging
             }
 
             return new ConsumedMessage(content,
-                                       args.BasicProperties.MessageId, 
-                                       args.DeliveryTag, 
+                                       args.BasicProperties.MessageId,
+                                       args.DeliveryTag,
                                        args.Redelivered);
         }
     }

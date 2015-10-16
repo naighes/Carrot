@@ -1,10 +1,10 @@
+using System.Threading.Tasks;
+using Carrot.Messages;
+
 namespace Carrot.Messaging
 {
-    using System;
-    using System.Threading.Tasks;
-
     public interface IConsumer
     {
-        Task Consume(Object message);
+        Task Consume(ConsumedMessageBase message);
     }
 }

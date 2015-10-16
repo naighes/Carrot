@@ -12,6 +12,11 @@ namespace Carrot.Messages
         {
         }
 
+        public override Object Content
+        {
+            get { return null; }
+        }
+
         internal override Task<IAggregateConsumingResult> Consume(IDictionary<Type, IConsumer> subscriptions)
         {
             return Task.FromResult((IAggregateConsumingResult)new UnsupportedMessageFailure());

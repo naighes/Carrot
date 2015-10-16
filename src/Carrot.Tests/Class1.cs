@@ -1,17 +1,18 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using RabbitMQ.Client;
-using RabbitMQ.Client.Framing.Impl;
+using Carrot.Messaging;
 
 namespace Carrot.Tests
 {
-    class MyClass
+    public class SampleConsumer : Consumer<Foo>
     {
-        void Main()
+        public override Task Consume(Foo message)
         {
+            return null;
         }
+    }
+
+    public class Foo
+    {
     }
 }
