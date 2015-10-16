@@ -45,11 +45,16 @@ namespace TowerBridge.Common.Infrastructure.Messages
 
     public class Failure : IAggregateConsumingResult
     {
-        public readonly Exception[] Exceptions;
+        private readonly Exception[] _exceptions;
 
         protected Failure(params Exception[] exceptions)
         {
-            Exceptions = exceptions;
+            _exceptions = exceptions;
+        }
+
+        public Exception[] Exceptions
+        {
+            get { return _exceptions ?? new Exception[] { }; }
         }
 
         internal static IAggregateConsumingResult Build(ConsumerWrapper.IConsumingResult[] results)

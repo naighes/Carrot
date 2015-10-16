@@ -102,7 +102,7 @@ namespace TowerBridge.Common.Infrastructure.Messaging
                                             args.Redelivered);
             }
 
-            return new ConsumedMessage(content, 
+            return new ConsumedMessage(content,
                                        args.BasicProperties.MessageId, 
                                        args.DeliveryTag, 
                                        args.Redelivered);

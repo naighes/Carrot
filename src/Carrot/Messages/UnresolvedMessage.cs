@@ -14,7 +14,14 @@ namespace TowerBridge.Common.Infrastructure.Messages
 
         internal override Task<IAggregateConsumingResult> Consume(IDictionary<Type, IConsumer> subscriptions)
         {
-            return Task.FromResult((IAggregateConsumingResult)new Failure());
+            return Task.FromResult((IAggregateConsumingResult)new UnresolvedMessageFailure());
+        }
+    }
+
+    public class UnresolvedMessageFailure : Failure
+    {
+        internal UnresolvedMessageFailure()
+        {
         }
     }
 }
