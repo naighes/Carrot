@@ -14,6 +14,11 @@ namespace Carrot.Messaging
             _headers = headers;
         }
 
+        public TMessage Content
+        {
+            get { return _content; }
+        }
+
         public class HeaderCollection : Dictionary<String, Object>
         {
             public String MessageId

@@ -25,7 +25,10 @@ namespace Carrot.Messages
         {
             var content = Content as TMessage;
 
-            // TODO: check is proper type.
+            if (content == null)
+                throw new InvalidCastException(String.Format("cannot cast '{0}' to '{1}'", 
+                                                             Content.GetType(),
+                                                             typeof(TMessage)));
 
             return new Message<TMessage>(content, FillHeaders<TMessage>());
         }

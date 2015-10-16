@@ -61,7 +61,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ConsumedMessageBaseTests.cs" />
+    <Compile Include="ConsumingMessages.cs" />
+    <Compile Include="MessageBuilding.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

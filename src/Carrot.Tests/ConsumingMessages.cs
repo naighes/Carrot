@@ -7,10 +7,10 @@ using Xunit;
 
 namespace Carrot.Tests
 {
-    public class ConsumedMessageBaseTests
+    public class ConsumingMessages
     {
         [Fact]
-        public void NestedConsumerConsumingSuccesfully()
+        public void ConsumingSuccesfully()
         {
             var configuration = new SubscriptionConfiguration();
             configuration.Consumes(new FakeConsumer(_ => Task.Factory.StartNew(() => { })));
@@ -20,7 +20,7 @@ namespace Carrot.Tests
         }
 
         [Fact]
-        public void NestedConsumerThrows()
+        public void Throws()
         {
             const String message = "boom";
             var configuration = new SubscriptionConfiguration();
@@ -61,35 +61,37 @@ namespace Carrot.Tests
             var actual = Assert.IsType<UnsupportedMessageFailure>(result);
             Assert.Equal(0, actual.Exceptions.Length);
         }
+    }
 
-        public class FakeConsumer : Consumer<Foo>
+    public class Foo { }
+
+    public class Bar { }
+
+    internal class FakeConsumedMessage : ConsumedMessage
+    {
+        internal FakeConsumedMessage(Object content, String messageId, UInt64 deliveryTag, Boolean redelivered)
+            : base(content, messageId, deliveryTag, redelivered)
         {
-            private readonly Func<Message<Foo>, Task> _func;
-
-            public FakeConsumer(Func<Message<Foo>, Task> func)
-            {
-                _func = func;
-            }
-
-            public override Task Consume(Message<Foo> message)
-            {
-                return _func(message);
-            }
         }
 
-        public class Foo { }
-
-        internal class FakeMessage : ConsumedMessage
+        internal override Boolean Match(Type type)
         {
-            internal FakeMessage(Object content, String messageId, UInt64 deliveryTag, Boolean redelivered)
-                : base(content, messageId, deliveryTag, redelivered)
-            {
-            }
+            return true;
+        }
+    }
 
-            internal override Boolean Match(Type type)
-            {
-                return true;
-            }
+    internal class FakeConsumer : Consumer<Foo>
+    {
+        private readonly Func<Message<Foo>, Task> _func;
+
+        public FakeConsumer(Func<Message<Foo>, Task> func)
+        {
+            _func = func;
+        }
+
+        public override Task Consume(Message<Foo> message)
+        {
+            return _func(message);
         }
     }
 }
