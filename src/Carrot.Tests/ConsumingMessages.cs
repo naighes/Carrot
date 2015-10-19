@@ -110,7 +110,7 @@ namespace Carrot.Tests
             this.Errors.Add(exception);
         }
 
-        public override Task Consume(Message<Foo> message)
+        public override Task ConsumeAsync(Message<Foo> message)
         {
             return _func(message);
         }

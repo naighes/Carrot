@@ -6,7 +6,7 @@ namespace Carrot.Messaging
 {
     public interface IConsumer
     {
-        Task Consume(ConsumedMessage message);
+        Task ConsumeAsync(ConsumedMessage message);
 
         void OnError(Exception exception);
     }

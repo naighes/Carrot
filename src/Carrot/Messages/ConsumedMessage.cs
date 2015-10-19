@@ -50,7 +50,7 @@ namespace Carrot.Messages
         {
             return Task.WhenAll(configuration.FindSubscriptions(this)
                                              .Select(_ => Task<Task>.Factory
-                                                                    .StartNew(_.Value.Consume, this)
+                                                                    .StartNew(_.Value.ConsumeAsync, this)
                                                                     .Unwrap()
                                                                     .ContinueWith(__ => ConsumingResult(__, _.Value))))
                        .ContinueWith<IAggregateConsumingResult>(AggregateResult);

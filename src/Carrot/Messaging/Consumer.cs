@@ -6,11 +6,11 @@ namespace Carrot.Messaging
 {
     public abstract class Consumer<TMessage> : IConsumer where TMessage : class
     {
-        public abstract Task Consume(Message<TMessage> message);
+        public abstract Task ConsumeAsync(Message<TMessage> message);
 
-        Task IConsumer.Consume(ConsumedMessage message)
+        Task IConsumer.ConsumeAsync(ConsumedMessage message)
         {
-            return Consume(message.As<TMessage>());
+            return ConsumeAsync(message.As<TMessage>());
         }
 
         public virtual void OnError(Exception exception) { }
