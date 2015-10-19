@@ -28,7 +28,7 @@ namespace Carrot.Messages
         }
     }
 
-    public class UnsupportedMessageFailure : Failure
+    internal class UnsupportedMessageFailure : Failure
     {
         internal UnsupportedMessageFailure(ConsumedMessageBase message)
             : base(message)

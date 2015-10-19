@@ -6,19 +6,21 @@ using RabbitMQ.Client.Events;
 
 namespace Carrot.Messaging
 {
-    public class AsyncBasicConsumer : DefaultBasicConsumer
+    public class AtLeastOnceConsumer : DefaultBasicConsumer
     {
+        private readonly IModel _model;
         private readonly IMessageTypeResolver _resolver;
         private readonly ISerializerFactory _serializerFactory;
         private readonly SubscriptionConfiguration _configuration;
 
         // TODO: make it internal and replace resolver and serializerFactory with builder.
-        public AsyncBasicConsumer(IModel model, 
+        public AtLeastOnceConsumer(IModel model, 
                                   IMessageTypeResolver resolver,
                                   ISerializerFactory serializerFactory,
                                   SubscriptionConfiguration configuration)
             : base(model)
         {
+            _model = model;
             _resolver = resolver;
             _serializerFactory = serializerFactory;
             _configuration = configuration;
@@ -51,7 +53,8 @@ namespace Carrot.Messaging
                             Body = body
                         };
 
-            ReadMessage(args).ConsumeAsync(_configuration);
+            ReadMessage(args).ConsumeAsync(_configuration)
+                             .ContinueWith(_ => _.Result.ReplyAsync(_model));
         }
 
         private ConsumedMessageBase ReadMessage(BasicDeliverEventArgs args)

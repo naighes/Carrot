@@ -33,7 +33,7 @@ namespace Carrot.Messaging
             configure(configuration);
             _model.BasicConsume(_name, 
                                 false, 
-                                new AsyncBasicConsumer(_model,
+                                new AtLeastOnceConsumer(_model,
                                                        new MessageBindingResolver(typeof(Object).Assembly), // TODO
                                                        new SerializerFactory(),
                                                        configuration));

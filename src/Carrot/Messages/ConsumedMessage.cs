@@ -23,7 +23,6 @@ namespace Carrot.Messages
 
         private static AggregateConsumingResult AggregateResult(Task<ConsumingResult[]> task, ConsumedMessageBase message)
         {
-            // TODO
             return task.Result.OfType<Failure>().Any()
                     ? Messages.Failure.Build(message, task.Result)
                     : new Messages.Success(message);

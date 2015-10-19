@@ -57,7 +57,7 @@
     <Compile Include="Messaging\AmqpChannel.cs" />
     <Compile Include="Messaging\ConsumedMessageBuilder.cs" />
     <Compile Include="Messaging\MessageBindingResolver.cs" />
-    <Compile Include="Messaging\AsyncBasicConsumer.cs" />
+    <Compile Include="Messaging\AtLeastOnceConsumer.cs" />
     <Compile Include="Messaging\Consumer.cs" />
     <Compile Include="Messaging\EmptyMessageType.cs" />
     <Compile Include="Messaging\IConsumer.cs" />

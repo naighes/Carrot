@@ -28,7 +28,7 @@ namespace Carrot.Messages
         }
     }
 
-    public class CorruptedMessageFailure : Failure
+    internal class CorruptedMessageFailure : Failure
     {
         internal CorruptedMessageFailure(ConsumedMessageBase message)
             : base(message)

@@ -5,6 +5,8 @@ using RabbitMQ.Client.Events;
 
 namespace Carrot.Messages
 {
+    using RabbitMQ.Client;
+
     public abstract class ConsumedMessageBase
     {
         protected readonly HeaderCollection Headers;
@@ -35,5 +37,10 @@ namespace Carrot.Messages
         }
 
         internal abstract Boolean Match(Type type);
+
+        internal void Ack(IModel model)
+        {
+            model.BasicAck(DeliveryTag, false);
+        }
     }
 }
