@@ -13,45 +13,57 @@ namespace Carrot.Messages
     {
         private readonly ConsumedMessageBase _message;
 
-        public Success(ConsumedMessageBase message)
+        internal Success(ConsumedMessageBase message)
         {
             _message = message;
         }
 
         internal override void ReplyAsync(IModel model)
         {
-            _message.Ack(model);
+            _message.Acknowledge(model);
         }
     }
 
-    internal class Failure : AggregateConsumingResult
+    internal class ReiteratedConsumingFailure : ConsumingFailureBase
     {
-        private readonly ConsumedMessageBase _message;
-        private readonly Exception[] _exceptions;
-
-        protected Failure(ConsumedMessageBase message, params Exception[] exceptions)
+        internal ReiteratedConsumingFailure(ConsumedMessageBase message, params Exception[] exceptions)
+            : base(message, exceptions)
         {
-            _message = message;
-            _exceptions = exceptions;
-        }
-
-        public Exception[] Exceptions
-        {
-            get { return _exceptions ?? new Exception[] { }; }
-        }
-
-        internal static AggregateConsumingResult Build(ConsumedMessageBase message,
-                                                        ConsumedMessage.ConsumingResult[] results)
-        {
-            return new Failure(message,
-                               results.OfType<ConsumedMessage.Failure>()
-                                      .Select(_ => _.Exception)
-                                      .ToArray());
         }
 
         internal override void ReplyAsync(IModel model)
         {
-            _message.Ack(model);
+            Message.Acknowledge(model);
+        }
+    }
+
+    internal class ConsumingFailure : ConsumingFailureBase
+    {
+        internal ConsumingFailure(ConsumedMessageBase message, params Exception[] exceptions)
+            : base(message, exceptions)
+        {
+        }
+
+        internal override void ReplyAsync(IModel model)
+        {
+            Message.Requeue(model);
+        }
+    }
+
+    internal abstract class ConsumingFailureBase : AggregateConsumingResult
+    {
+        protected readonly ConsumedMessageBase Message;
+        private readonly Exception[] _exceptions;
+
+        protected ConsumingFailureBase(ConsumedMessageBase message, params Exception[] exceptions)
+        {
+            Message = message;
+            _exceptions = exceptions;
+        }
+
+        internal Exception[] Exceptions
+        {
+            get { return _exceptions ?? new Exception[] { }; }
         }
     }
 }

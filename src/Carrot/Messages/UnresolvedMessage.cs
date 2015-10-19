@@ -1,6 +1,7 @@
 using System;
 using System.Threading.Tasks;
 using Carrot.Messaging;
+using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 
 namespace Carrot.Messages
@@ -19,7 +20,7 @@ namespace Carrot.Messages
 
         internal override Task<AggregateConsumingResult> ConsumeAsync(SubscriptionConfiguration configuration)
         {
-            return Task.FromResult((AggregateConsumingResult)new UnresolvedMessageFailure(this));
+            return Task.FromResult((AggregateConsumingResult)new UnresolvedMessageConsumingFailure(this));
         }
 
         internal override Boolean Match(Type type)
@@ -28,11 +29,16 @@ namespace Carrot.Messages
         }
     }
 
-    internal class UnresolvedMessageFailure : Failure
+    internal class UnresolvedMessageConsumingFailure : ConsumingFailureBase
     {
-        internal UnresolvedMessageFailure(ConsumedMessageBase message)
+        internal UnresolvedMessageConsumingFailure(ConsumedMessageBase message)
             : base(message)
         {
+        }
+
+        internal override void ReplyAsync(IModel model)
+        {
+            Message.Acknowledge(model);
         }
     }
 }

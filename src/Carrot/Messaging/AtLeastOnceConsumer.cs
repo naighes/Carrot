@@ -54,7 +54,7 @@ namespace Carrot.Messaging
                         };
 
             ReadMessage(args).ConsumeAsync(_configuration)
-                             .ContinueWith(_ => _.Result.ReplyAsync(_model));
+                             .ContinueWith(_ => _.Result.ReplyAsync(_model)); // TODO: check for exception on reply
         }
 
         private ConsumedMessageBase ReadMessage(BasicDeliverEventArgs args)
