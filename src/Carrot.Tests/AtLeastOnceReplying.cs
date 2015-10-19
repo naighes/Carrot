@@ -16,20 +16,7 @@ namespace Carrot.Tests
         public void ReplyOnSuccess()
         {
             const Int64 deliveryTag = 1234L;
-            var args = new BasicDeliverEventArgs
-                           {
-                               DeliveryTag = deliveryTag,
-                               BasicProperties = new BasicProperties()
-                           };
-            var configuration = new SubscriptionConfiguration();
-            var builder = new Mock<IConsumedMessageBuilder>();
-            var message = new FakeConsumedMessage(args, _ => new Success(_));
-            builder.Setup(_ => _.Build(args)).Returns(message);
-            var model = new Mock<IModel>();
-            var consumer = new AtLeastOnceConsumerWrapper(model.Object,
-                                                          builder.Object,
-                                                          configuration);
-            consumer.CallConsumeInternal(args).Wait();
+            var model = BuildModel(deliveryTag, _ => new Success(_));
             model.Verify(_ => _.BasicAck(deliveryTag, false));
         }
 
@@ -37,21 +24,34 @@ namespace Carrot.Tests
         public void ReplyOnConsumingFailure()
         {
             const Int64 deliveryTag = 1234L;
+            var model = BuildModel(deliveryTag, _ => new ConsumingFailure(_));
+            model.Verify(_ => _.BasicNack(deliveryTag, false, true));
+        }
+
+        [Fact]
+        public void ReplyOnReiteratedConsumingFailure()
+        {
+            const Int64 deliveryTag = 1234L;
+            var model = BuildModel(deliveryTag, _ => new ReiteratedConsumingFailure(_));
+            model.Verify(_ => _.BasicAck(deliveryTag, false));
+        }
+
+        private static Mock<IModel> BuildModel(UInt64 deliveryTag, 
+                                          Func<ConsumedMessageBase, AggregateConsumingResult> func)
+        {
             var args = new BasicDeliverEventArgs
                            {
-                               DeliveryTag = deliveryTag,
+                               DeliveryTag = deliveryTag, 
                                BasicProperties = new BasicProperties()
                            };
             var configuration = new SubscriptionConfiguration();
             var builder = new Mock<IConsumedMessageBuilder>();
-            var message = new FakeConsumedMessage(args, _ => new ConsumingFailure(_));
+            var message = new FakeConsumedMessage(args, func);
             builder.Setup(_ => _.Build(args)).Returns(message);
             var model = new Mock<IModel>();
-            var consumer = new AtLeastOnceConsumerWrapper(model.Object,
-                                                          builder.Object,
-                                                          configuration);
+            var consumer = new AtLeastOnceConsumerWrapper(model.Object, builder.Object, configuration);
             consumer.CallConsumeInternal(args).Wait();
-            model.Verify(_ => _.BasicNack(deliveryTag, false, true));
+            return model;
         }
 
         internal class FakeConsumedMessage : ConsumedMessageBase
