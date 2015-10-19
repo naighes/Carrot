@@ -1,5 +1,4 @@
 using System;
-using System.Text;
 using Carrot.Messages;
 using Carrot.Serialization;
 using RabbitMQ.Client;
@@ -13,6 +12,7 @@ namespace Carrot.Messaging
         private readonly ISerializerFactory _serializerFactory;
         private readonly SubscriptionConfiguration _configuration;
 
+        // TODO: make it internal and replace resolver and serializerFactory with builder.
         public AsyncBasicConsumer(IModel model, 
                                   IMessageTypeResolver resolver,
                                   ISerializerFactory serializerFactory,
@@ -39,7 +39,8 @@ namespace Carrot.Messaging
                                     routingKey,
                                     properties,
                                     body);
-            var e = new BasicDeliverEventArgs
+
+            var args = new BasicDeliverEventArgs
                         {
                             ConsumerTag = consumerTag,
                             DeliveryTag = deliveryTag,
@@ -50,34 +51,12 @@ namespace Carrot.Messaging
                             Body = body
                         };
 
-            var message = ReadMessage(e);
-
-            message.ConsumeAsync(_configuration);
+            ReadMessage(args).ConsumeAsync(_configuration);
         }
 
         private ConsumedMessageBase ReadMessage(BasicDeliverEventArgs args)
         {
-            var messageType = _resolver.Resolve(args.BasicProperties.Type);
-
-            if (messageType is EmptyMessageType)
-                return new UnresolvedMessage(args);
-
-            var serializer = _serializerFactory.Create(args.BasicProperties.ContentType);
-
-            if (serializer is NullSerializer)
-                return new UnsupportedMessage(args);
-
-            Object content;
-
-            try
-            {
-                content = serializer.Deserialize(args.Body,
-                                                 messageType.RuntimeType,
-                                                 Encoding.GetEncoding(args.BasicProperties.ContentEncoding)); // TODO: check for default encoding.
-            }
-            catch { return new CorruptedMessage(args); }
-
-            return new ConsumedMessage(content, args);
+            return new ConsumedMessageBuilder(_serializerFactory, _resolver).Build(args);
         }
     }
 }
