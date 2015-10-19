@@ -1,4 +1,5 @@
 using System;
+using System.Text;
 using Carrot.Messages;
 using Carrot.Messaging;
 using Carrot.Serialization;
@@ -45,6 +46,33 @@ namespace Carrot.Tests
                                                                       }
                                             });
             Assert.IsType<UnsupportedMessage>(message);
+        }
+
+        [Fact]
+        public void DeserializeThrows()
+        {
+            const String type = "fake-type";
+            const String contentType = "application/null";
+            var runtimeType = typeof(Foo);
+            var body = new Byte[] { };
+            var serializerFactory = new Mock<ISerializerFactory>();
+            var serializer = new Mock<ISerializer>();
+            serializer.Setup(_ => _.Deserialize(body, runtimeType, new UTF8Encoding(true)))
+                      .Throws(new Exception("boom"));
+            serializerFactory.Setup(_ => _.Create(contentType)).Returns(serializer.Object);
+            var resolver = new Mock<IMessageTypeResolver>();
+            resolver.Setup(_ => _.Resolve(type)).Returns(new MessageType(type, runtimeType));
+            var builder = new ConsumedMessageBuilder(serializerFactory.Object, resolver.Object);
+            var message = builder.Build(new BasicDeliverEventArgs
+                                            {
+                                                Body = body,
+                                                BasicProperties = new BasicProperties
+                                                                      {
+                                                                          ContentType = contentType,
+                                                                          Type = type
+                                                                      }
+                                            });
+            Assert.IsType<CorruptedMessage>(message);
         }
     }
 }
