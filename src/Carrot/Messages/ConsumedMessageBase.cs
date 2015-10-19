@@ -6,20 +6,17 @@ namespace Carrot.Messages
 {
     public abstract class ConsumedMessageBase
     {
-        protected readonly String MessageId;
+        protected readonly HeaderCollection Headers;
         protected readonly UInt64 DeliveryTag;
         protected readonly Boolean Redelivered;
-        protected readonly Int64 Timestamp;
 
-        protected ConsumedMessageBase(String messageId, 
+        protected ConsumedMessageBase(HeaderCollection headers, 
                                       UInt64 deliveryTag, 
-                                      Boolean redelivered,
-                                      Int64 timestamp)
+                                      Boolean redelivered)
         {
-            MessageId = messageId;
+            Headers = headers;
             DeliveryTag = deliveryTag;
             Redelivered = redelivered;
-            Timestamp = timestamp;
         }
 
         internal abstract Object Content { get; }
@@ -35,16 +32,7 @@ namespace Carrot.Messages
                                                              Content.GetType(),
                                                              typeof(TMessage)));
 
-            return new Message<TMessage>(content, FillHeaders<TMessage>());
-        }
-
-        private Message<TMessage>.HeaderCollection FillHeaders<TMessage>() where TMessage : class
-        {
-            return new Message<TMessage>.HeaderCollection
-                       {
-                           { "message_id", MessageId },
-                           { "timestamp", Timestamp }
-                       };
+            return new Message<TMessage>(content, Headers);
         }
 
         internal abstract Boolean Match(Type type);

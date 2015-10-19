@@ -15,8 +15,10 @@ namespace Carrot.Tests
         {
             var configuration = new SubscriptionConfiguration();
             configuration.Consumes(new FakeConsumer(_ => Task.Factory.StartNew(() => { })));
-            var result = new ConsumedMessage(new Foo(), null, 0, false, 0L).ConsumeAsync(configuration)
-                                                                           .Result;
+            var result = new ConsumedMessage(new Foo(),
+                                             new HeaderCollection(), 
+                                             0L, 
+                                             false).ConsumeAsync(configuration).Result;
             Assert.IsType<Success>(result);
         }
 
@@ -28,8 +30,10 @@ namespace Carrot.Tests
             var configuration = new SubscriptionConfiguration();
             var consumer = new FakeConsumer(_ => { throw exception; });
             configuration.Consumes(consumer);
-            var result = new ConsumedMessage(new Foo(), null, 0, false, 0L).ConsumeAsync(configuration)
-                                                                           .Result;
+            var result = new ConsumedMessage(new Foo(),
+                                             new HeaderCollection(),
+                                             0L,
+                                             false).ConsumeAsync(configuration).Result;
             var actual = Assert.IsType<Failure>(result);
             Assert.Equal(1, actual.Exceptions.Length);
             Assert.Equal(message, 
@@ -43,8 +47,9 @@ namespace Carrot.Tests
         [Fact]
         public void OnCorruptedMessage()
         {
-            var result = new CorruptedMessage(null, 0, false, 0L).ConsumeAsync(null)
-                                                                 .Result;
+            var result = new CorruptedMessage(new HeaderCollection(), 
+                                              0L, 
+                                              false).ConsumeAsync(null).Result;
             var actual = Assert.IsType<CorruptedMessageFailure>(result);
             Assert.Equal(0, actual.Exceptions.Length);
         }
@@ -52,8 +57,9 @@ namespace Carrot.Tests
         [Fact]
         public void OnUnresolvedMessage()
         {
-            var result = new UnresolvedMessage(null, 0, false, 0L).ConsumeAsync(null)
-                                                                  .Result;
+            var result = new UnresolvedMessage(new HeaderCollection(), 
+                                               0L,
+                                               false).ConsumeAsync(null).Result;
             var actual = Assert.IsType<UnresolvedMessageFailure>(result);
             Assert.Equal(0, actual.Exceptions.Length);
         }
@@ -61,8 +67,9 @@ namespace Carrot.Tests
         [Fact]
         public void OnUnsupportedMessage()
         {
-            var result = new UnsupportedMessage(null, 0, false, 0L).ConsumeAsync(null)
-                                                                   .Result;
+            var result = new UnsupportedMessage(new HeaderCollection(), 
+                                                0L,
+                                                false).ConsumeAsync(null).Result;
             var actual = Assert.IsType<UnsupportedMessageFailure>(result);
             Assert.Equal(0, actual.Exceptions.Length);
         }
@@ -75,11 +82,10 @@ namespace Carrot.Tests
     internal class FakeConsumedMessage : ConsumedMessage
     {
         internal FakeConsumedMessage(Object content, 
-                                     String messageId, 
-                                     UInt64 deliveryTag, 
-                                     Boolean redelivered,
-                                     Int64 timestamp)
-            : base(content, messageId, deliveryTag, redelivered, timestamp)
+                                     HeaderCollection headers,
+                                     UInt64 deliveryTag,
+                                     Boolean redelivered)
+            : base(content, headers, deliveryTag, redelivered)
         {
         }
 

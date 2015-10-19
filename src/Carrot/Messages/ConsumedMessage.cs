@@ -11,11 +11,10 @@ namespace Carrot.Messages
         private readonly Object _content;
 
         internal ConsumedMessage(Object content, 
-                                 String messageId, 
+                                 HeaderCollection headers, 
                                  UInt64 deliveryTag, 
-                                 Boolean redelivered,
-                                 Int64 timestamp)
-            : base(messageId, deliveryTag, redelivered, timestamp)
+                                 Boolean redelivered)
+            : base(headers, deliveryTag, redelivered)
         {
             _content = content;
         }
@@ -36,14 +35,12 @@ namespace Carrot.Messages
 
         private static IConsumingResult ConsumingResult(Task task, IConsumer consumer)
         {
-            if (task.Exception != null)
-            {
-                var exception = task.Exception.GetBaseException();
-                consumer.OnError(exception);
-                return new Failure(exception);
-            }
+            if (task.Exception == null)
+                return new Success();
 
-            return new Success();
+            var exception = task.Exception.GetBaseException();
+            consumer.OnError(exception);
+            return new Failure(exception);
         }
 
         internal override Boolean Match(Type type)

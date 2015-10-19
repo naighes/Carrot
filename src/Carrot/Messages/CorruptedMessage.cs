@@ -6,11 +6,10 @@ namespace Carrot.Messages
 {
     public class CorruptedMessage : ConsumedMessageBase
     {
-        public CorruptedMessage(String messageId, 
+        public CorruptedMessage(HeaderCollection headers, 
                                 UInt64 deliveryTag,
-                                Boolean redelivered,
-                                Int64 timestamp)
-            : base(messageId, deliveryTag, redelivered, timestamp)
+                                Boolean redelivered)
+            : base(headers, deliveryTag, redelivered)
         {
         }
 

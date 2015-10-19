@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using RabbitMQ.Client.Events;
 
 namespace Carrot.Messaging
 {
@@ -23,18 +24,39 @@ namespace Carrot.Messaging
         {
             get { return _headers; }
         }
+    }
 
-        public class HeaderCollection : Dictionary<String, Object>
+    public class HeaderCollection
+    {
+        private readonly IDictionary<String, Object> _dictionary;
+
+        internal HeaderCollection()
+            : this(new Dictionary<String, Object>())
         {
-            public String MessageId
-            {
-                get { return this["message_id"] as String; }
-            }
+        }
 
-            public Int64 Timestamp
-            {
-                get { return (Int64)this["timestamp"]; }
-            }
+        internal HeaderCollection(IDictionary<String, Object> dictionary)
+        {
+            _dictionary = dictionary;
+        }
+
+        public String MessageId
+        {
+            get { return _dictionary["message_id"] as String; }
+        }
+
+        public Int64 Timestamp
+        {
+            get { return (Int64)_dictionary["timestamp"]; }
+        }
+
+        public static HeaderCollection Parse(BasicDeliverEventArgs args)
+        {
+            return new HeaderCollection(new Dictionary<String, Object>
+                                        {
+                                            { "message_id", args.BasicProperties.MessageId },
+                                            { "timestamp", args.BasicProperties.Timestamp.UnixTime }
+                                        });
         }
     }
 }

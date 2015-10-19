@@ -6,11 +6,10 @@ namespace Carrot.Messages
 {
     public class UnsupportedMessage : ConsumedMessageBase
     {
-        public UnsupportedMessage(String messageId, 
+        public UnsupportedMessage(HeaderCollection headers,
                                   UInt64 deliveryTag,
-                                  Boolean redelivered,
-                                  Int64 timestamp)
-            : base(messageId, deliveryTag, redelivered, timestamp)
+                                  Boolean redelivered)
+            : base(headers, deliveryTag, redelivered)
         {
         }
 

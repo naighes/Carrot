@@ -57,27 +57,20 @@ namespace Carrot.Messaging
 
         private ConsumedMessageBase ReadMessage(BasicDeliverEventArgs args)
         {
+            var headers = HeaderCollection.Parse(args);
             var messageType = _resolver.Resolve(args.BasicProperties.Type);
 
             if (messageType is EmptyMessageType)
-            {
-                // TODO: message cannot be resolved -> ack 'n forget
-                return new UnresolvedMessage(args.BasicProperties.MessageId,
+                return new UnresolvedMessage(headers,
                                              args.DeliveryTag,
-                                             args.Redelivered,
-                                             args.BasicProperties.Timestamp.UnixTime);
-            }
+                                             args.Redelivered);
 
             var serializer = _serializerFactory.Create(args.BasicProperties.ContentType);
 
             if (serializer is NullSerializer)
-            {
-                // TODO: cannot find proper serializer -> throw (and DLQ)
-                return new UnsupportedMessage(args.BasicProperties.MessageId,
+                return new UnsupportedMessage(headers,
                                               args.DeliveryTag,
-                                              args.Redelivered,
-                                              args.BasicProperties.Timestamp.UnixTime);
-            }
+                                              args.Redelivered);
 
             Object content;
 
@@ -89,18 +82,15 @@ namespace Carrot.Messaging
             }
             catch
             {
-                // TODO: wrong format -> throw (and DLQ)
-                return new CorruptedMessage(args.BasicProperties.MessageId,
+                return new CorruptedMessage(headers,
                                             args.DeliveryTag,
-                                            args.Redelivered,
-                                            args.BasicProperties.Timestamp.UnixTime);
+                                            args.Redelivered);
             }
 
             return new ConsumedMessage(content,
-                                       args.BasicProperties.MessageId,
+                                       headers,
                                        args.DeliveryTag,
-                                       args.Redelivered,
-                                       args.BasicProperties.Timestamp.UnixTime);
+                                       args.Redelivered);
         }
     }
 }
