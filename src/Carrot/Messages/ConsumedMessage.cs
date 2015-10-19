@@ -16,18 +16,17 @@ namespace Carrot.Messages
             _content = content;
         }
 
-        internal interface IConsumingResult { }
-
         internal override Object Content
         {
             get { return _content; }
         }
 
-        private static IAggregateConsumingResult AggregateResult(Task<IConsumingResult[]> task)
+        private static AggregateConsumingResult AggregateResult(Task<ConsumingResult[]> task, ConsumedMessageBase message)
         {
+            // TODO
             return task.Result.OfType<Failure>().Any()
-                    ? Messages.Failure.Build(task.Result)
-                    : new Messages.Success();
+                    ? Messages.Failure.Build(message, task.Result)
+                    : new Messages.Success(message);
         }
 
         internal override Boolean Match(Type type)
@@ -35,23 +34,40 @@ namespace Carrot.Messages
             return Content != null && type.IsInstanceOfType(Content);
         }
 
-        internal override Task<IAggregateConsumingResult> ConsumeAsync(SubscriptionConfiguration configuration)
+        internal override Task<AggregateConsumingResult> ConsumeAsync(SubscriptionConfiguration configuration)
         {
             return Task.WhenAll(configuration.FindSubscriptions(this)
                                              .Select(_ => new OuterConsumer(_.Value).ConsumeAsync(this)))
-                       .ContinueWith<IAggregateConsumingResult>(AggregateResult);
+                       .ContinueWith(_ => AggregateResult(_, this));
         }
 
-        internal class Failure : IConsumingResult
+        internal abstract class ConsumingResult
+        {
+            protected readonly ConsumedMessage Message;
+
+            protected ConsumingResult(ConsumedMessage message)
+            {
+                Message = message;
+            }
+        }
+
+        internal class Failure : ConsumingResult
         {
             internal readonly Exception Exception;
 
-            internal Failure(Exception exception)
+            internal Failure(ConsumedMessage message, Exception exception)
+                : base(message)
             {
                 Exception = exception;
             }
         }
 
-        internal class Success : IConsumingResult { }
+        internal class Success : ConsumingResult
+        {
+            public Success(ConsumedMessage message)
+                : base(message)
+            {
+            }
+        }
     }
 }

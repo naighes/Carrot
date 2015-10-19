@@ -1,6 +1,5 @@
 using System;
 using System.Threading.Tasks;
-
 using Carrot.Messages;
 
 namespace Carrot.Messaging

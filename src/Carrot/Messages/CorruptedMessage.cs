@@ -17,9 +17,9 @@ namespace Carrot.Messages
             get { return null; }
         }
 
-        internal override Task<IAggregateConsumingResult> ConsumeAsync(SubscriptionConfiguration configuration)
+        internal override Task<AggregateConsumingResult> ConsumeAsync(SubscriptionConfiguration configuration)
         {
-            return Task.FromResult((IAggregateConsumingResult)new CorruptedMessageFailure());
+            return Task.FromResult((AggregateConsumingResult)new CorruptedMessageFailure(this));
         }
 
         internal override Boolean Match(Type type)
@@ -30,7 +30,8 @@ namespace Carrot.Messages
 
     public class CorruptedMessageFailure : Failure
     {
-        internal CorruptedMessageFailure()
+        internal CorruptedMessageFailure(ConsumedMessageBase message)
+            : base(message)
         {
         }
     }

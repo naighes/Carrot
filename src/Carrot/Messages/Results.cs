@@ -3,19 +3,25 @@ using System.Linq;
 
 namespace Carrot.Messages
 {
-    public interface IAggregateConsumingResult
+    public abstract class AggregateConsumingResult
     {
     }
 
-    public class Success : IAggregateConsumingResult
+    public class Success : AggregateConsumingResult
     {
+        private readonly ConsumedMessageBase _message;
+
+        public Success(ConsumedMessageBase message)
+        {
+            _message = message;
+        }
     }
 
-    public class Failure : IAggregateConsumingResult
+    public class Failure : AggregateConsumingResult
     {
         private readonly Exception[] _exceptions;
 
-        protected Failure(params Exception[] exceptions)
+        protected Failure(ConsumedMessageBase message, params Exception[] exceptions)
         {
             _exceptions = exceptions;
         }
@@ -25,9 +31,11 @@ namespace Carrot.Messages
             get { return _exceptions ?? new Exception[] { }; }
         }
 
-        internal static IAggregateConsumingResult Build(ConsumedMessage.IConsumingResult[] results)
+        internal static AggregateConsumingResult Build(ConsumedMessageBase message,
+                                                        ConsumedMessage.ConsumingResult[] results)
         {
-            return new Failure(results.OfType<ConsumedMessage.Failure>()
+            return new Failure(message,
+                               results.OfType<ConsumedMessage.Failure>()
                                       .Select(_ => _.Exception)
                                       .ToArray());
         }
