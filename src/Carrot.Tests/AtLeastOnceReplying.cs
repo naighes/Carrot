@@ -33,6 +33,27 @@ namespace Carrot.Tests
             model.Verify(_ => _.BasicAck(deliveryTag, false));
         }
 
+        [Fact]
+        public void ReplyOnConsumingFailure()
+        {
+            const Int64 deliveryTag = 1234L;
+            var args = new BasicDeliverEventArgs
+                           {
+                               DeliveryTag = deliveryTag,
+                               BasicProperties = new BasicProperties()
+                           };
+            var configuration = new SubscriptionConfiguration();
+            var builder = new Mock<IConsumedMessageBuilder>();
+            var message = new FakeConsumedMessage(args, _ => new ConsumingFailure(_));
+            builder.Setup(_ => _.Build(args)).Returns(message);
+            var model = new Mock<IModel>();
+            var consumer = new AtLeastOnceConsumerWrapper(model.Object,
+                                                          builder.Object,
+                                                          configuration);
+            consumer.CallConsumeInternal(args).Wait();
+            model.Verify(_ => _.BasicNack(deliveryTag, false, true));
+        }
+
         internal class FakeConsumedMessage : ConsumedMessageBase
         {
             private readonly Func<ConsumedMessageBase, AggregateConsumingResult> _result;
