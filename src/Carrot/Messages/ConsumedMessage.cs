@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Carrot.Extensions;
 using Carrot.Messaging;
+using RabbitMQ.Client.Events;
 
 namespace Carrot.Messages
 {
@@ -11,10 +12,9 @@ namespace Carrot.Messages
         private readonly Object _content;
 
         internal ConsumedMessage(Object content, 
-                                 HeaderCollection headers, 
-                                 UInt64 deliveryTag, 
-                                 Boolean redelivered)
-            : base(headers, deliveryTag, redelivered)
+                                 HeaderCollection headers,
+                                 BasicDeliverEventArgs args)
+            : base(headers, args)
         {
             _content = content;
         }

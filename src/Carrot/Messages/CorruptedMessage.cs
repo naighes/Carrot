@@ -1,15 +1,14 @@
 using System;
 using System.Threading.Tasks;
 using Carrot.Messaging;
+using RabbitMQ.Client.Events;
 
 namespace Carrot.Messages
 {
     public class CorruptedMessage : ConsumedMessageBase
     {
-        public CorruptedMessage(HeaderCollection headers, 
-                                UInt64 deliveryTag,
-                                Boolean redelivered)
-            : base(headers, deliveryTag, redelivered)
+        internal CorruptedMessage(HeaderCollection headers, BasicDeliverEventArgs args)
+            : base(headers, args) 
         {
         }
 

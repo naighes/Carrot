@@ -61,16 +61,12 @@ namespace Carrot.Messaging
             var messageType = _resolver.Resolve(args.BasicProperties.Type);
 
             if (messageType is EmptyMessageType)
-                return new UnresolvedMessage(headers,
-                                             args.DeliveryTag,
-                                             args.Redelivered);
+                return new UnresolvedMessage(headers, args);
 
             var serializer = _serializerFactory.Create(args.BasicProperties.ContentType);
 
             if (serializer is NullSerializer)
-                return new UnsupportedMessage(headers,
-                                              args.DeliveryTag,
-                                              args.Redelivered);
+                return new UnsupportedMessage(headers, args);
 
             Object content;
 
@@ -80,17 +76,9 @@ namespace Carrot.Messaging
                                                  messageType.RuntimeType,
                                                  Encoding.GetEncoding(args.BasicProperties.ContentEncoding));
             }
-            catch
-            {
-                return new CorruptedMessage(headers,
-                                            args.DeliveryTag,
-                                            args.Redelivered);
-            }
+            catch { return new CorruptedMessage(headers, args); }
 
-            return new ConsumedMessage(content,
-                                       headers,
-                                       args.DeliveryTag,
-                                       args.Redelivered);
+            return new ConsumedMessage(content, headers, args);
         }
     }
 }

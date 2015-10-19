@@ -1,6 +1,7 @@
 using System;
 using System.Threading.Tasks;
 using Carrot.Messaging;
+using RabbitMQ.Client.Events;
 
 namespace Carrot.Messages
 {
@@ -11,12 +12,11 @@ namespace Carrot.Messages
         protected readonly Boolean Redelivered;
 
         protected ConsumedMessageBase(HeaderCollection headers, 
-                                      UInt64 deliveryTag, 
-                                      Boolean redelivered)
+                                      BasicDeliverEventArgs args)
         {
             Headers = headers;
-            DeliveryTag = deliveryTag;
-            Redelivered = redelivered;
+            DeliveryTag = args.DeliveryTag;
+            Redelivered = args.Redelivered;
         }
 
         internal abstract Object Content { get; }

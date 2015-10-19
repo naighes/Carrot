@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Carrot.Messaging;
+using RabbitMQ.Client.Events;
 using Xunit;
 
 namespace Carrot.Tests
@@ -11,7 +12,7 @@ namespace Carrot.Tests
         public void ProperContentType()
         {
             var content = new Foo();
-            var message = new FakeConsumedMessage(content, new HeaderCollection(), 0L, false);
+            var message = new FakeConsumedMessage(content, new HeaderCollection(), new BasicDeliverEventArgs());
             var actual = message.As<Foo>();
             Assert.Equal(content, actual.Content);
         }
@@ -20,7 +21,7 @@ namespace Carrot.Tests
         public void WrongContentType()
         {
             var content = new Foo();
-            var message = new FakeConsumedMessage(content, new HeaderCollection(), 0L, false);
+            var message = new FakeConsumedMessage(content, new HeaderCollection(), new BasicDeliverEventArgs());
             Assert.Throws<InvalidCastException>(() => message.As<Bar>());
         }
 
@@ -35,7 +36,7 @@ namespace Carrot.Tests
                                                        { "message_id", messageId },
                                                        { "timestamp", timestamp }
                                                    });
-            var message = new FakeConsumedMessage(content, headers, 7898L, false);
+            var message = new FakeConsumedMessage(content, headers, new BasicDeliverEventArgs());
             var actual = message.As<Foo>();
             Assert.Equal(messageId, actual.Headers.MessageId);
             Assert.Equal(timestamp, actual.Headers.Timestamp);

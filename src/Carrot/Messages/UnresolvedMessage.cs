@@ -1,15 +1,14 @@
 using System;
 using System.Threading.Tasks;
 using Carrot.Messaging;
+using RabbitMQ.Client.Events;
 
 namespace Carrot.Messages
 {
     public class UnresolvedMessage : ConsumedMessageBase
     {
-        public UnresolvedMessage(HeaderCollection headers, 
-                                 UInt64 deliveryTag,
-                                 Boolean redelivered)
-            : base(headers, deliveryTag, redelivered)
+        internal UnresolvedMessage(HeaderCollection headers, BasicDeliverEventArgs args)
+            : base(headers, args)
         {
         }
 
