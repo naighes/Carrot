@@ -28,5 +28,23 @@ namespace Carrot.Tests
                                             });
             Assert.IsType<UnresolvedMessage>(message);
         }
+
+        [Fact]
+        public void MissingContentType()
+        {
+            const String contentType = "application/null";
+            var serializerFactory = new Mock<ISerializerFactory>();
+            serializerFactory.Setup(_ => _.Create(contentType)).Returns(NullSerializer.Instance);
+            var resolver = new Mock<IMessageTypeResolver>();
+            var builder = new ConsumedMessageBuilder(serializerFactory.Object, resolver.Object);
+            var message = builder.Build(new BasicDeliverEventArgs
+                                            {
+                                                BasicProperties = new BasicProperties
+                                                                      {
+                                                                          ContentType = contentType
+                                                                      }
+                                            });
+            Assert.IsType<UnsupportedMessage>(message);
+        }
     }
 }
