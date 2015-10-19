@@ -9,12 +9,17 @@ namespace Carrot.Messages
         protected readonly String MessageId;
         protected readonly UInt64 DeliveryTag;
         protected readonly Boolean Redelivered;
+        protected readonly Int64 Timestamp;
 
-        protected ConsumedMessageBase(String messageId, UInt64 deliveryTag, Boolean redelivered)
+        protected ConsumedMessageBase(String messageId, 
+                                      UInt64 deliveryTag, 
+                                      Boolean redelivered,
+                                      Int64 timestamp)
         {
             MessageId = messageId;
             DeliveryTag = deliveryTag;
             Redelivered = redelivered;
+            Timestamp = timestamp;
         }
 
         internal abstract Object Content { get; }
@@ -37,7 +42,8 @@ namespace Carrot.Messages
         {
             return new Message<TMessage>.HeaderCollection
                        {
-                           { "message_id", MessageId }
+                           { "message_id", MessageId },
+                           { "timestamp", Timestamp }
                        };
         }
 

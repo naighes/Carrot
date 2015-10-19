@@ -13,8 +13,9 @@ namespace Carrot.Messages
         internal ConsumedMessage(Object content, 
                                  String messageId, 
                                  UInt64 deliveryTag, 
-                                 Boolean redelivered)
-            : base(messageId, deliveryTag, redelivered)
+                                 Boolean redelivered,
+                                 Int64 timestamp)
+            : base(messageId, deliveryTag, redelivered, timestamp)
         {
             _content = content;
         }

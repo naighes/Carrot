@@ -62,9 +62,10 @@ namespace Carrot.Messaging
             if (messageType is EmptyMessageType)
             {
                 // TODO: message cannot be resolved -> ack 'n forget
-                return new UnresolvedMessage(args.BasicProperties.MessageId, 
-                                             args.DeliveryTag, 
-                                             args.Redelivered);
+                return new UnresolvedMessage(args.BasicProperties.MessageId,
+                                             args.DeliveryTag,
+                                             args.Redelivered,
+                                             args.BasicProperties.Timestamp.UnixTime);
             }
 
             var serializer = _serializerFactory.Create(args.BasicProperties.ContentType);
@@ -74,7 +75,8 @@ namespace Carrot.Messaging
                 // TODO: cannot find proper serializer -> throw (and DLQ)
                 return new UnsupportedMessage(args.BasicProperties.MessageId,
                                               args.DeliveryTag,
-                                              args.Redelivered);
+                                              args.Redelivered,
+                                              args.BasicProperties.Timestamp.UnixTime);
             }
 
             Object content;
@@ -90,13 +92,15 @@ namespace Carrot.Messaging
                 // TODO: wrong format -> throw (and DLQ)
                 return new CorruptedMessage(args.BasicProperties.MessageId,
                                             args.DeliveryTag,
-                                            args.Redelivered);
+                                            args.Redelivered,
+                                            args.BasicProperties.Timestamp.UnixTime);
             }
 
             return new ConsumedMessage(content,
                                        args.BasicProperties.MessageId,
                                        args.DeliveryTag,
-                                       args.Redelivered);
+                                       args.Redelivered,
+                                       args.BasicProperties.Timestamp.UnixTime);
         }
     }
 }

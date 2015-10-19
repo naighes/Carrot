@@ -30,6 +30,11 @@ namespace Carrot.Messaging
             {
                 get { return this["message_id"] as String; }
             }
+
+            public Int64 Timestamp
+            {
+                get { return (Int64)this["timestamp"]; }
+            }
         }
     }
 }

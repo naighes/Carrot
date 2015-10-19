@@ -6,8 +6,11 @@ namespace Carrot.Messages
 {
     public class UnresolvedMessage : ConsumedMessageBase
     {
-        public UnresolvedMessage(String messageId, UInt64 deliveryTag, Boolean redelivered)
-            : base(messageId, deliveryTag, redelivered)
+        public UnresolvedMessage(String messageId, 
+                                 UInt64 deliveryTag,
+                                 Boolean redelivered,
+                                 Int64 timestamp)
+            : base(messageId, deliveryTag, redelivered, timestamp)
         {
         }
 
