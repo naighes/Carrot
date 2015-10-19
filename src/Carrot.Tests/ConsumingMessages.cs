@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Carrot.Messages;
@@ -23,8 +24,10 @@ namespace Carrot.Tests
         public void Throws()
         {
             const String message = "boom";
+            var exception = new Exception(message);
             var configuration = new SubscriptionConfiguration();
-            configuration.Consumes(new FakeConsumer(_ => { throw new Exception(message); }));
+            var consumer = new FakeConsumer(_ => { throw exception; });
+            configuration.Consumes(consumer);
             var result = new ConsumedMessage(new Foo(), null, 0, false, 0L).ConsumeAsync(configuration)
                                                                            .Result;
             var actual = Assert.IsType<Failure>(result);
@@ -33,6 +36,8 @@ namespace Carrot.Tests
                          actual.Exceptions
                                .First()
                                .Message);
+            Assert.Equal(1, consumer.Errors.Count);
+            Assert.Equal(message, consumer.Errors.First().Message);
         }
 
         [Fact]
@@ -88,9 +93,18 @@ namespace Carrot.Tests
     {
         private readonly Func<Message<Foo>, Task> _func;
 
+        internal readonly IList<Exception> Errors = new List<Exception>();
+
         public FakeConsumer(Func<Message<Foo>, Task> func)
         {
             _func = func;
+        }
+
+        public override void OnError(Exception exception)
+        {
+            base.OnError(exception);
+
+            this.Errors.Add(exception);
         }
 
         public override Task Consume(Message<Foo> message)

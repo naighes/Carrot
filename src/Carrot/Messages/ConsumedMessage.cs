@@ -29,16 +29,19 @@ namespace Carrot.Messages
 
         private static IAggregateConsumingResult AggregateResult(Task<IConsumingResult[]> task)
         {
-            // TODO: should check for empty result. It means somethong went wrong.
             return task.Result.OfType<Failure>().Any()
-                ? Messages.Failure.Build(task.Result)
-                : new Messages.Success();
+                    ? Messages.Failure.Build(task.Result)
+                    : new Messages.Success();
         }
 
-        private static IConsumingResult ConsumingResult(Task task)
+        private static IConsumingResult ConsumingResult(Task task, IConsumer consumer)
         {
             if (task.Exception != null)
-                return new Failure(task.Exception.GetBaseException());
+            {
+                var exception = task.Exception.GetBaseException();
+                consumer.OnError(exception);
+                return new Failure(exception);
+            }
 
             return new Success();
         }
@@ -54,7 +57,7 @@ namespace Carrot.Messages
                                              .Select(_ => Task<Task>.Factory
                                                                     .StartNew(_.Value.Consume, this)
                                                                     .Unwrap()
-                                                                    .ContinueWith<IConsumingResult>(ConsumingResult)))
+                                                                    .ContinueWith(__ => ConsumingResult(__, _.Value))))
                        .ContinueWith<IAggregateConsumingResult>(AggregateResult);
         }
 
