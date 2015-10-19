@@ -31,12 +31,11 @@ namespace Carrot.Messaging
         {
             var configuration = new SubscriptionConfiguration();
             configure(configuration);
+            var builder = new ConsumedMessageBuilder(new SerializerFactory(),
+                                                     new MessageBindingResolver(typeof(Object).Assembly)); // TODO
             _model.BasicConsume(_name, 
                                 false, 
-                                new AtLeastOnceConsumer(_model,
-                                                       new MessageBindingResolver(typeof(Object).Assembly), // TODO
-                                                       new SerializerFactory(),
-                                                       configuration));
+                                new AtLeastOnceConsumer(_model, builder, configuration));
         }
     }
 }

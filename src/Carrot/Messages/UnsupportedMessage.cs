@@ -36,7 +36,7 @@ namespace Carrot.Messages
         {
         }
 
-        internal override void ReplyAsync(IModel model)
+        internal override void Reply(IModel model)
         {
             Message.Acknowledge(model);
         }

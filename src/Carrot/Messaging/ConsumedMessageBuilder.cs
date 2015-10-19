@@ -6,7 +6,12 @@ using RabbitMQ.Client.Events;
 
 namespace Carrot.Messaging
 {
-    internal class ConsumedMessageBuilder
+    public interface IConsumedMessageBuilder
+    {
+        ConsumedMessageBase Build(BasicDeliverEventArgs args);
+    }
+
+    public class ConsumedMessageBuilder : IConsumedMessageBuilder
     {
         private readonly ISerializerFactory _serializerFactory;
         private readonly IMessageTypeResolver _resolver;
@@ -17,7 +22,7 @@ namespace Carrot.Messaging
             _resolver = resolver;
         }
 
-        internal ConsumedMessageBase Build(BasicDeliverEventArgs args)
+        public ConsumedMessageBase Build(BasicDeliverEventArgs args)
         {
             var messageType = _resolver.Resolve(args.BasicProperties.Type);
 

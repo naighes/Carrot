@@ -1,6 +1,5 @@
 using System;
-using Carrot.Messages;
-using Carrot.Serialization;
+using System.Threading.Tasks;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 
@@ -9,20 +8,18 @@ namespace Carrot.Messaging
     public class AtLeastOnceConsumer : DefaultBasicConsumer
     {
         private readonly IModel _model;
-        private readonly IMessageTypeResolver _resolver;
-        private readonly ISerializerFactory _serializerFactory;
+        private readonly IConsumedMessageBuilder _builder;
+
         private readonly SubscriptionConfiguration _configuration;
 
         // TODO: make it internal and replace resolver and serializerFactory with builder.
-        public AtLeastOnceConsumer(IModel model, 
-                                  IMessageTypeResolver resolver,
-                                  ISerializerFactory serializerFactory,
-                                  SubscriptionConfiguration configuration)
+        internal AtLeastOnceConsumer(IModel model, 
+                                     IConsumedMessageBuilder builder,
+                                     SubscriptionConfiguration configuration)
             : base(model)
         {
             _model = model;
-            _resolver = resolver;
-            _serializerFactory = serializerFactory;
+            _builder = builder;
             _configuration = configuration;
         }
 
@@ -53,13 +50,14 @@ namespace Carrot.Messaging
                             Body = body
                         };
 
-            ReadMessage(args).ConsumeAsync(_configuration)
-                             .ContinueWith(_ => _.Result.ReplyAsync(_model)); // TODO: check for exception on reply
+            ConsumeInternal(args);
         }
 
-        private ConsumedMessageBase ReadMessage(BasicDeliverEventArgs args)
+        protected virtual Task ConsumeInternal(BasicDeliverEventArgs args)
         {
-            return new ConsumedMessageBuilder(_serializerFactory, _resolver).Build(args);
+            return _builder.Build(args)
+                           .ConsumeAsync(_configuration)
+                           .ContinueWith(_ => _.Result.Reply(_model));
         }
     }
 }

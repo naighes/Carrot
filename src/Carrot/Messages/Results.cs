@@ -5,7 +5,7 @@ namespace Carrot.Messages
 {
     internal abstract class AggregateConsumingResult
     {
-        internal abstract void ReplyAsync(IModel model);
+        internal abstract void Reply(IModel model);
     }
 
     internal class Success : AggregateConsumingResult
@@ -17,7 +17,7 @@ namespace Carrot.Messages
             _message = message;
         }
 
-        internal override void ReplyAsync(IModel model)
+        internal override void Reply(IModel model)
         {
             _message.Acknowledge(model);
         }
@@ -30,7 +30,7 @@ namespace Carrot.Messages
         {
         }
 
-        internal override void ReplyAsync(IModel model)
+        internal override void Reply(IModel model)
         {
             Message.Acknowledge(model);
         }
@@ -43,7 +43,7 @@ namespace Carrot.Messages
         {
         }
 
-        internal override void ReplyAsync(IModel model)
+        internal override void Reply(IModel model)
         {
             Message.Requeue(model);
         }
