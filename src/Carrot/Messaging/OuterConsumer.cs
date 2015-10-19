@@ -8,12 +8,12 @@ namespace Carrot.Messaging
     {
         private readonly IConsumer _innerConsumer;
 
-        public OuterConsumer(IConsumer innerConsumer)
+        internal OuterConsumer(IConsumer innerConsumer)
         {
             _innerConsumer = innerConsumer;
         }
 
-        public Task<ConsumedMessage.ConsumingResult> ConsumeAsync(ConsumedMessage message)
+        internal Task<ConsumedMessage.ConsumingResult> ConsumeAsync(ConsumedMessage message)
         {
             return Task<Task>.Factory
                              .StartNew(_ => _innerConsumer.ConsumeAsync(_), message)

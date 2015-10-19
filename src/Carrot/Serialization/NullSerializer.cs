@@ -5,7 +5,7 @@ namespace Carrot.Serialization
 {
     public class NullSerializer : ISerializer
     {
-        public static readonly ISerializer Instance = new NullSerializer();
+        internal static readonly ISerializer Instance = new NullSerializer();
 
         private NullSerializer() { }
 
