@@ -66,6 +66,7 @@
     <Compile Include="Messaging\MessageBindingAttribute.cs" />
     <Compile Include="Messaging\MessageQueue.cs" />
     <Compile Include="Messaging\MessageType.cs" />
+    <Compile Include="Messaging\OuterConsumer.cs" />
     <Compile Include="Messaging\SubscriptionConfiguration.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Serialization\ISerializer.cs" />
