@@ -12,7 +12,6 @@ namespace Carrot.Messaging
 
         private readonly SubscriptionConfiguration _configuration;
 
-        // TODO: make it internal and replace resolver and serializerFactory with builder.
         internal AtLeastOnceConsumer(IModel model, 
                                      IConsumedMessageBuilder builder,
                                      SubscriptionConfiguration configuration)

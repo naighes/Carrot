@@ -36,6 +36,30 @@ namespace Carrot.Tests
             model.Verify(_ => _.BasicAck(deliveryTag, false));
         }
 
+        [Fact]
+        public void ReplyOnCorruptedMessageConsumingFailure()
+        {
+            const Int64 deliveryTag = 1234L;
+            var model = BuildModel(deliveryTag, _ => new CorruptedMessageConsumingFailure(_));
+            model.Verify(_ => _.BasicAck(deliveryTag, false));
+        }
+
+        [Fact]
+        public void ReplyOnUnresolvedMessageConsumingFailure()
+        {
+            const Int64 deliveryTag = 1234L;
+            var model = BuildModel(deliveryTag, _ => new UnresolvedMessageConsumingFailure(_));
+            model.Verify(_ => _.BasicAck(deliveryTag, false));
+        }
+
+        [Fact]
+        public void ReplyOnUnsupportedMessageConsumingFailure()
+        {
+            const Int64 deliveryTag = 1234L;
+            var model = BuildModel(deliveryTag, _ => new UnsupportedMessageConsumingFailure(_));
+            model.Verify(_ => _.BasicAck(deliveryTag, false));
+        }
+
         private static Mock<IModel> BuildModel(UInt64 deliveryTag, 
                                           Func<ConsumedMessageBase, AggregateConsumingResult> func)
         {
