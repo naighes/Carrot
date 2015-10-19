@@ -107,7 +107,7 @@ namespace Carrot.Tests
         {
             base.OnError(exception);
 
-            this.Errors.Add(exception);
+            Errors.Add(exception);
         }
 
         public override Task ConsumeAsync(Message<Foo> message)
