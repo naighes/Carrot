@@ -69,6 +69,7 @@
     <Compile Include="ConsumingMessages.cs" />
     <Compile Include="MessageBuilding.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SerializerBuilding.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
