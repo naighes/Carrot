@@ -7,8 +7,8 @@ namespace Carrot.Messages
 {
     public class UnresolvedMessage : ConsumedMessageBase
     {
-        internal UnresolvedMessage(HeaderCollection headers, BasicDeliverEventArgs args)
-            : base(headers, args)
+        internal UnresolvedMessage(BasicDeliverEventArgs args)
+            : base(args)
         {
         }
 

@@ -57,16 +57,15 @@ namespace Carrot.Messaging
 
         private ConsumedMessageBase ReadMessage(BasicDeliverEventArgs args)
         {
-            var headers = HeaderCollection.Parse(args);
             var messageType = _resolver.Resolve(args.BasicProperties.Type);
 
             if (messageType is EmptyMessageType)
-                return new UnresolvedMessage(headers, args);
+                return new UnresolvedMessage(args);
 
             var serializer = _serializerFactory.Create(args.BasicProperties.ContentType);
 
             if (serializer is NullSerializer)
-                return new UnsupportedMessage(headers, args);
+                return new UnsupportedMessage(args);
 
             Object content;
 
@@ -74,11 +73,11 @@ namespace Carrot.Messaging
             {
                 content = serializer.Deserialize(args.Body,
                                                  messageType.RuntimeType,
-                                                 Encoding.GetEncoding(args.BasicProperties.ContentEncoding));
+                                                 Encoding.GetEncoding(args.BasicProperties.ContentEncoding)); // TODO: check for default encoding.
             }
-            catch { return new CorruptedMessage(headers, args); }
+            catch { return new CorruptedMessage(args); }
 
-            return new ConsumedMessage(content, headers, args);
+            return new ConsumedMessage(content, args);
         }
     }
 }

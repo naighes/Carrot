@@ -7,8 +7,8 @@ namespace Carrot.Messages
 {
     public class UnsupportedMessage : ConsumedMessageBase
     {
-        internal UnsupportedMessage(HeaderCollection headers, BasicDeliverEventArgs args)
-            : base(headers, args)
+        internal UnsupportedMessage(BasicDeliverEventArgs args)
+            : base(args)
         {
         }
 

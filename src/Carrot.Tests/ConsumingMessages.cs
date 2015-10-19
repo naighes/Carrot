@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Carrot.Messages;
 using Carrot.Messaging;
 using RabbitMQ.Client.Events;
+using RabbitMQ.Client.Framing;
 using Xunit;
 
 namespace Carrot.Tests
@@ -17,8 +18,7 @@ namespace Carrot.Tests
             var configuration = new SubscriptionConfiguration();
             configuration.Consumes(new FakeConsumer(_ => Task.Factory.StartNew(() => { })));
             var result = new ConsumedMessage(new Foo(),
-                                             new HeaderCollection(), 
-                                             new BasicDeliverEventArgs()).ConsumeAsync(configuration).Result;
+                                             FakeBasicDeliverEventArgs()).ConsumeAsync(configuration).Result;
             Assert.IsType<Success>(result);
         }
 
@@ -31,8 +31,7 @@ namespace Carrot.Tests
             var consumer = new FakeConsumer(_ => { throw exception; });
             configuration.Consumes(consumer);
             var result = new ConsumedMessage(new Foo(),
-                                             new HeaderCollection(),
-                                             new BasicDeliverEventArgs()).ConsumeAsync(configuration).Result;
+                                             FakeBasicDeliverEventArgs()).ConsumeAsync(configuration).Result;
             var actual = Assert.IsType<Failure>(result);
             Assert.Equal(1, actual.Exceptions.Length);
             Assert.Equal(message, 
@@ -46,8 +45,7 @@ namespace Carrot.Tests
         [Fact]
         public void OnCorruptedMessage()
         {
-            var result = new CorruptedMessage(new HeaderCollection(), 
-                                              new BasicDeliverEventArgs()).ConsumeAsync(null).Result;
+            var result = new CorruptedMessage(FakeBasicDeliverEventArgs()).ConsumeAsync(null).Result;
             var actual = Assert.IsType<CorruptedMessageFailure>(result);
             Assert.Equal(0, actual.Exceptions.Length);
         }
@@ -55,8 +53,7 @@ namespace Carrot.Tests
         [Fact]
         public void OnUnresolvedMessage()
         {
-            var result = new UnresolvedMessage(new HeaderCollection(), 
-                                               new BasicDeliverEventArgs()).ConsumeAsync(null).Result;
+            var result = new UnresolvedMessage(FakeBasicDeliverEventArgs()).ConsumeAsync(null).Result;
             var actual = Assert.IsType<UnresolvedMessageFailure>(result);
             Assert.Equal(0, actual.Exceptions.Length);
         }
@@ -64,10 +61,17 @@ namespace Carrot.Tests
         [Fact]
         public void OnUnsupportedMessage()
         {
-            var result = new UnsupportedMessage(new HeaderCollection(), 
-                                                new BasicDeliverEventArgs()).ConsumeAsync(null).Result;
+            var result = new UnsupportedMessage(FakeBasicDeliverEventArgs()).ConsumeAsync(null).Result;
             var actual = Assert.IsType<UnsupportedMessageFailure>(result);
             Assert.Equal(0, actual.Exceptions.Length);
+        }
+
+        private static BasicDeliverEventArgs FakeBasicDeliverEventArgs()
+        {
+            return new BasicDeliverEventArgs
+                       {
+                           BasicProperties = new BasicProperties()
+                       };
         }
     }
 
@@ -77,10 +81,8 @@ namespace Carrot.Tests
 
     internal class FakeConsumedMessage : ConsumedMessage
     {
-        internal FakeConsumedMessage(Object content, 
-                                     HeaderCollection headers,
-                                     BasicDeliverEventArgs args)
-            : base(content, headers, args)
+        internal FakeConsumedMessage(Object content, BasicDeliverEventArgs args)
+            : base(content, args)
         {
         }
 

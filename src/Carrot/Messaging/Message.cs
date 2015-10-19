@@ -50,7 +50,7 @@ namespace Carrot.Messaging
             get { return (Int64)_dictionary["timestamp"]; }
         }
 
-        public static HeaderCollection Parse(BasicDeliverEventArgs args)
+        internal static HeaderCollection Parse(BasicDeliverEventArgs args)
         {
             return new HeaderCollection(new Dictionary<String, Object>
                                         {

@@ -1,7 +1,7 @@
 using System;
-using System.Collections.Generic;
-using Carrot.Messaging;
+using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
+using RabbitMQ.Client.Framing;
 using Xunit;
 
 namespace Carrot.Tests
@@ -12,7 +12,7 @@ namespace Carrot.Tests
         public void ProperContentType()
         {
             var content = new Foo();
-            var message = new FakeConsumedMessage(content, new HeaderCollection(), new BasicDeliverEventArgs());
+            var message = new FakeConsumedMessage(content, FakeBasicDeliverEventArgs());
             var actual = message.As<Foo>();
             Assert.Equal(content, actual.Content);
         }
@@ -21,7 +21,7 @@ namespace Carrot.Tests
         public void WrongContentType()
         {
             var content = new Foo();
-            var message = new FakeConsumedMessage(content, new HeaderCollection(), new BasicDeliverEventArgs());
+            var message = new FakeConsumedMessage(content, FakeBasicDeliverEventArgs());
             Assert.Throws<InvalidCastException>(() => message.As<Bar>());
         }
 
@@ -31,15 +31,26 @@ namespace Carrot.Tests
             var content = new Foo();
             const String messageId = "one-id";
             const Int64 timestamp = 123456789L;
-            var headers = new HeaderCollection(new Dictionary<String, Object>
-                                                   {
-                                                       { "message_id", messageId },
-                                                       { "timestamp", timestamp }
-                                                   });
-            var message = new FakeConsumedMessage(content, headers, new BasicDeliverEventArgs());
+            var args = new BasicDeliverEventArgs
+                           {
+                               BasicProperties = new BasicProperties
+                                                     {
+                                                         MessageId = messageId,
+                                                         Timestamp = new AmqpTimestamp(timestamp)
+                                                     }
+                           };
+            var message = new FakeConsumedMessage(content, args);
             var actual = message.As<Foo>();
             Assert.Equal(messageId, actual.Headers.MessageId);
             Assert.Equal(timestamp, actual.Headers.Timestamp);
+        }
+
+        private static BasicDeliverEventArgs FakeBasicDeliverEventArgs()
+        {
+            return new BasicDeliverEventArgs
+            {
+                BasicProperties = new BasicProperties()
+            };
         }
     }
 }

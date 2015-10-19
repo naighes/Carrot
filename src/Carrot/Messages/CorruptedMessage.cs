@@ -7,8 +7,8 @@ namespace Carrot.Messages
 {
     public class CorruptedMessage : ConsumedMessageBase
     {
-        internal CorruptedMessage(HeaderCollection headers, BasicDeliverEventArgs args)
-            : base(headers, args) 
+        internal CorruptedMessage(BasicDeliverEventArgs args)
+            : base(args) 
         {
         }
 

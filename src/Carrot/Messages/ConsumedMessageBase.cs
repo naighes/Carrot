@@ -11,10 +11,9 @@ namespace Carrot.Messages
         protected readonly UInt64 DeliveryTag;
         protected readonly Boolean Redelivered;
 
-        protected ConsumedMessageBase(HeaderCollection headers, 
-                                      BasicDeliverEventArgs args)
+        protected ConsumedMessageBase(BasicDeliverEventArgs args)
         {
-            Headers = headers;
+            Headers = HeaderCollection.Parse(args);
             DeliveryTag = args.DeliveryTag;
             Redelivered = args.Redelivered;
         }

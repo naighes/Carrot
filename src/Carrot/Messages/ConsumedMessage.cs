@@ -11,10 +11,8 @@ namespace Carrot.Messages
     {
         private readonly Object _content;
 
-        internal ConsumedMessage(Object content, 
-                                 HeaderCollection headers,
-                                 BasicDeliverEventArgs args)
-            : base(headers, args)
+        internal ConsumedMessage(Object content, BasicDeliverEventArgs args)
+            : base(args)
         {
             _content = content;
         }
