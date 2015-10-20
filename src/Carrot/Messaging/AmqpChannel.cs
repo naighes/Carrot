@@ -27,7 +27,7 @@ namespace Carrot.Messaging
             return new AmqpChannel(connection, CreateModel(connection));
         }
 
-        public MessageQueue Bind(String name, String exchange, String routingKey)
+        public MessageQueue Bind(String name, String exchange, String routingKey = "")
         {
             return MessageQueue.New(_model, name, exchange, routingKey);
         }

@@ -17,17 +17,17 @@ namespace Carrot.Messaging
         }
 
         public static MessageQueue New(IModel model,
-                                       String exchange,
                                        String name,
+                                       String exchange,
                                        String routingKey)
         {
+            model.ExchangeDeclare(exchange, "direct", true);
             model.QueueDeclare(name, true, false, false, new Dictionary<String, Object>());
             model.QueueBind(name, exchange, routingKey, new Dictionary<String, Object>());
-            model.ExchangeDeclare(exchange, "direct", true);
             return new MessageQueue(name, model);
         }
 
-        public void Config(Action<SubscriptionConfiguration> configure)
+        public void Configure(Action<SubscriptionConfiguration> configure)
         {
             var configuration = new SubscriptionConfiguration();
             configure(configuration);
