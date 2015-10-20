@@ -74,7 +74,7 @@
     <Compile Include="Messaging\EmptyMessageType.cs" />
     <Compile Include="Messaging\IConsumer.cs" />
     <Compile Include="Messaging\IMessageTypeResolver.cs" />
-    <Compile Include="Messaging\Message.cs" />
+    <Compile Include="Messaging\ConsumedMessage.cs" />
     <Compile Include="Messaging\MessageBindingAttribute.cs" />
     <Compile Include="Messaging\MessageQueue.cs" />
     <Compile Include="Messaging\MessageType.cs" />

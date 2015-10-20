@@ -9,7 +9,7 @@ using RabbitMQ.Client;
 
 namespace Carrot.Messages
 {
-    internal class OutboundMessageEnvelope<TMessage>
+    internal class OutboundMessageEnvelope<TMessage> where TMessage : class
     {
         private const String DefaultContentEncoding = "UTF-8";
         private const String DefaultContentType = "application/json";

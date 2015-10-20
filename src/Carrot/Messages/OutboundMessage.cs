@@ -2,7 +2,7 @@ using Carrot.Messaging;
 
 namespace Carrot.Messages
 {
-    public class OutboundMessage<TMessage>
+    public class OutboundMessage<TMessage> : IMessage<TMessage> where TMessage : class
     {
         private readonly TMessage _content;
         private readonly HeaderCollection _headers = new HeaderCollection();

@@ -1,12 +1,12 @@
 namespace Carrot.Messaging
 {
-    public class Message<TMessage> : IMessage<TMessage>
+    public class ConsumedMessage<TMessage> : IMessage<TMessage>
         where TMessage : class
     {
         private readonly TMessage _content;
         private readonly HeaderCollection _headers;
 
-        internal Message(TMessage content, HeaderCollection headers)
+        internal ConsumedMessage(TMessage content, HeaderCollection headers)
         {
             _content = content;
             _headers = headers;

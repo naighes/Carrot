@@ -24,7 +24,7 @@ namespace Carrot.Messages
 
         internal abstract Task<AggregateConsumingResult> ConsumeAsync(SubscriptionConfiguration configuration);
 
-        internal Message<TMessage> As<TMessage>() where TMessage : class
+        internal ConsumedMessage<TMessage> As<TMessage>() where TMessage : class
         {
             var content = Content as TMessage;
 
@@ -33,7 +33,7 @@ namespace Carrot.Messages
                                                              Content.GetType(),
                                                              typeof(TMessage)));
 
-            return new Message<TMessage>(content, Headers);
+            return new ConsumedMessage<TMessage>(content, Headers);
         }
 
         internal abstract Boolean Match(Type type);

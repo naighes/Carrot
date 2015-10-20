@@ -29,7 +29,7 @@ namespace Carrot.Messaging
             if (messageType is EmptyMessageType)
                 return new UnresolvedMessage(args);
 
-            var serializer = _serializerFactory.Create(args.BasicProperties.ContentType); // TODO: json as default
+            var serializer = _serializerFactory.Create(args.BasicProperties.ContentType);
 
             if (serializer is NullSerializer)
                 return new UnsupportedMessage(args);

@@ -6,7 +6,7 @@ namespace Carrot.Messaging
 {
     public abstract class Consumer<TMessage> : IConsumer where TMessage : class
     {
-        public abstract Task ConsumeAsync(Message<TMessage> message);
+        public abstract Task ConsumeAsync(ConsumedMessage<TMessage> message);
 
         Task IConsumer.ConsumeAsync(ConsumedMessage message)
         {

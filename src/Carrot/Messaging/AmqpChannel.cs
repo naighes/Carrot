@@ -7,7 +7,14 @@ using RabbitMQ.Client.Framing.Impl;
 
 namespace Carrot.Messaging
 {
-    public class AmqpChannel : IDisposable
+    public interface IChannel : IDisposable
+    {
+        Task<IPublishResult> Publish<TMessage>(OutboundMessage<TMessage> message,
+                                               String exchange,
+                                               String routingKey = "") where TMessage : class;
+    }
+
+    public class AmqpChannel : IChannel
     {
         private readonly IConnection _connection;
         private readonly IModel _model;
@@ -59,7 +66,7 @@ namespace Carrot.Messaging
         // TODO: allow to define exchange type
         public Task<IPublishResult> Publish<TMessage>(OutboundMessage<TMessage> message, 
                                                       String exchange, 
-                                                      String routingKey = "")
+                                                      String routingKey = "") where TMessage : class
         {
             var envelope = new OutboundMessageEnvelope<TMessage>(message, 
                                                                  _serializerFactory, 

@@ -58,7 +58,7 @@ namespace Carrot.Tests
             Assert.Equal(result.Exception, exception);
         }
 
-        internal class OutboundMessageEnvelopeWrapper<TMessage> : OutboundMessageEnvelope<TMessage>
+        internal class OutboundMessageEnvelopeWrapper<TMessage> : OutboundMessageEnvelope<TMessage> where TMessage : class
         {
             internal OutboundMessageEnvelopeWrapper(OutboundMessage<TMessage> message, 
                                                     ISerializerFactory serializerFactory, 

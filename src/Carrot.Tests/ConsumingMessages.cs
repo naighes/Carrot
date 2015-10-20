@@ -119,11 +119,11 @@ namespace Carrot.Tests
 
     internal class FakeConsumer : Consumer<Foo>
     {
-        private readonly Func<Message<Foo>, Task> _func;
+        private readonly Func<ConsumedMessage<Foo>, Task> _func;
 
         internal readonly IList<Exception> Errors = new List<Exception>();
 
-        public FakeConsumer(Func<Message<Foo>, Task> func)
+        public FakeConsumer(Func<ConsumedMessage<Foo>, Task> func)
         {
             _func = func;
         }
@@ -135,7 +135,7 @@ namespace Carrot.Tests
             Errors.Add(exception);
         }
 
-        public override Task ConsumeAsync(Message<Foo> message)
+        public override Task ConsumeAsync(ConsumedMessage<Foo> message)
         {
             return _func(message);
         }
