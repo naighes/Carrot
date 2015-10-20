@@ -9,14 +9,17 @@ namespace Carrot.Messaging
     {
         private readonly String _name;
         private readonly IModel _model;
+        private readonly IMessageTypeResolver _resolver;
 
-        private MessageQueue(String name, IModel model)
+        private MessageQueue(String name, IModel model, IMessageTypeResolver resolver)
         {
             _name = name;
             _model = model;
+            this._resolver = resolver;
         }
 
-        public static MessageQueue New(IModel model,
+        public static MessageQueue New(IModel model, 
+                                       IMessageTypeResolver resolver,
                                        String name,
                                        String exchange,
                                        String routingKey)
@@ -24,15 +27,14 @@ namespace Carrot.Messaging
             model.ExchangeDeclare(exchange, "direct", true);
             model.QueueDeclare(name, true, false, false, new Dictionary<String, Object>());
             model.QueueBind(name, exchange, routingKey, new Dictionary<String, Object>());
-            return new MessageQueue(name, model);
+            return new MessageQueue(name, model, resolver);
         }
 
-        public void Configure(Action<SubscriptionConfiguration> configure)
+        public void ConfigureSubscriptions(Action<SubscriptionConfiguration> configure)
         {
             var configuration = new SubscriptionConfiguration();
             configure(configuration);
-            var builder = new ConsumedMessageBuilder(new SerializerFactory(),
-                                                     new MessageBindingResolver(typeof(Object).Assembly)); // TODO
+            var builder = new ConsumedMessageBuilder(new SerializerFactory(), _resolver);
             _model.BasicConsume(_name, 
                                 false, 
                                 new AtLeastOnceConsumer(_model, builder, configuration));

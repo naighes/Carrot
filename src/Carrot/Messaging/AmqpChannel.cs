@@ -1,5 +1,9 @@
 using System;
+using System.Reflection;
+using System.Text;
+using Newtonsoft.Json;
 using RabbitMQ.Client;
+using RabbitMQ.Client.Framing;
 using RabbitMQ.Client.Framing.Impl;
 
 namespace Carrot.Messaging
@@ -27,9 +31,27 @@ namespace Carrot.Messaging
             return new AmqpChannel(connection, CreateModel(connection));
         }
 
-        public MessageQueue Bind(String name, String exchange, String routingKey = "")
+        public MessageQueue Bind(IMessageTypeResolver resolver, 
+                                 String name, 
+                                 String exchange, 
+                                 String routingKey = "")
         {
-            return MessageQueue.New(_model, name, exchange, routingKey);
+            return MessageQueue.New(_model, resolver, name, exchange, routingKey);
+        }
+
+        public void Publish<TMessage>(TMessage message, String exchange, String routingKey = "")
+        {
+            // TODO: ensure exchange
+            var properties = new BasicProperties
+            {
+                ContentEncoding = "UTF-8",
+                ContentType = "application/json",
+                Type = typeof(TMessage).GetCustomAttribute<MessageBindingAttribute>().MessageType // TODO: cache
+            };
+            _model.BasicPublish(exchange,
+                                routingKey,
+                                properties,
+                                Encoding.GetEncoding(properties.ContentEncoding).GetBytes(JsonConvert.SerializeObject(message)));
         }
 
         private static IModel CreateModel(IConnection connection)
