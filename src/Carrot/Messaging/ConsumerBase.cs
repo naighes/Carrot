@@ -5,13 +5,18 @@ using RabbitMQ.Client.Events;
 
 namespace Carrot.Messaging
 {
-    public class AtLeastOnceConsumer : ConsumerBase
+    public abstract class ConsumerBase : DefaultBasicConsumer
     {
-        internal AtLeastOnceConsumer(IModel model, 
-                                     IConsumedMessageBuilder builder,
-                                     SubscriptionConfiguration configuration)
-            : base(model, builder, configuration)
+        protected readonly IConsumedMessageBuilder Builder;
+        protected readonly SubscriptionConfiguration Configuration;
+
+        protected ConsumerBase(IModel model,
+                               IConsumedMessageBuilder builder,
+                               SubscriptionConfiguration configuration)
+            : base(model)
         {
+            Builder = builder;
+            Configuration = configuration;
         }
 
         public override void HandleBasicDeliver(String consumerTag,
@@ -31,24 +36,19 @@ namespace Carrot.Messaging
                                     body);
 
             var args = new BasicDeliverEventArgs
-                        {
-                            ConsumerTag = consumerTag,
-                            DeliveryTag = deliveryTag,
-                            Redelivered = redelivered,
-                            Exchange = exchange,
-                            RoutingKey = routingKey,
-                            BasicProperties = properties,
-                            Body = body
-                        };
+                           {
+                               ConsumerTag = consumerTag,
+                               DeliveryTag = deliveryTag,
+                               Redelivered = redelivered,
+                               Exchange = exchange,
+                               RoutingKey = routingKey,
+                               BasicProperties = properties,
+                               Body = body
+                           };
 
             ConsumeInternal(args);
         }
 
-        protected override Task ConsumeInternal(BasicDeliverEventArgs args)
-        {
-            return Builder.Build(args)
-                          .ConsumeAsync(Configuration)
-                          .ContinueWith(_ => _.Result.Reply(Model));
-        }
+        protected abstract Task ConsumeInternal(BasicDeliverEventArgs args);
     }
 }
