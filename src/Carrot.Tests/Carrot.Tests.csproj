@@ -66,6 +66,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AtLeastOnceReplying.cs" />
+    <Compile Include="AtMostOnceReplying.cs" />
     <Compile Include="ConsumedMessageBuilding.cs" />
     <Compile Include="ConsumingMessages.cs" />
     <Compile Include="MessageBuilding.cs" />
