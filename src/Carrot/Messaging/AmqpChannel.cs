@@ -1,6 +1,7 @@
 using System;
 using System.Reflection;
 using System.Text;
+using Carrot.Extensions;
 using Newtonsoft.Json;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Framing;
@@ -12,11 +13,13 @@ namespace Carrot.Messaging
     {
         private readonly IConnection _connection;
         private readonly IModel _model;
+        private readonly IDateTimeProvider _dateTimeProvider;
 
-        private AmqpChannel(IConnection connection, IModel model)
+        private AmqpChannel(IConnection connection, IModel model, IDateTimeProvider dateTimeProvider)
         {
             _connection = connection;
             _model = model;
+            _dateTimeProvider = dateTimeProvider;
         }
 
         public static AmqpChannel New(String endpointUrl)
@@ -28,7 +31,7 @@ namespace Carrot.Messaging
                                             TopologyRecoveryEnabled = true
                                         };
             var connection = (AutorecoveringConnection)connectionFactory.CreateConnection();
-            return new AmqpChannel(connection, CreateModel(connection));
+            return new AmqpChannel(connection, CreateModel(connection), new DateTimeProvider());
         }
 
         public MessageQueue Bind(IMessageTypeResolver resolver, 
@@ -46,7 +49,8 @@ namespace Carrot.Messaging
             {
                 ContentEncoding = "UTF-8",
                 ContentType = "application/json",
-                Type = typeof(TMessage).GetCustomAttribute<MessageBindingAttribute>().MessageType // TODO: cache
+                Type = typeof(TMessage).GetCustomAttribute<MessageBindingAttribute>().MessageType, // TODO: cache
+                Timestamp = new AmqpTimestamp(_dateTimeProvider.UtcNow().ToUnixTimestamp())
             };
             _model.BasicPublish(exchange,
                                 routingKey,
