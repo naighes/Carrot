@@ -1,10 +1,8 @@
 using System;
-using System.Reflection;
-using System.Text;
-using Carrot.Extensions;
-using Newtonsoft.Json;
+using System.Threading.Tasks;
+using Carrot.Messages;
+using Carrot.Serialization;
 using RabbitMQ.Client;
-using RabbitMQ.Client.Framing;
 using RabbitMQ.Client.Framing.Impl;
 
 namespace Carrot.Messaging
@@ -15,19 +13,25 @@ namespace Carrot.Messaging
         private readonly IModel _model;
         private readonly IDateTimeProvider _dateTimeProvider;
         private readonly INewId _newId;
+        private readonly ISerializerFactory _serializerFactory;
+        private readonly IMessageTypeResolver _resolver;
 
         private AmqpChannel(IConnection connection, 
-                            IModel model, 
+                            IModel model,
                             IDateTimeProvider dateTimeProvider,
-                            INewId newId)
+                            INewId newId,
+                            ISerializerFactory serializerFactory, 
+                            IMessageTypeResolver resolver)
         {
             _connection = connection;
             _model = model;
             _dateTimeProvider = dateTimeProvider;
             _newId = newId;
+            _serializerFactory = serializerFactory;
+            _resolver = resolver;
         }
 
-        public static AmqpChannel New(String endpointUrl)
+        public static AmqpChannel New(String endpointUrl, IMessageTypeResolver resolver)
         {
             var connectionFactory = new ConnectionFactory
                                         {
@@ -36,35 +40,32 @@ namespace Carrot.Messaging
                                             TopologyRecoveryEnabled = true
                                         };
             var connection = (AutorecoveringConnection)connectionFactory.CreateConnection();
+
             return new AmqpChannel(connection, 
                                    CreateModel(connection), 
                                    new DateTimeProvider(),
-                                   new NewGuid());
+                                   new NewGuid(),
+                                   new SerializerFactory(),
+                                   resolver);
         }
 
-        public MessageQueue Bind(IMessageTypeResolver resolver, 
-                                 String name, 
-                                 String exchange, 
+        public MessageQueue Bind(String name,
+                                 String exchange,
                                  String routingKey = "")
         {
-            return MessageQueue.New(_model, resolver, name, exchange, routingKey);
+            return MessageQueue.New(_model, _resolver, name, exchange, routingKey);
         }
 
-        public void Publish<TMessage>(TMessage message, String exchange, String routingKey = "")
+        // TODO: allow to define exchange type
+        public Task<IPublishResult> Publish<TMessage>(OutboundMessage<TMessage> message, 
+                                                      String exchange, 
+                                                      String routingKey = "")
         {
-            // TODO: ensure exchange
-            var properties = new BasicProperties
-            {
-                ContentEncoding = "UTF-8",
-                ContentType = "application/json",
-                MessageId = _newId.Next(),
-                Type = typeof(TMessage).GetCustomAttribute<MessageBindingAttribute>().MessageType, // TODO: cache
-                Timestamp = new AmqpTimestamp(_dateTimeProvider.UtcNow().ToUnixTimestamp())
-            };
-            _model.BasicPublish(exchange,
-                                routingKey,
-                                properties,
-                                Encoding.GetEncoding(properties.ContentEncoding).GetBytes(JsonConvert.SerializeObject(message)));
+            var envelope = new OutboundMessageEnvelope<TMessage>(message, 
+                                                                 _serializerFactory, 
+                                                                 _dateTimeProvider, 
+                                                                 _newId);
+            return envelope.PublishAsync(_model, exchange, routingKey);
         }
 
         private static IModel CreateModel(IConnection connection)

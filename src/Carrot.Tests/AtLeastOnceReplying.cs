@@ -61,7 +61,7 @@ namespace Carrot.Tests
         }
 
         private static Mock<IModel> BuildModel(UInt64 deliveryTag, 
-                                          Func<ConsumedMessageBase, AggregateConsumingResult> func)
+                                               Func<ConsumedMessageBase, AggregateConsumingResult> func)
         {
             var args = new BasicDeliverEventArgs
                            {

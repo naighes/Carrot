@@ -99,6 +99,7 @@ namespace Carrot.Tests
         }
     }
 
+    [MessageBindingAttribute("urn:message:foo")]
     public class Foo { }
 
     public class Bar { }
