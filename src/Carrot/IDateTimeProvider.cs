@@ -6,4 +6,12 @@ namespace Carrot
     {
         DateTimeOffset UtcNow();
     }
+
+    internal class DateTimeProvider : IDateTimeProvider
+    {
+        public DateTimeOffset UtcNow()
+        {
+            return DateTimeOffset.UtcNow;
+        }
+    }
 }

@@ -47,10 +47,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DateTimeProvider.cs" />
     <Compile Include="Extensions\DateTimeOffsetExtensions.cs" />
     <Compile Include="Extensions\TaskExtensions.cs" />
     <Compile Include="IDateTimeProvider.cs" />
+    <Compile Include="INewId.cs" />
     <Compile Include="Messages\ConsumedMessage.cs" />
     <Compile Include="Messages\ConsumedMessageBase.cs" />
     <Compile Include="Messages\CorruptedMessage.cs" />

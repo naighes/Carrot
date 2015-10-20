@@ -14,12 +14,17 @@ namespace Carrot.Messaging
         private readonly IConnection _connection;
         private readonly IModel _model;
         private readonly IDateTimeProvider _dateTimeProvider;
+        private readonly INewId _newId;
 
-        private AmqpChannel(IConnection connection, IModel model, IDateTimeProvider dateTimeProvider)
+        private AmqpChannel(IConnection connection, 
+                            IModel model, 
+                            IDateTimeProvider dateTimeProvider,
+                            INewId newId)
         {
             _connection = connection;
             _model = model;
             _dateTimeProvider = dateTimeProvider;
+            _newId = newId;
         }
 
         public static AmqpChannel New(String endpointUrl)
@@ -31,7 +36,10 @@ namespace Carrot.Messaging
                                             TopologyRecoveryEnabled = true
                                         };
             var connection = (AutorecoveringConnection)connectionFactory.CreateConnection();
-            return new AmqpChannel(connection, CreateModel(connection), new DateTimeProvider());
+            return new AmqpChannel(connection, 
+                                   CreateModel(connection), 
+                                   new DateTimeProvider(),
+                                   new NewGuid());
         }
 
         public MessageQueue Bind(IMessageTypeResolver resolver, 
@@ -49,6 +57,7 @@ namespace Carrot.Messaging
             {
                 ContentEncoding = "UTF-8",
                 ContentType = "application/json",
+                MessageId = _newId.Next(),
                 Type = typeof(TMessage).GetCustomAttribute<MessageBindingAttribute>().MessageType, // TODO: cache
                 Timestamp = new AmqpTimestamp(_dateTimeProvider.UtcNow().ToUnixTimestamp())
             };
