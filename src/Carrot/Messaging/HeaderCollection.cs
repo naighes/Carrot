@@ -70,7 +70,8 @@ namespace Carrot.Messaging
         {
             var properties = new BasicProperties
                                  {
-                                     Headers = new Dictionary<String, Object>()
+                                     Headers = new Dictionary<String, Object>(),
+                                     Persistent = false
                                  };
 
             foreach (var pair in _dictionary)

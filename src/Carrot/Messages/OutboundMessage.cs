@@ -1,8 +1,10 @@
 using Carrot.Messaging;
+using RabbitMQ.Client;
 
 namespace Carrot.Messages
 {
-    public class OutboundMessage<TMessage> : IMessage<TMessage> where TMessage : class
+    public class OutboundMessage<TMessage> : IMessage<TMessage>
+        where TMessage : class
     {
         private readonly TMessage _content;
         private readonly HeaderCollection _headers = new HeaderCollection();
@@ -20,6 +22,11 @@ namespace Carrot.Messages
         public TMessage Content
         {
             get { return _content; }
+        }
+
+        internal virtual IBasicProperties ToOutboundBasicProperties()
+        {
+            return Headers.ToOutboundBasicProperties();
         }
     }
 }

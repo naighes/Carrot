@@ -32,7 +32,7 @@ namespace Carrot.Messages
 
         internal Task<IPublishResult> PublishAsync(IModel model, String exchange, String routingKey = "")
         {
-            var properties = _message.Headers.ToOutboundBasicProperties();
+            var properties = _message.ToOutboundBasicProperties();
 
             EnrichProperties(properties);
 
@@ -40,20 +40,23 @@ namespace Carrot.Messages
             var serializer = _serializerFactory.Create(properties.ContentType);
 
             return Task.Factory
-                       .StartNew(() =>
+                       .StartNew(_ =>
                                  {
                                      model.BasicPublish(exchange,
                                                         routingKey,
-                                                        properties,
+                                                        (IBasicProperties)_,
                                                         encoding.GetBytes(serializer.Serialize(_message.Content)));
-                                 })
-                       .ContinueWith<IPublishResult>(_ =>
-                                                     {
-                                                         if (_.Exception != null)
-                                                             return new FailurePublishing(_.Exception.GetBaseException());
+                                 },
+                                 properties)
+                       .ContinueWith<IPublishResult>(Result);
+        }
 
-                                                         return SuccessfulPublishing.FromBasicProperties(properties);
-                                                     });
+        private static IPublishResult Result(Task task)
+        {
+            if (task.Exception != null)
+                return new FailurePublishing(task.Exception.GetBaseException());
+
+            return SuccessfulPublishing.FromBasicProperties(task.AsyncState as IBasicProperties);
         }
 
         protected virtual void EnrichProperties(IBasicProperties properties)

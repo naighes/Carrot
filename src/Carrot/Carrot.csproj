@@ -54,6 +54,7 @@
     <Compile Include="Messages\ConsumedMessage.cs" />
     <Compile Include="Messages\ConsumedMessageBase.cs" />
     <Compile Include="Messages\CorruptedMessage.cs" />
+    <Compile Include="Messages\DurableOutboundMessage.cs" />
     <Compile Include="Messages\FailurePublishing.cs" />
     <Compile Include="Messages\IPublishResult.cs" />
     <Compile Include="Messages\OutboundMessage.cs" />

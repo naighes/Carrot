@@ -15,7 +15,7 @@ namespace Carrot.Messaging
         {
             _name = name;
             _model = model;
-            this._resolver = resolver;
+            _resolver = resolver;
         }
 
         internal static MessageQueue New(IModel model,
