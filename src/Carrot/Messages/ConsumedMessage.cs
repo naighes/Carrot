@@ -21,7 +21,8 @@ namespace Carrot.Messages
             get { return _content; }
         }
 
-        private static AggregateConsumingResult AggregateResult(Task<ConsumingResult[]> task, ConsumedMessageBase message)
+        private static AggregateConsumingResult AggregateResult(Task<ConsumingResult[]> task,
+                                                                ConsumedMessageBase message)
         {
             return task.Result.OfType<Failure>().Any()
                     ? message.BuildErrorResult(task.Result)

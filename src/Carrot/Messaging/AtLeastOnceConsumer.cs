@@ -4,6 +4,7 @@ using RabbitMQ.Client.Events;
 
 namespace Carrot.Messaging
 {
+    // TODO: plug consumer type
     public class AtLeastOnceConsumer : ConsumerBase
     {
         internal AtLeastOnceConsumer(IModel model, 

@@ -18,15 +18,16 @@ namespace Carrot.Messaging
             this._resolver = resolver;
         }
 
-        public static MessageQueue New(IModel model, 
-                                       IMessageTypeResolver resolver,
-                                       String name,
-                                       String exchange,
-                                       String routingKey)
+        internal static MessageQueue New(IModel model,
+                                         IMessageTypeResolver resolver,
+                                         String name,
+                                         String exchange,
+                                         String routingKey)
         {
             model.ExchangeDeclare(exchange, "direct", true);
             model.QueueDeclare(name, true, false, false, new Dictionary<String, Object>());
             model.QueueBind(name, exchange, routingKey, new Dictionary<String, Object>());
+
             return new MessageQueue(name, model, resolver);
         }
 
