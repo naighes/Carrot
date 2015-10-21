@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Carrot.Configuration;
 using Carrot.Messages;
 using Carrot.Serialization;
 using RabbitMQ.Client;

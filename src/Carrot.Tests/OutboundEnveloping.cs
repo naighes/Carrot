@@ -1,4 +1,5 @@
 using System;
+using Carrot.Configuration;
 using Carrot.Extensions;
 using Carrot.Messages;
 using Carrot.Messaging;

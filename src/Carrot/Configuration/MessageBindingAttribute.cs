@@ -1,6 +1,6 @@
 using System;
 
-namespace Carrot.Messaging
+namespace Carrot.Configuration
 {
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
     public class MessageBindingAttribute : Attribute

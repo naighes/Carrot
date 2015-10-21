@@ -1,6 +1,6 @@
 using System;
 using System.Text;
-using Carrot.Messaging;
+using Carrot.Configuration;
 using Carrot.Serialization;
 using RabbitMQ.Client.Events;
 

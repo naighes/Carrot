@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
+using Carrot.Configuration;
 using Carrot.Extensions;
 using Carrot.Messaging;
 using Carrot.Serialization;

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Carrot.Configuration;
 using Carrot.Messages;
 using Carrot.Messaging;
 using RabbitMQ.Client.Events;
@@ -99,7 +100,7 @@ namespace Carrot.Tests
         }
     }
 
-    [MessageBindingAttribute("urn:message:foo")]
+    [MessageBinding("urn:message:foo")]
     public class Foo { }
 
     public class Bar { }

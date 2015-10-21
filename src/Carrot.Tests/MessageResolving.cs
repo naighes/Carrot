@@ -1,5 +1,5 @@
 using System;
-using Carrot.Messaging;
+using Carrot.Configuration;
 using Xunit;
 
 namespace Carrot.Tests

@@ -2,8 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Carrot.Messages;
+using Carrot.Messaging;
 
-namespace Carrot.Messaging
+namespace Carrot.Configuration
 {
     public class SubscriptionConfiguration
     {
