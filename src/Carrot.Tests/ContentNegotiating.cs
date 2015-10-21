@@ -39,12 +39,13 @@ namespace Carrot.Tests
 
     public class ContentNegotiator
     {
-        public IEnumerable<MediaTypeHeader> Negotiate(IBasicProperties properties)
+        public SortedSet<MediaTypeHeader> Negotiate(IBasicProperties properties)
         {
-            return properties.ContentType
-                             .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
-                             .Select(_ => MediaTypeHeader.Parse(_.Trim()))
-                             .OrderByDescending(_ => _.Quality);
+            return new SortedSet<MediaTypeHeader>(properties.ContentType
+                                                            .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
+                                                            .Select(_ => MediaTypeHeader.Parse(_.Trim()))
+                                                            .OrderByDescending(_ => _.Quality),
+                                                  MediaTypeHeader.MediaTypeHeaderQualityComparer.Instance);
         }
 
         public struct MediaTypeHeader
@@ -75,6 +76,20 @@ namespace Carrot.Tests
                         type = MediaType.Parse(s);
 
                 return new MediaTypeHeader(type, quality);
+            }
+
+            internal class MediaTypeHeaderQualityComparer : IComparer<MediaTypeHeader>
+            {
+                internal static MediaTypeHeaderQualityComparer Instance = new MediaTypeHeaderQualityComparer();
+
+                private MediaTypeHeaderQualityComparer()
+                {
+                }
+
+                public Int32 Compare(MediaTypeHeader x, MediaTypeHeader y)
+                {
+                    return x.Quality.CompareTo(y.Quality) * -1;
+                }
             }
         }
 
