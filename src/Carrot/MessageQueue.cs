@@ -25,6 +25,16 @@ namespace Carrot
             get { return _name; }
         }
 
+        public void ConfigureSubscriptions(Action<SubscriptionConfiguration> configure)
+        {
+            var configuration = new SubscriptionConfiguration();
+            configure(configuration);
+            var builder = new ConsumedMessageBuilder(new SerializerFactory(), _resolver);
+            _model.BasicConsume(_name,
+                                false,
+                                new AtLeastOnceConsumer(_model, builder, configuration));
+        }
+
         internal static MessageQueue New(IModel model,
                                          IMessageTypeResolver resolver,
                                          String name,
@@ -38,16 +48,6 @@ namespace Carrot
             exchange.Bind(queue, model, routingKey);
 
             return queue;
-        }
-
-        public void ConfigureSubscriptions(Action<SubscriptionConfiguration> configure)
-        {
-            var configuration = new SubscriptionConfiguration();
-            configure(configuration);
-            var builder = new ConsumedMessageBuilder(new SerializerFactory(), _resolver);
-            _model.BasicConsume(_name,
-                                false,
-                                new AtLeastOnceConsumer(_model, builder, configuration));
         }
     }
 }

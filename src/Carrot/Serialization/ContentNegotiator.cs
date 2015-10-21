@@ -18,10 +18,10 @@ namespace Carrot.Serialization
 
         public struct MediaTypeHeader
         {
-            private const Single DefaultQuality = 1.0f;
-
             internal readonly MediaType Type;
             internal readonly Single Quality;
+
+            private const Single DefaultQuality = 1.0f;
 
             private MediaTypeHeader(MediaType type, Single quality)
             {
@@ -35,11 +35,11 @@ namespace Carrot.Serialization
                 var quality = DefaultQuality;
 
                 foreach (var s in source.Split(new[] { ';' },
-                    StringSplitOptions.RemoveEmptyEntries)
-                    .Select(_ => _.Trim()))
+                                               StringSplitOptions.RemoveEmptyEntries)
+                                        .Select(_ => _.Trim()))
                     if (s.StartsWith("q", StringComparison.Ordinal))
                         quality = Single.Parse(s.Substring(s.IndexOf('=') + 1)
-                            .TrimStart());
+                                                .TrimStart());
                     else if (s.IndexOf('=') == -1) 
                         type = MediaType.Parse(s);
 

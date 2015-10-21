@@ -76,13 +76,6 @@ namespace Carrot
             return envelope.PublishAsync(_model, exchange, routingKey);
         }
 
-        private static IModel CreateModel(IConnection connection)
-        {
-            var model = connection.CreateModel();
-            model.ConfirmSelect();
-            return model;
-        }
-
         public void Dispose()
         {
             if (_model != null)
@@ -90,6 +83,13 @@ namespace Carrot
 
             if (_connection != null)
                 _connection.Dispose();
+        }
+
+        private static IModel CreateModel(IConnection connection)
+        {
+            var model = connection.CreateModel();
+            model.ConfirmSelect();
+            return model;
         }
     }
 }

@@ -21,14 +21,6 @@ namespace Carrot.Messages
             get { return _content; }
         }
 
-        private static AggregateConsumingResult AggregateResult(Task<ConsumingResult[]> task,
-                                                                ConsumedMessageBase message)
-        {
-            return task.Result.OfType<Failure>().Any()
-                    ? message.BuildErrorResult(task.Result)
-                    : new Messages.Success(message);
-        }
-
         internal override Boolean Match(Type type)
         {
             return Content != null && type.IsInstanceOfType(Content);
@@ -39,6 +31,14 @@ namespace Carrot.Messages
             return Task.WhenAll(configuration.FindSubscriptions(this)
                                              .Select(_ => new OuterConsumer(_.Value).ConsumeAsync(this)))
                        .ContinueWith(_ => AggregateResult(_, this));
+        }
+
+        private static AggregateConsumingResult AggregateResult(Task<ConsumingResult[]> task,
+                                                                ConsumedMessageBase message)
+        {
+            return task.Result.OfType<Failure>().Any()
+                    ? message.BuildErrorResult(task.Result)
+                    : new Messages.Success(message);
         }
 
         internal abstract class ConsumingResult

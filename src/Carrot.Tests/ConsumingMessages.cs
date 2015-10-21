@@ -34,10 +34,7 @@ namespace Carrot.Tests
                                              FakeBasicDeliverEventArgs()).ConsumeAsync(configuration).Result;
             var actual = Assert.IsType<ConsumingFailure>(result);
             Assert.Equal(1, actual.Exceptions.Length);
-            Assert.Equal(message,
-                         actual.Exceptions
-                               .First()
-                               .Message);
+            Assert.Equal(message, actual.Exceptions.First().Message);
             Assert.Equal(1, consumer.Errors.Count);
             Assert.Equal(message, consumer.Errors.First().Message);
         }
@@ -58,10 +55,7 @@ namespace Carrot.Tests
                                                  }).ConsumeAsync(configuration).Result;
             var actual = Assert.IsType<ReiteratedConsumingFailure>(result);
             Assert.Equal(1, actual.Exceptions.Length);
-            Assert.Equal(message,
-                         actual.Exceptions
-                               .First()
-                               .Message);
+            Assert.Equal(message, actual.Exceptions.First().Message);
             Assert.Equal(1, consumer.Errors.Count);
             Assert.Equal(message, consumer.Errors.First().Message);
         }
@@ -119,9 +113,9 @@ namespace Carrot.Tests
 
     internal class FakeConsumer : Consumer<Foo>
     {
-        private readonly Func<ConsumedMessage<Foo>, Task> _func;
-
         internal readonly IList<Exception> Errors = new List<Exception>();
+
+        private readonly Func<ConsumedMessage<Foo>, Task> _func;
 
         public FakeConsumer(Func<ConsumedMessage<Foo>, Task> func)
         {

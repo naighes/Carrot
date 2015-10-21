@@ -7,6 +7,33 @@ namespace Carrot.Messages
     {
     }
 
+    public class FailurePublishing : IPublishResult
+    {
+        public readonly Exception Exception;
+
+        internal FailurePublishing(Exception exception)
+        {
+            Exception = exception;
+        }
+    }
+
+    public class SuccessfulPublishing : IPublishResult
+    {
+        public readonly String MessageId;
+        public readonly Int64 Timestamp;
+
+        private SuccessfulPublishing(String messageId, Int64 timestamp)
+        {
+            MessageId = messageId;
+            Timestamp = timestamp;
+        }
+
+        internal static SuccessfulPublishing FromBasicProperties(IBasicProperties properties)
+        {
+            return new SuccessfulPublishing(properties.MessageId, properties.Timestamp.UnixTime);
+        }
+    }
+
     internal abstract class AggregateConsumingResult
     {
         internal abstract void Reply(IModel model);
@@ -67,33 +94,6 @@ namespace Carrot.Messages
         internal Exception[] Exceptions
         {
             get { return _exceptions ?? new Exception[] { }; }
-        }
-    }
-
-    public class FailurePublishing : IPublishResult
-    {
-        public readonly Exception Exception;
-
-        internal FailurePublishing(Exception exception)
-        {
-            Exception = exception;
-        }
-    }
-
-    public class SuccessfulPublishing : IPublishResult
-    {
-        public readonly String MessageId;
-        public readonly Int64 Timestamp;
-
-        private SuccessfulPublishing(String messageId, Int64 timestamp)
-        {
-            MessageId = messageId;
-            Timestamp = timestamp;
-        }
-
-        internal static SuccessfulPublishing FromBasicProperties(IBasicProperties properties)
-        {
-            return new SuccessfulPublishing(properties.MessageId, properties.Timestamp.UnixTime);
         }
     }
 }

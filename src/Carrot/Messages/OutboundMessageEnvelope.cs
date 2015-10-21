@@ -54,19 +54,6 @@ namespace Carrot.Messages
                        .ContinueWith<IPublishResult>(Result);
         }
 
-        private static BasicProperties BuildBasicProperties()
-        {
-            return new BasicProperties { Headers = new Dictionary<String, Object>() };
-        }
-
-        private static IPublishResult Result(Task task)
-        {
-            if (task.Exception != null)
-                return new FailurePublishing(task.Exception.GetBaseException());
-
-            return SuccessfulPublishing.FromBasicProperties(task.AsyncState as IBasicProperties);
-        }
-
         protected virtual void HydrateProperties(IBasicProperties properties)
         {
             _message.HydrateProperties(properties);
@@ -79,6 +66,19 @@ namespace Carrot.Messages
 
             if (properties.ContentType == null)
                 properties.ContentType = DefaultContentType;
+        }
+
+        private static BasicProperties BuildBasicProperties()
+        {
+            return new BasicProperties { Headers = new Dictionary<String, Object>() };
+        }
+
+        private static IPublishResult Result(Task task)
+        {
+            if (task.Exception != null)
+                return new FailurePublishing(task.Exception.GetBaseException());
+
+            return SuccessfulPublishing.FromBasicProperties(task.AsyncState as IBasicProperties);
         }
     }
 }
