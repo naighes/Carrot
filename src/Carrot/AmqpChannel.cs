@@ -6,7 +6,7 @@ using Carrot.Serialization;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Framing.Impl;
 
-namespace Carrot.Messaging
+namespace Carrot
 {
     public interface IChannel : IDisposable
     {

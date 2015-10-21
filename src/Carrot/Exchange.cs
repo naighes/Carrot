@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using RabbitMQ.Client;
 
-namespace Carrot.Messaging
+namespace Carrot
 {
     public struct Exchange
     {

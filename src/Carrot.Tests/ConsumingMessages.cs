@@ -4,7 +4,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using Carrot.Configuration;
 using Carrot.Messages;
-using Carrot.Messaging;
 using RabbitMQ.Client.Events;
 using RabbitMQ.Client.Framing;
 using Xunit;

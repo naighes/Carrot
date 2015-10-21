@@ -2,7 +2,6 @@ using System;
 using Carrot.Configuration;
 using Carrot.Extensions;
 using Carrot.Messages;
-using Carrot.Messaging;
 using Carrot.Serialization;
 using Moq;
 using RabbitMQ.Client;

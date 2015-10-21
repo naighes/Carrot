@@ -47,16 +47,24 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AmqpChannel.cs" />
+    <Compile Include="AtLeastOnceConsumer.cs" />
+    <Compile Include="AtMostOnceConsumer.cs" />
     <Compile Include="Configuration\EmptyMessageType.cs" />
     <Compile Include="Configuration\IMessageTypeResolver.cs" />
     <Compile Include="Configuration\MessageBindingAttribute.cs" />
     <Compile Include="Configuration\MessageBindingResolver.cs" />
     <Compile Include="Configuration\MessageType.cs" />
     <Compile Include="Configuration\SubscriptionConfiguration.cs" />
+    <Compile Include="Consumer.cs" />
+    <Compile Include="ConsumerBase.cs" />
+    <Compile Include="Exchange.cs" />
     <Compile Include="Extensions\DateTimeOffsetExtensions.cs" />
     <Compile Include="Extensions\TaskExtensions.cs" />
+    <Compile Include="IConsumer.cs" />
     <Compile Include="IDateTimeProvider.cs" />
     <Compile Include="INewId.cs" />
+    <Compile Include="MessageQueue.cs" />
     <Compile Include="Messages\ConsumedMessage.cs" />
     <Compile Include="Messages\ConsumedMessageBase.cs" />
     <Compile Include="Messages\ConsumedMessageBuilder.cs" />
@@ -70,16 +78,8 @@
     <Compile Include="Messages\Results.cs" />
     <Compile Include="Messages\UnresolvedMessage.cs" />
     <Compile Include="Messages\UnsupportedMessage.cs" />
-    <Compile Include="Messaging\AmqpChannel.cs" />
-    <Compile Include="Messaging\AtMostOnceConsumer.cs" />
-    <Compile Include="Messaging\ConsumerBase.cs" />
-    <Compile Include="Messaging\Exchange.cs" />
-    <Compile Include="Messaging\AtLeastOnceConsumer.cs" />
-    <Compile Include="Messaging\Consumer.cs" />
-    <Compile Include="Messaging\IConsumer.cs" />
     <Compile Include="Messages\ConsumedMessage.generic.cs" />
-    <Compile Include="Messaging\MessageQueue.cs" />
-    <Compile Include="Messaging\OuterConsumer.cs" />
+    <Compile Include="OuterConsumer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Serialization\ISerializer.cs" />
     <Compile Include="Serialization\ISerializerFactory.cs" />
@@ -90,6 +90,7 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

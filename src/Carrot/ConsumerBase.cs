@@ -5,7 +5,7 @@ using Carrot.Messages;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 
-namespace Carrot.Messaging
+namespace Carrot
 {
     public abstract class ConsumerBase : DefaultBasicConsumer
     {

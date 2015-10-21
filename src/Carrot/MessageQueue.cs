@@ -5,7 +5,7 @@ using Carrot.Messages;
 using Carrot.Serialization;
 using RabbitMQ.Client;
 
-namespace Carrot.Messaging
+namespace Carrot
 {
     public class MessageQueue
     {
