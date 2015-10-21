@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using Carrot.Extensions;
@@ -20,16 +19,19 @@ namespace Carrot.Messages
         private readonly ISerializerFactory _serializerFactory;
         private readonly IDateTimeProvider _dateTimeProvider;
         private readonly INewId _newId;
+        private readonly IMessageTypeResolver _resolver;
 
         internal OutboundMessageEnvelope(OutboundMessage<TMessage> message,
                                          ISerializerFactory serializerFactory,
                                          IDateTimeProvider dateTimeProvider,
-                                         INewId newId)
+                                         INewId newId,
+                                         IMessageTypeResolver resolver)
         {
             _message = message;
             _serializerFactory = serializerFactory;
             _dateTimeProvider = dateTimeProvider;
             _newId = newId;
+            _resolver = resolver;
         }
 
         internal Task<IPublishResult> PublishAsync(IModel model, String exchange, String routingKey = "")
@@ -70,23 +72,13 @@ namespace Carrot.Messages
             _message.HydrateProperties(properties);
             properties.MessageId = _newId.Next();
             properties.Timestamp = new AmqpTimestamp(_dateTimeProvider.UtcNow().ToUnixTimestamp());
-            properties.Type = MessageType();
+            properties.Type = _resolver.Resolve<TMessage>().RawName;
 
             if (properties.ContentEncoding == null)
                 properties.ContentEncoding = DefaultContentEncoding;
 
             if (properties.ContentType == null)
                 properties.ContentType = DefaultContentType;
-        }
-
-        // TODO: should depend on resolver.
-        private static String MessageType()
-        {
-            var attribute = typeof(TMessage).GetCustomAttribute<MessageBindingAttribute>();
-
-            return attribute != null 
-                ? attribute.MessageType 
-                : String.Format("urn:message:{0}", typeof(TMessage).FullName);
         }
     }
 }

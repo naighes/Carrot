@@ -71,7 +71,8 @@ namespace Carrot.Messaging
             var envelope = new OutboundMessageEnvelope<TMessage>(message, 
                                                                  _serializerFactory, 
                                                                  _dateTimeProvider, 
-                                                                 _newId);
+                                                                 _newId,
+                                                                 _resolver);
             return envelope.PublishAsync(_model, exchange, routingKey);
         }
 

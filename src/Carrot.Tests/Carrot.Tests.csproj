@@ -71,6 +71,7 @@
     <Compile Include="ConsumingMessages.cs" />
     <Compile Include="MessageBuilding.cs" />
     <Compile Include="MessageHeaders.cs" />
+    <Compile Include="MessageResolving.cs" />
     <Compile Include="OutboundEnveloping.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SerializerBuilding.cs" />

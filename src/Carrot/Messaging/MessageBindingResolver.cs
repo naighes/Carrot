@@ -27,5 +27,15 @@ namespace Carrot.Messaging
                        ? new MessageType(source, _internalMap[source])
                        : EmptyMessageType.Instance;
         }
+
+        public MessageType Resolve<TMessage>() where TMessage : class
+        {
+            var type = typeof(TMessage);
+            var attribute = type.GetCustomAttribute<MessageBindingAttribute>();
+
+            return attribute != null
+                ? new MessageType(attribute.MessageType, type)
+                : new MessageType(String.Format("urn:message:{0}", type.FullName), type);
+        }
     }
 }
