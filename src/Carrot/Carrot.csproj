@@ -81,6 +81,7 @@
     <Compile Include="Messages\ConsumedMessage.generic.cs" />
     <Compile Include="OuterConsumer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Serialization\ContentNegotiator.cs" />
     <Compile Include="Serialization\ISerializer.cs" />
     <Compile Include="Serialization\ISerializerFactory.cs" />
     <Compile Include="Serialization\JsonSerializer.cs" />
