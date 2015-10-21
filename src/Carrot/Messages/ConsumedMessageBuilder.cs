@@ -1,16 +1,11 @@
 using System;
 using System.Text;
-using Carrot.Messages;
+using Carrot.Messaging;
 using Carrot.Serialization;
 using RabbitMQ.Client.Events;
 
-namespace Carrot.Messaging
+namespace Carrot.Messages
 {
-    public interface IConsumedMessageBuilder
-    {
-        ConsumedMessageBase Build(BasicDeliverEventArgs args);
-    }
-
     public class ConsumedMessageBuilder : IConsumedMessageBuilder
     {
         private readonly ISerializerFactory _serializerFactory;

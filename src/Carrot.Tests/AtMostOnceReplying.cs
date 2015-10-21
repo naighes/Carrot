@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using Carrot.Messages;
 using Carrot.Messaging;
 using Moq;
 using RabbitMQ.Client;
