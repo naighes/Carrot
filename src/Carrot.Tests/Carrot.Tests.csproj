@@ -70,6 +70,7 @@
     <Compile Include="AtMostOnceReplying.cs" />
     <Compile Include="ConsumedMessageBuilding.cs" />
     <Compile Include="ConsumingMessages.cs" />
+    <Compile Include="ContentNegotiating.cs" />
     <Compile Include="MessageBuilding.cs" />
     <Compile Include="MessageHeaders.cs" />
     <Compile Include="MessageResolving.cs" />

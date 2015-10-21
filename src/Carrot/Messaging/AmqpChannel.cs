@@ -9,9 +9,9 @@ namespace Carrot.Messaging
 {
     public interface IChannel : IDisposable
     {
-        Task<IPublishResult> Publish<TMessage>(OutboundMessage<TMessage> message,
-                                               Exchange exchange,
-                                               String routingKey = "") where TMessage : class;
+        Task<IPublishResult> PublishAsync<TMessage>(OutboundMessage<TMessage> message,
+                                                    Exchange exchange,
+                                                    String routingKey = "") where TMessage : class;
     }
 
     public class AmqpChannel : IChannel
@@ -63,10 +63,9 @@ namespace Carrot.Messaging
             return MessageQueue.New(_model, _resolver, name, exchange, routingKey);
         }
 
-        // TODO: allow to define exchange type
-        public Task<IPublishResult> Publish<TMessage>(OutboundMessage<TMessage> message,
-                                                      Exchange exchange,
-                                                      String routingKey = "") where TMessage : class
+        public Task<IPublishResult> PublishAsync<TMessage>(OutboundMessage<TMessage> message,
+                                                           Exchange exchange,
+                                                           String routingKey = "") where TMessage : class
         {
             var envelope = new OutboundMessageEnvelope<TMessage>(message,
                                                                  _serializerFactory,
