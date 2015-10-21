@@ -1,22 +1,45 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Carrot.Serialization
 {
     public class SerializerFactory : ISerializerFactory
     {
-        private readonly IDictionary<String, ISerializer> _serializers;
+        private readonly ContentNegotiator _negotiator = new ContentNegotiator();
+        private readonly IDictionary<ContentNegotiator.MediaTypeHeader, ISerializer> _serializers;
 
-        public SerializerFactory(IDictionary<String, ISerializer> serializers = null)
+        private readonly Dictionary<ContentNegotiator.MediaTypeHeader, ISerializer> _default = new Dictionary<ContentNegotiator.MediaTypeHeader, ISerializer>
+                                                   {
+                                                       { ContentNegotiator.MediaTypeHeader.Parse("application/json"), new JsonSerializer() }
+                                                   };
+
+        public SerializerFactory(IDictionary<String, ISerializer> map = null)
         {
-            _serializers = serializers ?? new Dictionary<String, ISerializer> { { "application/json", new JsonSerializer() } };
+            _serializers = map != null
+                                ? MapSerializers(map)
+                                : _default;
         }
 
         public ISerializer Create(String contentType)
         {
-            return !_serializers.ContainsKey(contentType)
-                       ? NullSerializer.Instance
-                       : _serializers[contentType];
+            var result = _negotiator.Negotiate(contentType);
+
+            foreach (var header in result.Where(header => _serializers.ContainsKey(header)))
+                return _serializers[header];
+
+            return NullSerializer.Instance;
+        }
+
+        private static Dictionary<ContentNegotiator.MediaTypeHeader, ISerializer> MapSerializers(IDictionary<String, ISerializer> map)
+        {
+            return map.Select(ToKeyValuePair).ToDictionary(_ => _.Key, _ => _.Value);
+        }
+
+        private static KeyValuePair<ContentNegotiator.MediaTypeHeader, ISerializer> ToKeyValuePair(KeyValuePair<String, ISerializer> pair)
+        {
+            return new KeyValuePair<ContentNegotiator.MediaTypeHeader, ISerializer>(ContentNegotiator.MediaTypeHeader.Parse(pair.Key),
+                                                                                    pair.Value);
         }
     }
 }

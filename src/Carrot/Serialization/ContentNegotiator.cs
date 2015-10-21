@@ -1,18 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using RabbitMQ.Client;
 
 namespace Carrot.Serialization
 {
     public class ContentNegotiator
     {
-        public SortedSet<MediaTypeHeader> Negotiate(IBasicProperties properties)
-        {
-            return ParseContentType(properties.ContentType);
-        }
-
-        private static SortedSet<MediaTypeHeader> ParseContentType(String contentType)
+        internal SortedSet<MediaTypeHeader> Negotiate(String contentType)
         {
             return new SortedSet<MediaTypeHeader>(contentType.Split(new[] { ',' },
                                                                     StringSplitOptions.RemoveEmptyEntries)
