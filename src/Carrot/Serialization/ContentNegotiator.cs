@@ -9,10 +9,15 @@ namespace Carrot.Serialization
     {
         public SortedSet<MediaTypeHeader> Negotiate(IBasicProperties properties)
         {
-            return new SortedSet<MediaTypeHeader>(properties.ContentType
-                                                            .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
-                                                            .Select(_ => MediaTypeHeader.Parse(_.Trim()))
-                                                            .OrderByDescending(_ => _.Quality),
+            return ParseContentType(properties.ContentType);
+        }
+
+        private static SortedSet<MediaTypeHeader> ParseContentType(String contentType)
+        {
+            return new SortedSet<MediaTypeHeader>(contentType.Split(new[] { ',' },
+                                                                    StringSplitOptions.RemoveEmptyEntries)
+                                                             .Select(_ => MediaTypeHeader.Parse(_.Trim()))
+                                                             .OrderByDescending(_ => _.Quality),
                                                   MediaTypeHeader.MediaTypeHeaderQualityComparer.Instance);
         }
 
@@ -23,10 +28,38 @@ namespace Carrot.Serialization
 
             private const Single DefaultQuality = 1.0f;
 
-            private MediaTypeHeader(MediaType type, Single quality)
+            internal MediaTypeHeader(MediaType type, Single quality)
             {
                 Type = type;
                 Quality = quality;
+            }
+
+            public static Boolean operator ==(MediaTypeHeader left, MediaTypeHeader right)
+            {
+                return left.Equals(right);
+            }
+
+            public static Boolean operator !=(MediaTypeHeader left, MediaTypeHeader right)
+            {
+                return !left.Equals(right);
+            }
+
+            public Boolean Equals(MediaTypeHeader other)
+            {
+                return Type == other.Type;
+            }
+
+            public override Boolean Equals(Object obj)
+            {
+                if (ReferenceEquals(null, obj))
+                    return false;
+
+                return obj is MediaTypeHeader && Equals((MediaTypeHeader)obj);
+            }
+
+            public override Int32 GetHashCode()
+            {
+                return Type.GetHashCode();
             }
 
             internal static MediaTypeHeader Parse(String source)
@@ -67,7 +100,7 @@ namespace Carrot.Serialization
             public readonly String Vendor;
             public readonly String Suffix;
 
-            private MediaType(String type, String vendor = null, String suffix = null)
+            internal MediaType(String type, String vendor = null, String suffix = null)
             {
                 Type = type;
                 Vendor = vendor;
@@ -82,6 +115,11 @@ namespace Carrot.Serialization
             public static Boolean operator !=(MediaType left, MediaType right)
             {
                 return !left.Equals(right);
+            }
+
+            public override String ToString()
+            {
+                return String.Format("{0}/vnd.{1}+{2}", Type, Vendor, Suffix);
             }
 
             public Boolean Equals(MediaType other)

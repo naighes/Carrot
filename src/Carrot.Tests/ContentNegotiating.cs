@@ -34,5 +34,37 @@ namespace Carrot.Tests
             Assert.Equal("checkmate", mediaType.Vendor);
             Assert.Equal("json", mediaType.Suffix);
         }
+
+        [Fact]
+        public void MediaTypeEquality()
+        {
+            var a = new ContentNegotiator.MediaType("application", "me", "xml");
+            var b = new ContentNegotiator.MediaType("application", "me", "json");
+            Assert.NotEqual(a, b);
+            Assert.NotEqual(a.GetHashCode(), b.GetHashCode());
+            var c = new ContentNegotiator.MediaType("application", "me", "xml");
+            Assert.Equal(a, c);
+            Assert.Equal(a.GetHashCode(), c.GetHashCode());
+            var d = new ContentNegotiator.MediaType("application", "you", "xml");
+            Assert.NotEqual(a, d);
+            Assert.NotEqual(a.GetHashCode(), d.GetHashCode());
+            var e = new ContentNegotiator.MediaType("stream", "me", "xml");
+            Assert.NotEqual(a, e);
+            Assert.NotEqual(a.GetHashCode(), e.GetHashCode());
+        }
+
+        [Fact]
+        public void MediaTypeHeaderEquality()
+        {
+            var mt1 = new ContentNegotiator.MediaType("application", "me", "xml");
+            var mt2 = new ContentNegotiator.MediaType("application", "me", "json");
+            var a = new ContentNegotiator.MediaTypeHeader(mt1, 0.1f);
+            var b = new ContentNegotiator.MediaTypeHeader(mt1, 0.2f);
+            Assert.Equal(a, b);
+            Assert.Equal(a.GetHashCode(), b.GetHashCode());
+            var c = new ContentNegotiator.MediaTypeHeader(mt2, 0.1f);
+            Assert.NotEqual(a, c);
+            Assert.NotEqual(a.GetHashCode(), c.GetHashCode());
+        }
     }
 }
