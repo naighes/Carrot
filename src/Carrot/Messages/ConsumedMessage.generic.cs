@@ -1,5 +1,3 @@
-using Carrot.Messaging;
-
 namespace Carrot.Messages
 {
     public class ConsumedMessage<TMessage> : IMessage<TMessage>

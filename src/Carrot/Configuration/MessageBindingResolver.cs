@@ -7,7 +7,7 @@ namespace Carrot.Configuration
 {
     public class MessageBindingResolver : IMessageTypeResolver
     {
-        private readonly IDictionary<string, Type> _internalMap;
+        private readonly IDictionary<String, Type> _internalMap;
 
         public MessageBindingResolver(params Assembly[] assemblies)
         {

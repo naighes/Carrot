@@ -1,4 +1,4 @@
-namespace Carrot.Messaging
+namespace Carrot.Messages
 {
     public interface IMessage<out TMessage>
         where TMessage : class

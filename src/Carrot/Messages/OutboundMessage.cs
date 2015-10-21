@@ -1,4 +1,3 @@
-using Carrot.Messaging;
 using RabbitMQ.Client;
 
 namespace Carrot.Messages

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 
-namespace Carrot.Messaging
+namespace Carrot.Messages
 {
     public class HeaderCollection
     {

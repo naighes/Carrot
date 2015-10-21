@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using Carrot.Messaging;
+using Carrot.Messages;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Framing;
 using Xunit;
