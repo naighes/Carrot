@@ -58,7 +58,6 @@
     <Compile Include="Messages\OutboundMessage.cs" />
     <Compile Include="Messages\OutboundMessageEnvelope.cs" />
     <Compile Include="Messages\Results.cs" />
-    <Compile Include="Messages\SuccessfulPublishing.cs" />
     <Compile Include="Messages\UnresolvedMessage.cs" />
     <Compile Include="Messages\UnsupportedMessage.cs" />
     <Compile Include="Messaging\AmqpChannel.cs" />
@@ -74,7 +73,7 @@
     <Compile Include="Messaging\EmptyMessageType.cs" />
     <Compile Include="Messaging\IConsumer.cs" />
     <Compile Include="Messaging\IMessageTypeResolver.cs" />
-    <Compile Include="Messaging\ConsumedMessage.cs" />
+    <Compile Include="Messages\ConsumedMessage.generic.cs" />
     <Compile Include="Messaging\MessageBindingAttribute.cs" />
     <Compile Include="Messaging\MessageQueue.cs" />
     <Compile Include="Messaging\MessageType.cs" />
