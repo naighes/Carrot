@@ -6,8 +6,8 @@ namespace Carrot.Messaging
 {
     public class AtMostOnceConsumer : ConsumerBase
     {
-        internal AtMostOnceConsumer(IModel model, 
-                                    IConsumedMessageBuilder builder, 
+        internal AtMostOnceConsumer(IModel model,
+                                    IConsumedMessageBuilder builder,
                                     SubscriptionConfiguration configuration)
             : base(model, builder, configuration)
         {

@@ -7,7 +7,7 @@ namespace Carrot.Messaging
     // TODO: plug consumer type
     public class AtLeastOnceConsumer : ConsumerBase
     {
-        internal AtLeastOnceConsumer(IModel model, 
+        internal AtLeastOnceConsumer(IModel model,
                                      IConsumedMessageBuilder builder,
                                      SubscriptionConfiguration configuration)
             : base(model, builder, configuration)

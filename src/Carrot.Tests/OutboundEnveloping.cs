@@ -33,7 +33,8 @@ namespace Carrot.Tests
                                                            dateTimeProvider.Object,
                                                            newId.Object,
                                                            resolver.Object);
-            var result = Assert.IsType<SuccessfulPublishing>(wrapper.PublishAsync(model.Object, "target_exchange").Result);
+            var result = Assert.IsType<SuccessfulPublishing>(wrapper.PublishAsync(model.Object,
+                                                                                  Exchange.Direct("target_exchange")).Result);
             Assert.Equal(messageId, result.MessageId);
         }
 
@@ -51,9 +52,9 @@ namespace Carrot.Tests
             var newId = new Mock<INewId>();
             var model = new Mock<IModel>();
             var exception = new Exception();
-            model.Setup(_ => _.BasicPublish(exchange, 
-                                            String.Empty, 
-                                            It.IsAny<IBasicProperties>(), 
+            model.Setup(_ => _.BasicPublish(exchange,
+                                            String.Empty,
+                                            It.IsAny<IBasicProperties>(),
                                             It.IsAny<Byte[]>()))
                  .Throws(exception);
             var resolver = new Mock<IMessageTypeResolver>();
@@ -63,7 +64,8 @@ namespace Carrot.Tests
                                                            dateTimeProvider.Object,
                                                            newId.Object,
                                                            resolver.Object);
-            var result = Assert.IsType<FailurePublishing>(wrapper.PublishAsync(model.Object, exchange).Result);
+            var result = Assert.IsType<FailurePublishing>(wrapper.PublishAsync(model.Object,
+                                                                               Exchange.Direct(exchange)).Result);
             Assert.Equal(result.Exception, exception);
         }
 
@@ -79,8 +81,8 @@ namespace Carrot.Tests
             dateTimeProvider.Setup(_ => _.UtcNow()).Returns(timestamp);
             var resolver = new Mock<IMessageTypeResolver>();
             resolver.Setup(_ => _.Resolve<Foo>()).Returns(new MessageType("urn:message:fake", typeof(Foo)));
-            var envelope = new OutboundMessageEnvelopeWrapper<Foo>(new OutboundMessage<Foo>(new Foo()), 
-                                                                   new Mock<ISerializerFactory>().Object, 
+            var envelope = new OutboundMessageEnvelopeWrapper<Foo>(new OutboundMessage<Foo>(new Foo()),
+                                                                   new Mock<ISerializerFactory>().Object,
                                                                    dateTimeProvider.Object,
                                                                    newId.Object,
                                                                    resolver.Object);
@@ -169,9 +171,9 @@ namespace Carrot.Tests
 
         internal class OutboundMessageEnvelopeWrapper<TMessage> : OutboundMessageEnvelope<TMessage> where TMessage : class
         {
-            internal OutboundMessageEnvelopeWrapper(OutboundMessage<TMessage> message, 
-                                                    ISerializerFactory serializerFactory, 
-                                                    IDateTimeProvider dateTimeProvider, 
+            internal OutboundMessageEnvelopeWrapper(OutboundMessage<TMessage> message,
+                                                    ISerializerFactory serializerFactory,
+                                                    IDateTimeProvider dateTimeProvider,
                                                     INewId newId,
                                                     IMessageTypeResolver resolver)
                 : base(message, serializerFactory, dateTimeProvider, newId, resolver)

@@ -34,7 +34,7 @@ namespace Carrot.Messages
             _resolver = resolver;
         }
 
-        internal Task<IPublishResult> PublishAsync(IModel model, String exchange, String routingKey = "")
+        internal Task<IPublishResult> PublishAsync(IModel model, Exchange exchange, String routingKey = "")
         {
             var properties = BuildBasicProperties();
             HydrateProperties(properties);
@@ -45,7 +45,7 @@ namespace Carrot.Messages
             return Task.Factory
                        .StartNew(_ =>
                                  {
-                                     model.BasicPublish(exchange,
+                                     model.BasicPublish(exchange.Name,
                                                         routingKey,
                                                         (IBasicProperties)_,
                                                         encoding.GetBytes(serializer.Serialize(_message.Content)));

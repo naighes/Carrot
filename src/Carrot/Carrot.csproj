@@ -67,6 +67,7 @@
     <Compile Include="Messaging\AtMostOnceConsumer.cs" />
     <Compile Include="Messaging\ConsumedMessageBuilder.cs" />
     <Compile Include="Messaging\ConsumerBase.cs" />
+    <Compile Include="Messaging\Exchange.cs" />
     <Compile Include="Messaging\HeaderCollection.cs" />
     <Compile Include="Messaging\IMessage.cs" />
     <Compile Include="Messaging\MessageBindingResolver.cs" />

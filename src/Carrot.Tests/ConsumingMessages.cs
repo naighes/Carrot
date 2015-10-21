@@ -34,7 +34,7 @@ namespace Carrot.Tests
                                              FakeBasicDeliverEventArgs()).ConsumeAsync(configuration).Result;
             var actual = Assert.IsType<ConsumingFailure>(result);
             Assert.Equal(1, actual.Exceptions.Length);
-            Assert.Equal(message, 
+            Assert.Equal(message,
                          actual.Exceptions
                                .First()
                                .Message);
@@ -58,7 +58,7 @@ namespace Carrot.Tests
                                                  }).ConsumeAsync(configuration).Result;
             var actual = Assert.IsType<ReiteratedConsumingFailure>(result);
             Assert.Equal(1, actual.Exceptions.Length);
-            Assert.Equal(message, 
+            Assert.Equal(message,
                          actual.Exceptions
                                .First()
                                .Message);

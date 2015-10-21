@@ -18,17 +18,24 @@ namespace Carrot.Messaging
             _resolver = resolver;
         }
 
+        internal String Name
+        {
+            get { return _name; }
+        }
+
         internal static MessageQueue New(IModel model,
                                          IMessageTypeResolver resolver,
                                          String name,
-                                         String exchange,
-                                         String routingKey)
+                                         Exchange exchange,
+                                         String routingKey = "")
         {
-            model.ExchangeDeclare(exchange, "direct", true);
-            model.QueueDeclare(name, true, false, false, new Dictionary<String, Object>());
-            model.QueueBind(name, exchange, routingKey, new Dictionary<String, Object>());
+            var queue = new MessageQueue(name, model, resolver);
 
-            return new MessageQueue(name, model, resolver);
+            exchange.Declare(model);
+            model.QueueDeclare(name, true, false, false, new Dictionary<String, Object>());
+            exchange.Bind(queue, model, routingKey);
+
+            return queue;
         }
 
         public void ConfigureSubscriptions(Action<SubscriptionConfiguration> configure)
@@ -36,8 +43,8 @@ namespace Carrot.Messaging
             var configuration = new SubscriptionConfiguration();
             configure(configuration);
             var builder = new ConsumedMessageBuilder(new SerializerFactory(), _resolver);
-            _model.BasicConsume(_name, 
-                                false, 
+            _model.BasicConsume(_name,
+                                false,
                                 new AtLeastOnceConsumer(_model, builder, configuration));
         }
     }

@@ -29,7 +29,7 @@ namespace Carrot.Messages
             var content = Content as TMessage;
 
             if (content == null)
-                throw new InvalidCastException(String.Format("cannot cast '{0}' to '{1}'", 
+                throw new InvalidCastException(String.Format("cannot cast '{0}' to '{1}'",
                                                              Content.GetType(),
                                                              typeof(TMessage)));
 

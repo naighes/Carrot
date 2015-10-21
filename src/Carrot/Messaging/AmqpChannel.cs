@@ -10,7 +10,7 @@ namespace Carrot.Messaging
     public interface IChannel : IDisposable
     {
         Task<IPublishResult> Publish<TMessage>(OutboundMessage<TMessage> message,
-                                               String exchange,
+                                               Exchange exchange,
                                                String routingKey = "") where TMessage : class;
     }
 
@@ -23,11 +23,11 @@ namespace Carrot.Messaging
         private readonly ISerializerFactory _serializerFactory;
         private readonly IMessageTypeResolver _resolver;
 
-        private AmqpChannel(IConnection connection, 
+        private AmqpChannel(IConnection connection,
                             IModel model,
                             IDateTimeProvider dateTimeProvider,
                             INewId newId,
-                            ISerializerFactory serializerFactory, 
+                            ISerializerFactory serializerFactory,
                             IMessageTypeResolver resolver)
         {
             _connection = connection;
@@ -48,8 +48,8 @@ namespace Carrot.Messaging
                                         };
             var connection = (AutorecoveringConnection)connectionFactory.CreateConnection();
 
-            return new AmqpChannel(connection, 
-                                   CreateModel(connection), 
+            return new AmqpChannel(connection,
+                                   CreateModel(connection),
                                    new DateTimeProvider(),
                                    new NewGuid(),
                                    new SerializerFactory(),
@@ -57,20 +57,20 @@ namespace Carrot.Messaging
         }
 
         public MessageQueue Bind(String name,
-                                 String exchange,
+                                 Exchange exchange,
                                  String routingKey = "")
         {
             return MessageQueue.New(_model, _resolver, name, exchange, routingKey);
         }
 
         // TODO: allow to define exchange type
-        public Task<IPublishResult> Publish<TMessage>(OutboundMessage<TMessage> message, 
-                                                      String exchange, 
+        public Task<IPublishResult> Publish<TMessage>(OutboundMessage<TMessage> message,
+                                                      Exchange exchange,
                                                       String routingKey = "") where TMessage : class
         {
-            var envelope = new OutboundMessageEnvelope<TMessage>(message, 
-                                                                 _serializerFactory, 
-                                                                 _dateTimeProvider, 
+            var envelope = new OutboundMessageEnvelope<TMessage>(message,
+                                                                 _serializerFactory,
+                                                                 _dateTimeProvider,
                                                                  _newId,
                                                                  _resolver);
             return envelope.PublishAsync(_model, exchange, routingKey);

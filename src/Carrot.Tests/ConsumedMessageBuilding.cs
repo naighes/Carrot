@@ -22,10 +22,7 @@ namespace Carrot.Tests
             var builder = new ConsumedMessageBuilder(serializerFactory.Object, resolver.Object);
             var message = builder.Build(new BasicDeliverEventArgs
                                             {
-                                                BasicProperties = new BasicProperties
-                                                                      {
-                                                                          Type = type
-                                                                      }
+                                                BasicProperties = new BasicProperties { Type = type }
                                             });
             Assert.IsType<UnresolvedMessage>(message);
         }
@@ -40,10 +37,7 @@ namespace Carrot.Tests
             var builder = new ConsumedMessageBuilder(serializerFactory.Object, resolver.Object);
             var message = builder.Build(new BasicDeliverEventArgs
                                             {
-                                                BasicProperties = new BasicProperties
-                                                                      {
-                                                                          ContentType = contentType
-                                                                      }
+                                                BasicProperties = new BasicProperties { ContentType = contentType }
                                             });
             Assert.IsType<UnsupportedMessage>(message);
         }

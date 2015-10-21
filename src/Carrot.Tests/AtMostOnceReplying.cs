@@ -31,8 +31,8 @@ namespace Carrot.Tests
 
         internal class AtMostOnceConsumerWrapper : AtMostOnceConsumer
         {
-            internal AtMostOnceConsumerWrapper(IModel model, 
-                                               IConsumedMessageBuilder builder, 
+            internal AtMostOnceConsumerWrapper(IModel model,
+                                               IConsumedMessageBuilder builder,
                                                SubscriptionConfiguration configuration)
                 : base(model, builder, configuration)
             {

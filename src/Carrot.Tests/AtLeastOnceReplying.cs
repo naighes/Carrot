@@ -60,12 +60,12 @@ namespace Carrot.Tests
             model.Verify(_ => _.BasicAck(deliveryTag, false));
         }
 
-        private static Mock<IModel> BuildModel(UInt64 deliveryTag, 
+        private static Mock<IModel> BuildModel(UInt64 deliveryTag,
                                                Func<ConsumedMessageBase, AggregateConsumingResult> func)
         {
             var args = new BasicDeliverEventArgs
                            {
-                               DeliveryTag = deliveryTag, 
+                               DeliveryTag = deliveryTag,
                                BasicProperties = new BasicProperties()
                            };
             var configuration = new SubscriptionConfiguration();
@@ -107,8 +107,8 @@ namespace Carrot.Tests
 
         internal class AtLeastOnceConsumerWrapper : AtLeastOnceConsumer
         {
-            internal AtLeastOnceConsumerWrapper(IModel model, 
-                                                IConsumedMessageBuilder builder, 
+            internal AtLeastOnceConsumerWrapper(IModel model,
+                                                IConsumedMessageBuilder builder,
                                                 SubscriptionConfiguration configuration)
                 : base(model, builder, configuration)
             {

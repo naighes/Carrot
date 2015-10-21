@@ -65,6 +65,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AmqpEntities.cs" />
     <Compile Include="AtLeastOnceReplying.cs" />
     <Compile Include="AtMostOnceReplying.cs" />
     <Compile Include="ConsumedMessageBuilding.cs" />
