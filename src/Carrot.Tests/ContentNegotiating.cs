@@ -13,8 +13,7 @@ namespace Carrot.Tests
         public void ContentTypeParsing()
         {
             const String input = "text/plain; q=0.5, text/html, text/x-dvi; q=0.8,application/vnd.checkmate+json;version=2;q=0.1";
-            var types = new ContentNegotiator().Negotiate(new BasicProperties { ContentType = input })
-                                               .OrderByDescending(_ => _.Quality);
+            var types = new ContentNegotiator().Negotiate(new BasicProperties { ContentType = input });
 
             var first = types.First();
             Assert.Equal(ContentNegotiator.MediaType.Parse("text/html"), first.Type);
@@ -44,7 +43,8 @@ namespace Carrot.Tests
         {
             return properties.ContentType
                              .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
-                             .Select(_ => MediaTypeHeader.Parse(_.Trim()));
+                             .Select(_ => MediaTypeHeader.Parse(_.Trim()))
+                             .OrderByDescending(_ => _.Quality);
         }
 
         public struct MediaTypeHeader
