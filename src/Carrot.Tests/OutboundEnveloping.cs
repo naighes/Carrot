@@ -1,8 +1,10 @@
 using System;
+using Carrot.Extensions;
 using Carrot.Messages;
 using Carrot.Serialization;
 using Moq;
 using RabbitMQ.Client;
+using RabbitMQ.Client.Framing;
 using Xunit;
 
 namespace Carrot.Tests
@@ -58,6 +60,123 @@ namespace Carrot.Tests
             Assert.Equal(result.Exception, exception);
         }
 
+        [Fact]
+        public void BasicPropertiesMapping()
+        {
+            const String messageId = "one-id";
+            var timestamp = new DateTimeOffset(2015, 1, 2, 3, 4, 5, TimeSpan.Zero);
+            var properties = new BasicProperties();
+            var newId = new Mock<INewId>();
+            newId.Setup(_ => _.Next()).Returns(messageId);
+            var dateTimeProvider = new Mock<IDateTimeProvider>();
+            dateTimeProvider.Setup(_ => _.UtcNow()).Returns(timestamp);
+            var envelope = new OutboundMessageEnvelopeWrapper<Foo>(new OutboundMessage<Foo>(new Foo()), 
+                                                                   new Mock<ISerializerFactory>().Object, 
+                                                                   dateTimeProvider.Object, 
+                                                                   newId.Object);
+            envelope.CallHydrateProperties(properties);
+            Assert.Equal(messageId, properties.MessageId);
+            Assert.Equal(timestamp.ToUnixTimestamp(), properties.Timestamp.UnixTime);
+        }
+
+        [Fact]
+        public void MessageType()
+        {
+            var envelope = new OutboundMessageEnvelopeWrapper<Foo>(new OutboundMessage<Foo>(new Foo()),
+                                                                   new Mock<ISerializerFactory>().Object,
+                                                                   new Mock<IDateTimeProvider>().Object,
+                                                                   new Mock<INewId>().Object);
+            var properties = new BasicProperties();
+            envelope.CallHydrateProperties(properties);
+            Assert.Equal("urn:message:foo", properties.Type);
+        }
+
+        [Fact]
+        public void MessageTypeFallback()
+        {
+            var envelope = new OutboundMessageEnvelopeWrapper<Bar>(new OutboundMessage<Bar>(new Bar()),
+                                                                   new Mock<ISerializerFactory>().Object,
+                                                                   new Mock<IDateTimeProvider>().Object,
+                                                                   new Mock<INewId>().Object);
+            var properties = new BasicProperties();
+            envelope.CallHydrateProperties(properties);
+            Assert.Equal("urn:message:Carrot.Tests.Bar", properties.Type);
+        }
+
+        [Fact]
+        public void ContentEncoding()
+        {
+            const String contentEncoding = "UTF-16";
+            var envelope = new OutboundMessageEnvelopeWrapper<Bar>(new OutboundMessage<Bar>(new Bar()),
+                                                                   new Mock<ISerializerFactory>().Object,
+                                                                   new Mock<IDateTimeProvider>().Object,
+                                                                   new Mock<INewId>().Object);
+            var properties = new BasicProperties { ContentEncoding = contentEncoding };
+            envelope.CallHydrateProperties(properties);
+            Assert.Equal(contentEncoding, properties.ContentEncoding);
+        }
+
+        [Fact]
+        public void DefaultContentEncoding()
+        {
+            var envelope = new OutboundMessageEnvelopeWrapper<Bar>(new OutboundMessage<Bar>(new Bar()),
+                                                                   new Mock<ISerializerFactory>().Object,
+                                                                   new Mock<IDateTimeProvider>().Object,
+                                                                   new Mock<INewId>().Object);
+            var properties = new BasicProperties();
+            envelope.CallHydrateProperties(properties);
+            Assert.Equal("UTF-8", properties.ContentEncoding);
+        }
+
+        [Fact]
+        public void ContentType()
+        {
+            const String contentType = "application/xml";
+            var envelope = new OutboundMessageEnvelopeWrapper<Bar>(new OutboundMessage<Bar>(new Bar()),
+                                                                   new Mock<ISerializerFactory>().Object,
+                                                                   new Mock<IDateTimeProvider>().Object,
+                                                                   new Mock<INewId>().Object);
+            var properties = new BasicProperties { ContentType = contentType };
+            envelope.CallHydrateProperties(properties);
+            Assert.Equal(contentType, properties.ContentType);
+        }
+
+        [Fact]
+        public void DefaultContentType()
+        {
+            var envelope = new OutboundMessageEnvelopeWrapper<Bar>(new OutboundMessage<Bar>(new Bar()),
+                                                                   new Mock<ISerializerFactory>().Object,
+                                                                   new Mock<IDateTimeProvider>().Object,
+                                                                   new Mock<INewId>().Object);
+            var properties = new BasicProperties();
+            envelope.CallHydrateProperties(properties);
+            Assert.Equal("application/json", properties.ContentType);
+        }
+
+        [Fact]
+        public void NonDurableMessage()
+        {
+            var envelope = new OutboundMessageEnvelopeWrapper<Bar>(new OutboundMessage<Bar>(new Bar()),
+                                                                   new Mock<ISerializerFactory>().Object,
+                                                                   new Mock<IDateTimeProvider>().Object,
+                                                                   new Mock<INewId>().Object);
+            var properties = new BasicProperties();
+            envelope.CallHydrateProperties(properties);
+            Assert.False(properties.Persistent);
+        }
+
+        [Fact]
+        public void DurableMessage()
+        {
+            var envelope = new OutboundMessageEnvelopeWrapper<Bar>(new DurableOutboundMessage<Bar>(new Bar()),
+                                                                   new Mock<ISerializerFactory>().Object,
+                                                                   new Mock<IDateTimeProvider>().Object,
+                                                                   new Mock<INewId>().Object);
+            var properties = new BasicProperties();
+            envelope.CallHydrateProperties(properties);
+            Assert.True(properties.Persistent);
+        }
+
         internal class OutboundMessageEnvelopeWrapper<TMessage> : OutboundMessageEnvelope<TMessage> where TMessage : class
         {
             internal OutboundMessageEnvelopeWrapper(OutboundMessage<TMessage> message, 
@@ -66,6 +185,11 @@ namespace Carrot.Tests
                                                     INewId newId)
                 : base(message, serializerFactory, dateTimeProvider, newId)
             {
+            }
+
+            internal void CallHydrateProperties(IBasicProperties properties)
+            {
+                HydrateProperties(properties);
             }
         }
     }

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
@@ -6,6 +7,7 @@ using Carrot.Extensions;
 using Carrot.Messaging;
 using Carrot.Serialization;
 using RabbitMQ.Client;
+using RabbitMQ.Client.Framing;
 
 namespace Carrot.Messages
 {
@@ -32,9 +34,8 @@ namespace Carrot.Messages
 
         internal Task<IPublishResult> PublishAsync(IModel model, String exchange, String routingKey = "")
         {
-            var properties = _message.ToOutboundBasicProperties();
-
-            EnrichProperties(properties);
+            var properties = BuildBasicProperties();
+            HydrateProperties(properties);
 
             var encoding = Encoding.GetEncoding(properties.ContentEncoding);
             var serializer = _serializerFactory.Create(properties.ContentType);
@@ -51,6 +52,11 @@ namespace Carrot.Messages
                        .ContinueWith<IPublishResult>(Result);
         }
 
+        private static BasicProperties BuildBasicProperties()
+        {
+            return new BasicProperties { Headers = new Dictionary<String, Object>() };
+        }
+
         private static IPublishResult Result(Task task)
         {
             if (task.Exception != null)
@@ -59,17 +65,28 @@ namespace Carrot.Messages
             return SuccessfulPublishing.FromBasicProperties(task.AsyncState as IBasicProperties);
         }
 
-        protected virtual void EnrichProperties(IBasicProperties properties)
+        protected virtual void HydrateProperties(IBasicProperties properties)
         {
+            _message.HydrateProperties(properties);
             properties.MessageId = _newId.Next();
             properties.Timestamp = new AmqpTimestamp(_dateTimeProvider.UtcNow().ToUnixTimestamp());
-            properties.Type = typeof(TMessage).GetCustomAttribute<MessageBindingAttribute>().MessageType;
+            properties.Type = MessageType();
 
             if (properties.ContentEncoding == null)
                 properties.ContentEncoding = DefaultContentEncoding;
 
             if (properties.ContentType == null)
                 properties.ContentType = DefaultContentType;
+        }
+
+        // TODO: should depend on resolver.
+        private static String MessageType()
+        {
+            var attribute = typeof(TMessage).GetCustomAttribute<MessageBindingAttribute>();
+
+            return attribute != null 
+                ? attribute.MessageType 
+                : String.Format("urn:message:{0}", typeof(TMessage).FullName);
         }
     }
 }

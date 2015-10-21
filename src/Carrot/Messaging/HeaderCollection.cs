@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
-using RabbitMQ.Client.Framing;
 
 namespace Carrot.Messaging
 {
@@ -66,19 +65,13 @@ namespace Carrot.Messaging
                                             });
         }
 
-        internal IBasicProperties ToOutboundBasicProperties()
+        internal void HydrateProperties(IBasicProperties properties)
         {
-            var properties = new BasicProperties
-                                 {
-                                     Headers = new Dictionary<String, Object>(),
-                                     Persistent = false
-                                 };
+            properties.Persistent = false;
 
             foreach (var pair in _dictionary)
                 if (!_reserverKeys.Contains(pair.Key))
                     properties.Headers.Add(pair.Key, pair.Value);
-
-            return properties;
         }
     }
 }

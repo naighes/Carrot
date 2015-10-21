@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Carrot.Messaging;
 using RabbitMQ.Client;
+using RabbitMQ.Client.Framing;
 using Xunit;
 
 namespace Carrot.Tests
@@ -28,7 +29,8 @@ namespace Carrot.Tests
             const String key = "foo";
             const String value = "bar";
             collection.AddHeader(key, value);
-            var properties = collection.ToOutboundBasicProperties();
+            var properties = new BasicProperties { Headers = new Dictionary<String, Object>() };
+            collection.HydrateProperties(properties);
 
             Assert.Null(properties.MessageId);
             Assert.Equal(new AmqpTimestamp(0L), properties.Timestamp);

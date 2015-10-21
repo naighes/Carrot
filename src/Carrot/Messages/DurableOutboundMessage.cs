@@ -10,12 +10,10 @@ namespace Carrot.Messages
         {
         }
 
-        internal override IBasicProperties ToOutboundBasicProperties()
+        internal override void HydrateProperties(IBasicProperties properties)
         {
-            var properties = base.ToOutboundBasicProperties();
+            base.HydrateProperties(properties);
             properties.Persistent = true;
-
-            return properties;
         }
     }
 }

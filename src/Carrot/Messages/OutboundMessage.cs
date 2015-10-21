@@ -24,9 +24,9 @@ namespace Carrot.Messages
             get { return _content; }
         }
 
-        internal virtual IBasicProperties ToOutboundBasicProperties()
+        internal virtual void HydrateProperties(IBasicProperties properties)
         {
-            return Headers.ToOutboundBasicProperties();
+            Headers.HydrateProperties(properties);
         }
     }
 }
