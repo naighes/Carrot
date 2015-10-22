@@ -4,7 +4,6 @@ Carrot is a .NET lightweight library that provides a couple of facilities over R
 
 [![install from nuget](https://img.shields.io/nuget/v/Carrot.svg?style=flat-square)](https://www.nuget.org/packages/Carrot)[![downloads](http://img.shields.io/nuget/dt/Carrot.svg?style=flat-square)](https://www.nuget.org/packages/Carrot)
 
-
 Getting started
 ====
 
@@ -44,4 +43,10 @@ You're up 'n running! Do not forget to call `AmqpChannel.Dispose()` when your ap
 You can publish messages as the following:
 
     channel.PublishAsync(new OutboundMessage<Foo>(new Foo { Bar = 2 }),
+                         exchange);
+
+Please note that messages are not durable by default.
+If you need durable messaging, make use of `DurableOutboundMessage<T>`:
+
+    channel.PublishAsync(new DurableOutboundMessage<Foo>(new Foo { Bar = 2 }),
                          exchange);
