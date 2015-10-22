@@ -7,7 +7,7 @@
 	  <authors>Nicola Baldi (naighes)</authors>
 	  <owners>Nicola Baldi (naighes)</owners>  
 	  <requireLicenseAcceptance>false</requireLicenseAcceptance>
-	  <description>Lightweight .NET library to provide facilities for RabbitMQ.</description>
+	  <description>Carrot is a .NET lightweight library that provides a couple of facilities over RabbitMQ.</description>
 	  <copyright>copyright © Nicola Baldi (naighes) 2015</copyright>
   </metadata>
 </package>

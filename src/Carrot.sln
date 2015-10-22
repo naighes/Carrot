@@ -14,6 +14,21 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{FCBF01
 		.nuget\NuGet.targets = .nuget\NuGet.targets
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution items", "Solution items", "{684A9AC5-4E09-49CA-B18F-37D04356E2F5}"
+	ProjectSection(SolutionItems) = preProject
+		CommonAssemblyInfo.cs = CommonAssemblyInfo.cs
+		..\README.md = ..\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ps", "ps", "{5245149C-E13A-41FE-B8CA-3AB4E7901FE6}"
+	ProjectSection(SolutionItems) = preProject
+		..\build.bat = ..\build.bat
+		..\build.ps1 = ..\build.ps1
+		..\default.ps1 = ..\default.ps1
+		..\extras.psm1 = ..\extras.psm1
+		..\nuget_push.bat = ..\nuget_push.bat
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -31,5 +46,8 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{5245149C-E13A-41FE-B8CA-3AB4E7901FE6} = {684A9AC5-4E09-49CA-B18F-37D04356E2F5}
 	EndGlobalSection
 EndGlobal
