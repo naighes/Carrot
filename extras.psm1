@@ -94,7 +94,7 @@ function Get-InformationalVersion {
     param([Parameter(Position = 0, Mandatory = $true)][String]$productVersion,
 		  [Parameter(Position = 1, Mandatory = $true)][String]$patchVersion,
 		  [Parameter(Position = 2, Mandatory = $true)][String]$buildNumber,
-		  [Parameter(Position = 3, Mandatory = $false)][String]$preRelease = "")
+		  [Parameter(Position = 3, Mandatory = $false)][String]$preRelease)
 	$assemblyInformationalVersion = $productVersion + "." + $patchVersion + "." + $buildNumber
 
 	if ($preRelease -ne "") {

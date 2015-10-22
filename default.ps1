@@ -154,31 +154,31 @@ Task Run-UnitTests {
 	}
 }
 
-# Task NuGet-CreatePackages {
-	# if (-not(Test-Path $nugetOutputPath)) {
-		# md $nugetOutputPath
-	# }
+Task NuGet-CreatePackages {
+	if (-not(Test-Path $nugetOutputPath)) {
+		md $nugetOutputPath
+	}
 
-	# foreach ($info in Get-ProjectsInfo "$srcDir" "$commonAssemblyInfoPath") {
-		# if (Test-Path -Path $info.NuspecFile) {
-			# $version = Get-InformationalVersion "$productVersion" "$patchVersion" 
+	foreach ($info in Get-ProjectsInfo "$srcDir" "$commonAssemblyInfoPath") {
+		if (Test-Path -Path $info.NuspecFile) {
+			$version = Get-InformationalVersion "$productVersion" "$patchVersion" "$buildNumber"
 			
-			# Write-Host "Generating NuGet package for $($info.ProjectFile) from nuspec file '$($info.NuspecFile)'."
-			# exec { & $(Get-Tool "NuGet" "$toolsDirectoryPath") pack $info.ProjectFilePath -IncludeReferencedProjects -OutputDirectory $nugetOutputPath -Version $version -Prop Configuration=$config }
+			Write-Host "Generating NuGet package for $($info.ProjectFile) from nuspec file '$($info.NuspecFile)'."
+			exec { & $("$srcDir\.nuget\NuGet.exe") pack $info.ProjectFilePath -IncludeReferencedProjects -OutputDirectory $nugetOutputPath -Version $version -Prop Configuration=$config }
 			
-			# Write-Host ""
-		# }
-	# }
-# }
+			Write-Host ""
+		}
+	}
+}
 
-# Task NuGet-Publish {
-	# Write-Host "Publishing packages."
+Task NuGet-Publish {
+	Write-Host "Publishing packages."
 	
-	# foreach ($package in ls $nugetOutputPath "*.nupkg") {
-		# Write-Host "Publishing package $($package.FullName) to NuGet repository on '$nugetServer'."
-		# exec { & $(Get-Tool "NuGet" "$toolsDirectoryPath") push "$($package.FullName)" $nugetApiKey -Source $nugetServer }
-	# }
-# }
+	foreach ($package in ls $nugetOutputPath "*.nupkg") {
+		Write-Host "Publishing package $($package.FullName) to NuGet repository on '$nugetServer'."
+		exec { & $(Get-Tool "NuGet" "$toolsDirectoryPath") push "$($package.FullName)" $nugetApiKey -Source $nugetServer }
+	}
+}
 
 Task AssemblyInfo-Generate {
 	Write-Output "Generating assemblies info."

@@ -4,7 +4,6 @@ param([Parameter(Position = 0,Mandatory = 0)][string]$buildFile = 'default.ps1',
 
 $directory = Get-ChildItem -recurse | Where-Object {$_.PSIsContainer -eq $true -and $_.Name.StartsWith("psake")}
 $path = "$($directory.FullName)\tools\psake.psm1"
-Write-Host $path
 Remove-Module [p]sake
 Import-Module ($path)
 Invoke-psake $buildFile @($task) $properties

@@ -3,6 +3,6 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 [assembly: AssemblyTitle("Carrot")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("Lightweight .NET library to provide facilities for RabbitMQ.")]
 [assembly: Guid("101be792-1a3b-45dd-b6d1-2b6baed40819")]
 [assembly: InternalsVisibleTo("Carrot.Tests")]
