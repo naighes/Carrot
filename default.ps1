@@ -6,7 +6,6 @@ properties {
 	$srcDir = "$baseDir\src"
 	$nugetPackagesDirectoryName = "packages"
 	$nugetPackagesDirectoryPath = "$srcDir\$nugetPackagesDirectoryName"
-	# $toolsDirectoryPath = "$baseDir\tools\"
 	$config = "Release"
 	$commonAssemblyInfoPath = "$srcDir\CommonAssemblyInfo.cs"
 	
@@ -30,9 +29,7 @@ Task SmokeTest {
 	Write-Host "Up & running on '$baseDir'!"
 }
 
-# Task Default -Depends PrepareBinaries
-
-Task PrepareBinaries -Depends Clean, NuGet-Restore, Compile
+Task PrepareBinaries -Depends Clean, NuGet-Restore, Compile, Run-UnitTests
 
 Task CreateRelease -Depends AssemblyInfo-Generate, PrepareBinaries
 
@@ -131,43 +128,31 @@ Task Compile {
     }
 }
 
-# Task Run-UnitTests {
-	# $tools = @("nunit-console")
-    # $badOutputPattern = "Could not load file or assembly.+?(?:cannot be loaded.|incorrect format.)"
-    # $failurePattern = ",\s+[1-9]\d*\s+failed,"
-    # $successPattern = "Test assembly:.+seconds"
+Task Run-UnitTests {
+    $tools = @("xunit.console.exe", "xunit.console.x86.exe")
 
-    # foreach ($info in Get-ProjectsInfo "$srcDir" "$commonAssemblyInfoPath") {
-		# Write-Host "Examining project '$($info.ProjectFile)'."
-
-        # if ($info.IsTestProject) {
-			# $binFolder = "$($info.BinDirectory)$config"
-            # $assemblyPath = "$binFolder\$($info.AssemblyName).dll"
- 			# Write-Host "Found test assembly '$assemblyPath'." -ForegroundColor Cyan
-
-            # foreach ($tool in $tools) {
-				# $toolPath = Get-Tool $tool $baseDir
-				# $output = "$(& $toolPath $assemblyPath)"
+	foreach ($info in Get-ProjectsInfo "$srcDir" "$commonAssemblyInfoPath") {
+		Write-Host "Examining project '$($info.ProjectFile)'."
+		
+		if ($info.IsTestProject) {
+			$binFolder = "$($info.BinDirectory)$config"
+            $assemblyPath = "$binFolder\$($info.AssemblyName).dll"
+ 			Write-Host "Found test assembly '$assemblyPath'." -ForegroundColor Cyan
+			
+			foreach ($tool in $tools) {
+				$d = Get-ChildItem $baseDir -recurse | Where-Object {$_.PSIsContainer -eq $true -and $_.Name.StartsWith("xunit.runner.console")}
+				$toolPath = "$($d.FullName)\tools\$tool"
+				Write-Host $p
+				$output = "$(& $toolPath $assemblyPath)"
+				Write-Host $output
 				
-				# if ($output -match 'Tests run:\s+([0-9]+),\s+Errors:\s+([0-9]+),\s+Failures:\s+([0-9]+),\s+Inconclusive:\s+([0-9]+)') { 
-					# $failedTests = [int]$matches[3] + [int]$matches[2]
-					
-					# Write-Host $failedTests
-					
-					# if ($failedTests -gt 0) {
-						# Write-Host $matches[0] -ForegroundColor Red
-						# Exit-Build "$failedTests Tests fail into assembly '$assemblyPath'!"
-					# }
-					# else {
-						# Write-Host $matches[0] -ForegroundColor Green
-					# }
-				# }
-            # }
-
-			# Write-Host ""
-        # }
-    # }
-# }
+				if ($LastExitCode) {
+					Exit-Build "One or more tests failed for project '$assemblyPath'."
+				}
+			}
+		}
+	}
+}
 
 # Task NuGet-CreatePackages {
 	# if (-not(Test-Path $nugetOutputPath)) {

@@ -42,7 +42,7 @@ function Get-ProjectsInfo {
 			PackagesConfigPath = "$($file.Directory.FullName)\packages.config";
 			NuspecFile = "$($file.Directory.FullName)\$($projectName).nuspec";
 			AssemblyName = ($document.Project.PropertyGroup | where { $_.AssemblyName -ne $null }).AssemblyName;
-			IsTestProject = ($document.Project.ItemGroup.Reference.Include | where { $_ -eq "nunit.framework" }) -ne $null;
+			IsTestProject = ($document.Project.ItemGroup.Reference.Include | where { $_.StartsWith("xunit") }) -ne $null;
 			AssemblyInfoPath = $assemblyInfoPath;
 			
 			Company = $("$solutionInfo.Company");
@@ -61,16 +61,6 @@ function Get-ProjectsInfo {
     }
 
     return $paths;
-}
-
-function Get-Tool {
-    [CmdletBinding()]
-    param([Parameter(Position = 0, Mandatory = $true)][String]$toolFile,
-		  [Parameter(Position = 1, Mandatory = $true)][String]$toolsPath)
-
-    $tool = (@(Get-ChildItem "$toolsPath" -Recurse -Filter "$toolFile.exe") | Select-Object -First 1)
-
-    return $tool.FullName
 }
 
 function Get-BuildNumber {
