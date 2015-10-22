@@ -73,9 +73,9 @@ function Get-Tool {
     return $tool.FullName
 }
 
-function Get-HgRevision {
-    $revision = hg identify -n
-    $revision = $revision.trimEnd('\n').replace("+", "")
+function Get-BuildNumber {
+    $revision = git rev-list HEAD --count
+    $revision = $revision.trimEnd('\n')
     return $revision
 }
 

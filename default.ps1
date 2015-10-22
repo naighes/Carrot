@@ -17,12 +17,13 @@ properties {
 	
     $productVersion = "0"
 	$patchVersion = "0"
-	# $buildNumber = ...
 		
 	$nugetOutputPath = "$baseDir\nuget-out"
 	
 	# $nugetApiKey = ""
 	# $nugetServer = ""
+	$preRelease = "alpha"
+	$buildNumber = Get-BuildNumber
 }
 
 Task SmokeTest {
@@ -33,11 +34,13 @@ Task SmokeTest {
 
 Task PrepareBinaries -Depends Clean, NuGet-Restore, Compile
 
-# Task CreateRelease -Depends AssemblyInfo-Generate, PrepareBinaries
+Task CreateRelease -Depends AssemblyInfo-Generate, PrepareBinaries
 
 # Task NuGet-Push -Depends CreateRelease, NuGet-CreatePackages, NuGet-Publish
 
 Task Clean {
+	Write-Host $bn
+	
 	if (Test-Path $nugetPackagesDirectoryPath) {
 		try {
 			Write-Host "Cleaning up NuGet packages directory at '$nugetPackagesDirectoryPath'."
@@ -173,7 +176,7 @@ Task Compile {
 
 	# foreach ($info in Get-ProjectsInfo "$srcDir" "$commonAssemblyInfoPath") {
 		# if (Test-Path -Path $info.NuspecFile) {
-			# $version = Get-InformationalVersion "$productVersion" "$patchVersion" "$buildNumber" 
+			# $version = Get-InformationalVersion "$productVersion" "$patchVersion" 
 			
 			# Write-Host "Generating NuGet package for $($info.ProjectFile) from nuspec file '$($info.NuspecFile)'."
 			# exec { & $(Get-Tool "NuGet" "$toolsDirectoryPath") pack $info.ProjectFilePath -IncludeReferencedProjects -OutputDirectory $nugetOutputPath -Version $version -Prop Configuration=$config }
@@ -192,34 +195,34 @@ Task Compile {
 	# }
 # }
 
-# Task AssemblyInfo-Generate {
-	# Write-Output "Generating assemblies info for build number '$buildNumber'."
+Task AssemblyInfo-Generate {
+	Write-Output "Generating assemblies info."
 	
-	# $assemblyFileVersion = Get-FileVersion "$productVersion" "$patchVersion" "$buildNumber"
-	# $assemblyInformationalVersion = Get-InformationalVersion "$productVersion" "$patchVersion" "$buildNumber" "$preRelease"
-	# $solutionInfo = Get-SolutionInfo $commonAssemblyInfoPath
+	$assemblyFileVersion = Get-FileVersion "$productVersion" "$patchVersion" "$patchVersion" "$buildNumber"
+	$assemblyInformationalVersion = Get-InformationalVersion "$productVersion" "$patchVersion" "$buildNumber" "$preRelease"
+	$solutionInfo = Get-SolutionInfo $commonAssemblyInfoPath
 	
-	# Generate-CommonAssemblyInfo "$($solutionInfo.CLSCompliant)" `
-							    # "$config" `
-							    # "$($solutionInfo.Company)" `
-							    # "$($solutionInfo.Product)" `
-							    # "$($solutionInfo.Copyright)" `
-							    # $assemblyFileVersion `
-							    # $assemblyFileVersion `
-							    # $assemblyInformationalVersion `
-								# "$($solutionInfo.ComVisible)" `
-								# "$($solutionInfo.NeutralResourcesLanguage)" `
-								# "$($solutionInfo.DelaySign)" `
-							    # $commonAssemblyInfoPath
+	Generate-CommonAssemblyInfo "$($solutionInfo.CLSCompliant)" `
+							    "$config" `
+							    "$($solutionInfo.Company)" `
+							    "$($solutionInfo.Product)" `
+							    "$($solutionInfo.Copyright)" `
+							    $assemblyFileVersion `
+							    $assemblyFileVersion `
+							    $assemblyInformationalVersion `
+								"$($solutionInfo.ComVisible)" `
+								"$($solutionInfo.NeutralResourcesLanguage)" `
+								"$($solutionInfo.DelaySign)" `
+							    $commonAssemblyInfoPath
 	
-	# foreach ($info in Get-ProjectsInfo "$baseDir" "$commonAssemblyInfoPath") {
-		# Write-Host "$($info.Title)"
+	foreach ($info in Get-ProjectsInfo "$baseDir" "$commonAssemblyInfoPath") {
+		Write-Host "$($info.Title)"
 	
-		# $assemblyTitle = "$($info.Title)"
-		# $guid = "$($info.Guid)"
-		# $description = "$($info.Description)"
-		# $internalsVisibleTo = "$($info.InternalsVisibleTo)"
+		$assemblyTitle = "$($info.Title)"
+		$guid = "$($info.Guid)"
+		$description = "$($info.Description)"
+		$internalsVisibleTo = "$($info.InternalsVisibleTo)"
 		
-		# Generate-AssemblyInfo $assemblyTitle $guid $description $internalsVisibleTo $($info.AssemblyInfoPath)
-	# }
-# }
+		Generate-AssemblyInfo $assemblyTitle $guid $description $internalsVisibleTo $($info.AssemblyInfoPath)
+	}
+}
