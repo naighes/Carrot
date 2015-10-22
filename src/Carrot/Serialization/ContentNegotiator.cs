@@ -82,7 +82,8 @@ namespace Carrot.Serialization
                                         .Select(_ => _.Trim()))
                     if (s.StartsWith("q", StringComparison.Ordinal))
                         quality = Single.Parse(s.Substring(s.IndexOf('=') + 1)
-                                                .TrimStart());
+                                                .TrimStart(),
+                                               CultureInfo.InvariantCulture);
                     else if (s.IndexOf('=') == -1) 
                         type = MediaType.Parse(s);
 
