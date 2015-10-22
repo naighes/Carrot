@@ -19,8 +19,6 @@ properties {
 		
 	$nugetOutputPath = "$baseDir\nuget-out"
 	
-	# $nugetApiKey = ""
-	# $nugetServer = ""
 	$preRelease = "alpha"
 	$buildNumber = Get-BuildNumber
 }
@@ -33,7 +31,7 @@ Task PrepareBinaries -Depends Clean, NuGet-Restore, Compile, Run-UnitTests
 
 Task CreateRelease -Depends AssemblyInfo-Generate, PrepareBinaries
 
-# Task NuGet-Push -Depends CreateRelease, NuGet-CreatePackages, NuGet-Publish
+Task NuGet-Push -Depends CreateRelease, NuGet-CreatePackages #, NuGet-Publish
 
 Task Clean {
 	Write-Host $bn
@@ -161,7 +159,7 @@ Task NuGet-CreatePackages {
 
 	foreach ($info in Get-ProjectsInfo "$srcDir" "$commonAssemblyInfoPath") {
 		if (Test-Path -Path $info.NuspecFile) {
-			$version = Get-InformationalVersion "$productVersion" "$patchVersion" "$buildNumber"
+			$version = Get-InformationalVersion "$productVersion" "$patchVersion" "$buildNumber" "$preRelease"
 			
 			Write-Host "Generating NuGet package for $($info.ProjectFile) from nuspec file '$($info.NuspecFile)'."
 			exec { & $("$srcDir\.nuget\NuGet.exe") pack $info.ProjectFilePath -IncludeReferencedProjects -OutputDirectory $nugetOutputPath -Version $version -Prop Configuration=$config }
