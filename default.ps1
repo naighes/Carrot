@@ -31,7 +31,7 @@ Task PrepareBinaries -Depends Clean, NuGet-Restore, Compile, Run-UnitTests
 
 Task CreateRelease -Depends AssemblyInfo-Generate, PrepareBinaries
 
-Task NuGet-Push -Depends CreateRelease, NuGet-CreatePackages #, NuGet-Publish
+Task NuGet-Push -Depends CreateRelease, NuGet-CreatePackages, NuGet-Publish
 
 Task Clean {
 	Write-Host $bn
@@ -174,7 +174,7 @@ Task NuGet-Publish {
 	
 	foreach ($package in ls $nugetOutputPath "*.nupkg") {
 		Write-Host "Publishing package $($package.FullName) to NuGet repository on '$nugetServer'."
-		exec { & $(Get-Tool "NuGet" "$toolsDirectoryPath") push "$($package.FullName)" $nugetApiKey -Source $nugetServer }
+		exec { & $("$srcDir\.nuget\NuGet.exe") push "$($package.FullName)" }
 	}
 }
 
