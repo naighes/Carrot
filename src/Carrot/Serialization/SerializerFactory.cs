@@ -26,8 +26,8 @@ namespace Carrot.Serialization
             var result = _negotiator.Negotiate(contentType);
 
             foreach (var header in result)
-                if (this._serializers.ContainsKey(header))
-                    return this._serializers[header];
+                if (_serializers.ContainsKey(header))
+                    return _serializers[header];
 
             return NullSerializer.Instance;
         }

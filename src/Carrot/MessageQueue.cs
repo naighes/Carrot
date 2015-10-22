@@ -25,14 +25,14 @@ namespace Carrot
             get { return _name; }
         }
 
-        public void ConfigureSubscriptions(Action<SubscriptionConfiguration> configure)
+        public void SubscribeByAtMostOnce(Action<SubscriptionConfiguration> configure)
         {
-            var configuration = new SubscriptionConfiguration();
-            configure(configuration);
-            var builder = new ConsumedMessageBuilder(new SerializerFactory(), _resolver);
-            _model.BasicConsume(_name,
-                                false,
-                                new AtLeastOnceConsumer(_model, builder, configuration));
+            Subscribe(configure, (b, c) => new AtMostOnceConsumer(_model, b, c));
+        }
+
+        public void SubscribeByAtLeastOnce(Action<SubscriptionConfiguration> configure)
+        {
+            Subscribe(configure, (b, c) => new AtLeastOnceConsumer(_model, b, c));
         }
 
         internal static MessageQueue New(IModel model,
@@ -48,6 +48,16 @@ namespace Carrot
             exchange.Bind(queue, model, routingKey);
 
             return queue;
+        }
+
+        private void Subscribe(Action<SubscriptionConfiguration> configure,
+                               Func<IConsumedMessageBuilder, SubscriptionConfiguration, ConsumerBase> func)
+        {
+            var configuration = new SubscriptionConfiguration();
+            configure(configuration);
+            IConsumedMessageBuilder builder = new ConsumedMessageBuilder(new SerializerFactory(), _resolver);
+
+            _model.BasicConsume(_name, false, func(builder, configuration));
         }
     }
 }
