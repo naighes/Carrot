@@ -198,7 +198,7 @@ Task Compile {
 Task AssemblyInfo-Generate {
 	Write-Output "Generating assemblies info."
 	
-	$assemblyFileVersion = Get-FileVersion "$productVersion" "$patchVersion" "$patchVersion" "$buildNumber"
+	$assemblyFileVersion = Get-FileVersion "$productVersion" "$patchVersion" "$buildNumber"
 	$assemblyInformationalVersion = Get-InformationalVersion "$productVersion" "$patchVersion" "$buildNumber" "$preRelease"
 	$solutionInfo = Get-SolutionInfo $commonAssemblyInfoPath
 	
