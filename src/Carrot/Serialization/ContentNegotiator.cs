@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 
 namespace Carrot.Serialization
@@ -15,7 +16,7 @@ namespace Carrot.Serialization
                                                   MediaTypeHeader.MediaTypeHeaderQualityComparer.Instance);
         }
 
-        public struct MediaTypeHeader
+        public class MediaTypeHeader : IEquatable<MediaTypeHeader>
         {
             internal readonly MediaType Type;
             internal readonly Single Quality;
@@ -30,17 +31,23 @@ namespace Carrot.Serialization
 
             public static Boolean operator ==(MediaTypeHeader left, MediaTypeHeader right)
             {
-                return left.Equals(right);
+                return Equals(left, right);
             }
 
             public static Boolean operator !=(MediaTypeHeader left, MediaTypeHeader right)
             {
-                return !left.Equals(right);
+                return !Equals(left, right);
             }
 
             public Boolean Equals(MediaTypeHeader other)
             {
-                return Type == other.Type;
+                if (ReferenceEquals(null, other))
+                    return false;
+
+                if (ReferenceEquals(this, other))
+                    return true;
+
+                return Type.Equals(other.Type);
             }
 
             public override Boolean Equals(Object obj)
@@ -48,12 +55,21 @@ namespace Carrot.Serialization
                 if (ReferenceEquals(null, obj))
                     return false;
 
-                return obj is MediaTypeHeader && Equals((MediaTypeHeader)obj);
+                if (ReferenceEquals(this, obj))
+                    return true;
+
+                var other = obj as MediaTypeHeader;
+                return other != null && Equals(other);
             }
 
             public override Int32 GetHashCode()
             {
                 return Type.GetHashCode();
+            }
+
+            public override String ToString()
+            {
+                return String.Format("{0};q={1}", Type, Quality.ToString(CultureInfo.InvariantCulture));
             }
 
             internal static MediaTypeHeader Parse(String source)
@@ -88,38 +104,39 @@ namespace Carrot.Serialization
             }
         }
 
-        public struct MediaType
+        public abstract class RegistrationTree : IEquatable<RegistrationTree>
         {
-            public readonly String Type;
-            public readonly String Vendor;
+            public readonly String Name;
             public readonly String Suffix;
+            public readonly String Prefix;
 
-            internal MediaType(String type, String vendor = null, String suffix = null)
+            internal RegistrationTree(String name, String suffix, String prefix)
             {
-                Type = type;
-                Vendor = vendor;
+                Name = name;
                 Suffix = suffix;
+                Prefix = prefix;
             }
 
-            public static Boolean operator ==(MediaType left, MediaType right)
+            public static Boolean operator ==(RegistrationTree left, RegistrationTree right)
             {
-                return left.Equals(right);
+                return Equals(left, right);
             }
 
-            public static Boolean operator !=(MediaType left, MediaType right)
+            public static Boolean operator !=(RegistrationTree left, RegistrationTree right)
             {
-                return !left.Equals(right);
+                return !Equals(left, right);
             }
 
-            public override String ToString()
+            public Boolean Equals(RegistrationTree other)
             {
-                return String.Format("{0}/vnd.{1}+{2}", Type, Vendor, Suffix);
-            }
+                if (ReferenceEquals(null, other))
+                    return false;
 
-            public Boolean Equals(MediaType other)
-            {
-                return String.Equals(Type, other.Type) &&
-                       String.Equals(Vendor, other.Vendor) &&
+                if (ReferenceEquals(this, other))
+                    return true;
+
+                return String.Equals(Prefix, other.Prefix) &&
+                       String.Equals(Name, other.Name) &&
                        String.Equals(Suffix, other.Suffix);
             }
 
@@ -128,18 +145,136 @@ namespace Carrot.Serialization
                 if (ReferenceEquals(null, obj))
                     return false;
 
-                return obj is MediaType && Equals((MediaType)obj);
+                if (ReferenceEquals(this, obj))
+                    return true;
+
+                var other = obj as RegistrationTree;
+                return other != null && Equals(other);
             }
 
             public override Int32 GetHashCode()
             {
                 unchecked
                 {
-                    var hashCode = Type != null ? Type.GetHashCode() : 0;
-                    hashCode = (hashCode * 397) ^ (Vendor != null ? Vendor.GetHashCode() : 0);
-                    hashCode = (hashCode * 397) ^ (Suffix != null ? Suffix.GetHashCode() : 0);
-                    return hashCode;
+                    return ((Name != null ? Name.GetHashCode() : 0) * 397) ^ 
+                           ((Prefix != null ? Prefix.GetHashCode() : 0) * 397) ^ 
+                           (Suffix != null ? Suffix.GetHashCode() : 0);
                 }
+            }
+
+            public override String ToString()
+            {
+                return Suffix == null
+                    ? String.Format("{0}{1}", Prefix, Name)
+                    : String.Format("{0}{1}+{2}", Prefix, Name, Suffix);
+            }
+
+            internal static RegistrationTree Parse(String source)
+            {
+                return source.StartsWith("vnd.", StringComparison.Ordinal)
+                    ? new VendorTree(ParseName(source, "vnd."), ParseSuffix(source))
+                    : (RegistrationTree)new StandardTree(ParseName(source), ParseSuffix(source));
+            }
+
+            protected static String ParseSuffix(String source)
+            {
+                const String key = "+";
+                var start = source.IndexOf(key, StringComparison.Ordinal);
+
+                return start == -1 ? null : source.Substring(start + 1);
+            }
+
+            protected static String ParseName(String source, String key = null)
+            {
+                var index = key == null ? 0 : source.IndexOf(key, StringComparison.Ordinal);
+
+                if (index == -1)
+                    return null;
+
+                var start = index + (key == null ? 0 : key.Length);
+                var end = source.IndexOf("+", StringComparison.Ordinal);
+
+                return end == -1 ? source.Substring(start) : source.Substring(start, end - start);
+            }
+        }
+
+        public class VendorTree : RegistrationTree
+        {
+            private const String PrefixKey = "vnd.";
+
+            internal VendorTree(String name, String suffix)
+                : base(name, suffix, PrefixKey)
+            {
+            }
+        }
+
+        public class StandardTree : RegistrationTree
+        {
+            private const String PrefixKey = "";
+
+            internal StandardTree(String name, String suffix)
+                : base(name, suffix, PrefixKey)
+            {
+            }
+        }
+
+        public class MediaType : IEquatable<MediaType>
+        {
+            public readonly String Type;
+            public readonly RegistrationTree RegistrationTree;
+
+            internal MediaType(String type, RegistrationTree registrationTree = null)
+            {
+                Type = type;
+                RegistrationTree = registrationTree;
+            }
+
+            public static Boolean operator ==(MediaType left, MediaType right)
+            {
+                return Equals(left, right);
+            }
+
+            public static Boolean operator !=(MediaType left, MediaType right)
+            {
+                return !Equals(left, right);
+            }
+
+            public Boolean Equals(MediaType other)
+            {
+                if (ReferenceEquals(null, other))
+                    return false;
+
+                if (ReferenceEquals(this, other))
+                    return true;
+
+                return String.Equals(Type, other.Type) && RegistrationTree.Equals(other.RegistrationTree);
+            }
+
+            public override Boolean Equals(Object obj)
+            {
+                if (ReferenceEquals(null, obj))
+                    return false;
+
+                if (ReferenceEquals(this, obj))
+                    return true;
+
+                var other = obj as MediaType;
+                return other != null && Equals(other);
+            }
+
+            public override Int32 GetHashCode()
+            {
+                unchecked
+                {
+                    return (Type.GetHashCode() * 397) ^ RegistrationTree.GetHashCode();
+                }
+            }
+
+            public override String ToString()
+            {
+                return RegistrationTree == null
+                    ? Type
+                    : String.Format("{0}/{1}", Type, RegistrationTree);
             }
 
             internal static MediaType Parse(String source)
@@ -154,29 +289,9 @@ namespace Carrot.Serialization
 
                 var type = strings[0];
 
-                if (strings.Length <= 0)
-                    return new MediaType(type);
-
-                return new MediaType(type,
-                                     ParseSegment(strings[1].Trim(), "vnd.", "+"),
-                                     ParseSegment(strings[1].Trim(), "+"));
-            }
-
-            private static String ParseSegment(String source, String startKey, String endKey = null)
-            {
-                var index = source.IndexOf(startKey, StringComparison.Ordinal);
-
-                if (index == -1)
-                    return null;
-
-                var start = index + startKey.Length;
-
-                if (endKey == null)
-                    return source.Substring(start, source.Length - start);
-
-                var end = source.IndexOf(endKey, start, StringComparison.Ordinal);
-
-                return end != -1 ? source.Substring(start, end - start) : null;
+                return strings.Length <= 0 
+                    ? new MediaType(type) 
+                    : new MediaType(type, RegistrationTree.Parse(strings[1].Trim()));
             }
         }
     }

@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using Carrot.Serialization;
 using Xunit;
 
@@ -29,41 +31,50 @@ namespace Carrot.Tests
             var mediaType = ContentNegotiator.MediaType.Parse("application/vnd.checkmate+json");
             Assert.Equal(mediaType, fourth.Type);
             Assert.Equal(0.1f, fourth.Quality);
-
-            Assert.Equal("checkmate", mediaType.Vendor);
-            Assert.Equal("json", mediaType.Suffix);
         }
 
         [Fact]
-        public void MediaTypeEquality()
+        public void CustomMap()
         {
-            var a = new ContentNegotiator.MediaType("application", "me", "xml");
-            var b = new ContentNegotiator.MediaType("application", "me", "json");
-            Assert.NotEqual(a, b);
-            Assert.NotEqual(a.GetHashCode(), b.GetHashCode());
-            var c = new ContentNegotiator.MediaType("application", "me", "xml");
-            Assert.Equal(a, c);
-            Assert.Equal(a.GetHashCode(), c.GetHashCode());
-            var d = new ContentNegotiator.MediaType("application", "you", "xml");
-            Assert.NotEqual(a, d);
-            Assert.NotEqual(a.GetHashCode(), d.GetHashCode());
-            var e = new ContentNegotiator.MediaType("stream", "me", "xml");
-            Assert.NotEqual(a, e);
-            Assert.NotEqual(a.GetHashCode(), e.GetHashCode());
+            const String contentType = "application/dummy";
+            var map = new Dictionary<String, ISerializer>
+                          {
+                              { contentType, new FakeSerializer() }
+                          };
+            var factory = new SerializerFactory(map);
+            var serializer = factory.Create(contentType);
+            Assert.IsType<FakeSerializer>(serializer);
         }
 
         [Fact]
-        public void MediaTypeHeaderEquality()
+        public void DefaultSerializer()
         {
-            var mt1 = new ContentNegotiator.MediaType("application", "me", "xml");
-            var mt2 = new ContentNegotiator.MediaType("application", "me", "json");
-            var a = new ContentNegotiator.MediaTypeHeader(mt1, 0.1f);
-            var b = new ContentNegotiator.MediaTypeHeader(mt1, 0.2f);
-            Assert.Equal(a, b);
-            Assert.Equal(a.GetHashCode(), b.GetHashCode());
-            var c = new ContentNegotiator.MediaTypeHeader(mt2, 0.1f);
-            Assert.NotEqual(a, c);
-            Assert.NotEqual(a.GetHashCode(), c.GetHashCode());
+            const String contentType = "application/json";
+            var factory = new SerializerFactory();
+            var serializer = factory.Create(contentType);
+            Assert.IsType<JsonSerializer>(serializer);
+        }
+
+        [Fact]
+        public void NotFound()
+        {
+            const String contentType = "application/unknow";
+            var factory = new SerializerFactory();
+            var serializer = factory.Create(contentType);
+            Assert.IsType<NullSerializer>(serializer);
+        }
+
+        internal class FakeSerializer : ISerializer
+        {
+            public object Deserialize(Byte[] body, Type type, Encoding encoding = null)
+            {
+                throw new NotImplementedException();
+            }
+
+            public string Serialize(Object obj)
+            {
+                throw new NotImplementedException();
+            }
         }
     }
 }
