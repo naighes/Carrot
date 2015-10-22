@@ -1,0 +1,1 @@
+start /B /WAIT "" "src\.nuget\NuGet.exe" install src\.nuget\packages.config -o src\packages
