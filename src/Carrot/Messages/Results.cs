@@ -3,6 +3,8 @@ using RabbitMQ.Client;
 
 namespace Carrot.Messages
 {
+    #region publishing
+
     public interface IPublishResult { }
 
     public class FailurePublishing : IPublishResult
@@ -32,36 +34,53 @@ namespace Carrot.Messages
         }
     }
 
+    #endregion
+
     public abstract class AggregateConsumingResult
     {
-        public abstract void Reply(IModel model);
+        protected readonly ConsumedMessageBase Message;
+
+        protected AggregateConsumingResult(ConsumedMessageBase message)
+        {
+            Message = message;
+        }
+
+        public virtual void Reply(IModel model)
+        {
+            Message.Acknowledge(model);
+        }
     }
 
     public class Success : AggregateConsumingResult
     {
-        private readonly ConsumedMessageBase _message;
-
         internal Success(ConsumedMessageBase message)
+            : base(message)
         {
-            _message = message;
+        }
+    }
+
+    public abstract class ConsumingFailureBase : AggregateConsumingResult
+    {
+        private readonly Exception[] _exceptions;
+
+        protected ConsumingFailureBase(ConsumedMessageBase message, params Exception[] exceptions)
+            : base(message)
+        {
+            _exceptions = exceptions;
         }
 
-        public override void Reply(IModel model)
+        internal Exception[] Exceptions
         {
-            _message.Acknowledge(model);
+            get { return _exceptions ?? new Exception[] { }; }
         }
     }
 
     public class ReiteratedConsumingFailure : ConsumingFailureBase
     {
-        internal ReiteratedConsumingFailure(ConsumedMessageBase message, params Exception[] exceptions)
+        internal ReiteratedConsumingFailure(ConsumedMessageBase message,
+                                            params Exception[] exceptions)
             : base(message, exceptions)
         {
-        }
-
-        public override void Reply(IModel model)
-        {
-            Message.Acknowledge(model);
         }
     }
 
@@ -78,33 +97,11 @@ namespace Carrot.Messages
         }
     }
 
-    public abstract class ConsumingFailureBase : AggregateConsumingResult
-    {
-        protected readonly ConsumedMessageBase Message;
-        private readonly Exception[] _exceptions;
-
-        protected ConsumingFailureBase(ConsumedMessageBase message, params Exception[] exceptions)
-        {
-            Message = message;
-            _exceptions = exceptions;
-        }
-
-        internal Exception[] Exceptions
-        {
-            get { return _exceptions ?? new Exception[] { }; }
-        }
-    }
-
     internal class UnsupportedMessageConsumingFailure : ConsumingFailureBase
     {
         internal UnsupportedMessageConsumingFailure(ConsumedMessageBase message)
             : base(message)
         {
-        }
-
-        public override void Reply(IModel model)
-        {
-            Message.Acknowledge(model);
         }
     }
 
@@ -114,11 +111,6 @@ namespace Carrot.Messages
             : base(message)
         {
         }
-
-        public override void Reply(IModel model)
-        {
-            Message.Acknowledge(model);
-        }
     }
 
     internal class CorruptedMessageConsumingFailure : ConsumingFailureBase
@@ -126,11 +118,6 @@ namespace Carrot.Messages
         internal CorruptedMessageConsumingFailure(ConsumedMessageBase message)
             : base(message)
         {
-        }
-
-        public override void Reply(IModel model)
-        {
-            Message.Acknowledge(model);
         }
     }
 }
