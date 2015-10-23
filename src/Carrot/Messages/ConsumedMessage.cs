@@ -33,11 +33,23 @@ namespace Carrot.Messages
                        .ContinueWith(_ => AggregateResult(_, this));
         }
 
-        private static AggregateConsumingResult AggregateResult(Task<ConsumingResult[]> task,
-                                                                ConsumedMessageBase message)
+        internal AggregateConsumingResult BuildErrorResult(ConsumingResult[] results)
+        {
+            var exceptions = results.OfType<Failure>()
+                                    .Select(_ => _.Exception)
+                                    .ToArray();
+
+            if (Redelivered)
+                return new ReiteratedConsumingFailure(this, exceptions);
+
+            return new ConsumingFailure(this, exceptions);
+        }
+
+        private AggregateConsumingResult AggregateResult(Task<ConsumingResult[]> task,
+                                                         ConsumedMessageBase message)
         {
             return task.Result.OfType<Failure>().Any()
-                    ? message.BuildErrorResult(task.Result)
+                    ? BuildErrorResult(task.Result)
                     : new Messages.Success(message);
         }
 
