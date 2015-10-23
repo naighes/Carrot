@@ -1,4 +1,3 @@
-using System;
 using System.Text;
 using Carrot.Configuration;
 using Carrot.Serialization;
@@ -29,17 +28,18 @@ namespace Carrot.Messages
             if (serializer is NullSerializer)
                 return new UnsupportedMessage(args);
 
-            Object content;
-
-            try
-            {
-                content = serializer.Deserialize(args.Body,
-                                                 messageType.RuntimeType,
-                                                 Encoding(args));
-            }
+            try { return Content(args, serializer, messageType); }
             catch { return new CorruptedMessage(args); }
+        }
 
-            return new ConsumedMessage(content, args);
+        private static ConsumedMessage Content(BasicDeliverEventArgs args,
+                                               ISerializer serializer,
+                                               MessageType messageType)
+        {
+            return new ConsumedMessage(serializer.Deserialize(args.Body,
+                                                              messageType.RuntimeType,
+                                                              Encoding(args)),
+                                       args);
         }
 
         private static Encoding Encoding(BasicDeliverEventArgs args)

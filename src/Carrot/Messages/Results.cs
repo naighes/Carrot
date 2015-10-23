@@ -62,7 +62,6 @@ namespace Carrot.Messages
 
     public abstract class ConsumingFailureBase : AggregateConsumingResult
     {
-        // TODO: add deadletterexchange strategy.
         private readonly Exception[] _exceptions;
 
         protected ConsumingFailureBase(ConsumedMessageBase message, params Exception[] exceptions)
@@ -74,6 +73,12 @@ namespace Carrot.Messages
         internal Exception[] Exceptions
         {
             get { return _exceptions ?? new Exception[] { }; }
+        }
+
+        internal override AggregateConsumingResult Reply(IModel model)
+        {
+            // TODO: on error send to deadletterexchange
+            return base.Reply(model);
         }
     }
 
