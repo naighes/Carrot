@@ -31,7 +31,7 @@ namespace Carrot.Messages
         internal override Task<AggregateConsumingResult> ConsumeAsync(SubscriptionConfiguration configuration)
         {
             return Task.WhenAll(configuration.FindSubscriptions(this)
-                                             .Select(_ => new OuterConsumer(_.Value).ConsumeAsync(this)))
+                                             .Select(_ => new OuterConsumer(_).ConsumeAsync(this)))
                        .ContinueWith(_ => AggregateResult(_, this));
         }
 

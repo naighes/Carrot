@@ -14,10 +14,10 @@ namespace Carrot.Configuration
             _subscriptions.Add(typeof(TMessage), consumer);
         }
 
-        internal IDictionary<Type, IConsumer> FindSubscriptions(ConsumedMessageBase message)
+        internal IEnumerable<IConsumer> FindSubscriptions(ConsumedMessageBase message)
         {
             return _subscriptions.Where(_ => message.Match(_.Key))
-                                 .ToDictionary(_ => _.Key, _ => _.Value);
+                                 .Select(_ => _.Value);
         }
     }
 }
