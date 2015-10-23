@@ -17,16 +17,16 @@ namespace Carrot.Messages
             get { return null; }
         }
 
-        protected abstract ConsumingFailureBase Result { get; }
-
         internal override Task<AggregateConsumingResult> ConsumeAsync(SubscriptionConfiguration configuration)
         {
-            return Task.FromResult<AggregateConsumingResult>(Result);
+            return Task.FromResult<AggregateConsumingResult>(Result());
         }
 
         internal override Boolean Match(Type type)
         {
             return false;
         }
+
+        protected abstract ConsumingFailureBase Result();
     }
 }
