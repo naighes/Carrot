@@ -6,6 +6,8 @@ using RabbitMQ.Client.Events;
 
 namespace Carrot.Messages
 {
+    using System.Collections.Generic;
+
     public class ConsumedMessage : ConsumedMessageBase
     {
         private readonly Object _content;
@@ -33,7 +35,7 @@ namespace Carrot.Messages
                        .ContinueWith(_ => AggregateResult(_, this));
         }
 
-        internal AggregateConsumingResult BuildErrorResult(ConsumingResult[] results)
+        private AggregateConsumingResult BuildErrorResult(IEnumerable<ConsumingResult> results)
         {
             var exceptions = results.OfType<Failure>()
                                     .Select(_ => _.Exception)
