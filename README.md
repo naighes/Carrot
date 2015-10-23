@@ -40,6 +40,11 @@ Create an instance of `AmqpChannel` providing the RabbitMQ host as input.
 
 You're up 'n running! Do not forget to call `AmqpChannel.Dispose()` when your application exits.
 
+Please note that exchanges are not durable by default.
+You can rely on proper methods in case:
+
+    var exchange = Exchange.DurableDirect("source_exchange");
+
 You can publish messages as the following:
 
     channel.PublishAsync(new OutboundMessage<Foo>(new Foo { Bar = 2 }),
