@@ -3,9 +3,7 @@ using RabbitMQ.Client;
 
 namespace Carrot.Messages
 {
-    public interface IPublishResult
-    {
-    }
+    public interface IPublishResult { }
 
     public class FailurePublishing : IPublishResult
     {
@@ -34,12 +32,12 @@ namespace Carrot.Messages
         }
     }
 
-    internal abstract class AggregateConsumingResult
+    public abstract class AggregateConsumingResult
     {
-        internal abstract void Reply(IModel model);
+        public abstract void Reply(IModel model);
     }
 
-    internal class Success : AggregateConsumingResult
+    public class Success : AggregateConsumingResult
     {
         private readonly ConsumedMessageBase _message;
 
@@ -48,39 +46,39 @@ namespace Carrot.Messages
             _message = message;
         }
 
-        internal override void Reply(IModel model)
+        public override void Reply(IModel model)
         {
             _message.Acknowledge(model);
         }
     }
 
-    internal class ReiteratedConsumingFailure : ConsumingFailureBase
+    public class ReiteratedConsumingFailure : ConsumingFailureBase
     {
         internal ReiteratedConsumingFailure(ConsumedMessageBase message, params Exception[] exceptions)
             : base(message, exceptions)
         {
         }
 
-        internal override void Reply(IModel model)
+        public override void Reply(IModel model)
         {
             Message.Acknowledge(model);
         }
     }
 
-    internal class ConsumingFailure : ConsumingFailureBase
+    public class ConsumingFailure : ConsumingFailureBase
     {
         internal ConsumingFailure(ConsumedMessageBase message, params Exception[] exceptions)
             : base(message, exceptions)
         {
         }
 
-        internal override void Reply(IModel model)
+        public override void Reply(IModel model)
         {
             Message.Requeue(model);
         }
     }
 
-    internal abstract class ConsumingFailureBase : AggregateConsumingResult
+    public abstract class ConsumingFailureBase : AggregateConsumingResult
     {
         protected readonly ConsumedMessageBase Message;
         private readonly Exception[] _exceptions;
@@ -94,6 +92,45 @@ namespace Carrot.Messages
         internal Exception[] Exceptions
         {
             get { return _exceptions ?? new Exception[] { }; }
+        }
+    }
+
+    internal class UnsupportedMessageConsumingFailure : ConsumingFailureBase
+    {
+        internal UnsupportedMessageConsumingFailure(ConsumedMessageBase message)
+            : base(message)
+        {
+        }
+
+        public override void Reply(IModel model)
+        {
+            Message.Acknowledge(model);
+        }
+    }
+
+    internal class UnresolvedMessageConsumingFailure : ConsumingFailureBase
+    {
+        internal UnresolvedMessageConsumingFailure(ConsumedMessageBase message)
+            : base(message)
+        {
+        }
+
+        public override void Reply(IModel model)
+        {
+            Message.Acknowledge(model);
+        }
+    }
+
+    internal class CorruptedMessageConsumingFailure : ConsumingFailureBase
+    {
+        internal CorruptedMessageConsumingFailure(ConsumedMessageBase message)
+            : base(message)
+        {
+        }
+
+        public override void Reply(IModel model)
+        {
+            Message.Acknowledge(model);
         }
     }
 }

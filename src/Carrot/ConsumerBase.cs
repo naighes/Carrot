@@ -52,5 +52,10 @@ namespace Carrot
         }
 
         protected abstract Task ConsumeInternal(BasicDeliverEventArgs args);
+
+        protected Task<AggregateConsumingResult> ConsumeAsync(BasicDeliverEventArgs args)
+        {
+            return Builder.Build(args).ConsumeAsync(Configuration);
+        }
     }
 }

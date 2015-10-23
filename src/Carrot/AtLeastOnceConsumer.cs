@@ -17,9 +17,7 @@ namespace Carrot
 
         protected override Task ConsumeInternal(BasicDeliverEventArgs args)
         {
-            return Builder.Build(args)
-                          .ConsumeAsync(Configuration)
-                          .ContinueWith(_ => _.Result.Reply(Model));
+            return ConsumeAsync(args).ContinueWith(_ => _.Result.Reply(Model));
         }
     }
 }

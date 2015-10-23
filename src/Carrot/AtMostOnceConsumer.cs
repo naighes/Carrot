@@ -19,7 +19,7 @@ namespace Carrot
         {
             Model.BasicAck(args.DeliveryTag, false);
 
-            return Builder.Build(args).ConsumeAsync(Configuration);
+            return ConsumeAsync(args);
         }
     }
 }

@@ -1,7 +1,6 @@
 using System;
 using System.Threading.Tasks;
 using Carrot.Configuration;
-using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 
 namespace Carrot.Messages
@@ -26,19 +25,6 @@ namespace Carrot.Messages
         internal override Boolean Match(Type type)
         {
             return false;
-        }
-    }
-
-    internal class UnresolvedMessageConsumingFailure : ConsumingFailureBase
-    {
-        internal UnresolvedMessageConsumingFailure(ConsumedMessageBase message)
-            : base(message)
-        {
-        }
-
-        internal override void Reply(IModel model)
-        {
-            Message.Acknowledge(model);
         }
     }
 }
