@@ -2,7 +2,7 @@ using RabbitMQ.Client.Events;
 
 namespace Carrot.Messages
 {
-    public class CorruptedMessage : ErrorAffectedConsumedMessage
+    public class CorruptedMessage : NonConsumableMessage
     {
         internal CorruptedMessage(BasicDeliverEventArgs args)
             : base(args) 

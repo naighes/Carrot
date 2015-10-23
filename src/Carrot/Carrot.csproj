@@ -75,7 +75,7 @@
     <Compile Include="Messages\ConsumedMessageBuilder.cs" />
     <Compile Include="Messages\CorruptedMessage.cs" />
     <Compile Include="Messages\DurableOutboundMessage.cs" />
-    <Compile Include="Messages\ErrorAffectedConsumedMessage.cs" />
+    <Compile Include="Messages\NonConsumableMessage.cs" />
     <Compile Include="Messages\HeaderCollection.cs" />
     <Compile Include="Messages\IConsumedMessageBuilder.cs" />
     <Compile Include="Messages\IMessage.cs" />

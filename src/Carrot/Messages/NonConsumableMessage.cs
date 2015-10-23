@@ -5,9 +5,9 @@ using RabbitMQ.Client.Events;
 
 namespace Carrot.Messages
 {
-    public abstract class ErrorAffectedConsumedMessage : ConsumedMessageBase
+    public abstract class NonConsumableMessage : ConsumedMessageBase
     {
-        protected ErrorAffectedConsumedMessage(BasicDeliverEventArgs args)
+        protected NonConsumableMessage(BasicDeliverEventArgs args)
             : base(args)
         {
         }
