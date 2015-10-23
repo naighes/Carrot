@@ -48,10 +48,10 @@ namespace Carrot
                                Body = body
                            };
 
-            ConsumeInternal(args);
+            ConsumeInternalAsync(args);
         }
 
-        protected abstract Task ConsumeInternal(BasicDeliverEventArgs args);
+        protected abstract Task<AggregateConsumingResult> ConsumeInternalAsync(BasicDeliverEventArgs args);
 
         protected Task<AggregateConsumingResult> ConsumeAsync(BasicDeliverEventArgs args)
         {

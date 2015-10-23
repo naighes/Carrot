@@ -116,7 +116,7 @@ namespace Carrot.Tests
 
             internal Task CallConsumeInternal(BasicDeliverEventArgs args)
             {
-                return ConsumeInternal(args);
+                return this.ConsumeInternalAsync(args);
             }
         }
     }

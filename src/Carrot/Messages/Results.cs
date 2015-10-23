@@ -45,9 +45,10 @@ namespace Carrot.Messages
             Message = message;
         }
 
-        public virtual void Reply(IModel model)
+        internal virtual AggregateConsumingResult Reply(IModel model)
         {
             Message.Acknowledge(model);
+            return this;
         }
     }
 
@@ -91,9 +92,10 @@ namespace Carrot.Messages
         {
         }
 
-        public override void Reply(IModel model)
+        internal override AggregateConsumingResult Reply(IModel model)
         {
             Message.Requeue(model);
+            return this;
         }
     }
 

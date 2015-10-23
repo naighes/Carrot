@@ -15,7 +15,7 @@ namespace Carrot
         {
         }
 
-        protected override Task ConsumeInternal(BasicDeliverEventArgs args)
+        protected override Task<AggregateConsumingResult> ConsumeInternalAsync(BasicDeliverEventArgs args)
         {
             Model.BasicAck(args.DeliveryTag, false);
 
