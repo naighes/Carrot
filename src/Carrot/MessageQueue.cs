@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Carrot.Configuration;
+using Carrot.Fallback;
 using Carrot.Messages;
 using Carrot.Serialization;
 using RabbitMQ.Client;
@@ -27,12 +28,24 @@ namespace Carrot
 
         public void SubscribeByAtMostOnce(Action<SubscriptionConfiguration> configure)
         {
-            Subscribe(configure, (b, c) => new AtMostOnceConsumer(_model, b, c));
+            SubscribeByAtMostOnce(configure, NoFallbackStrategy.Instance);
+        }
+
+        public void SubscribeByAtMostOnce(Action<SubscriptionConfiguration> configure,
+                                          IFallbackStrategy fallbackStrategy)
+        {
+            Subscribe(configure, (b, c) => new AtMostOnceConsumer(_model, b, c), fallbackStrategy);
         }
 
         public void SubscribeByAtLeastOnce(Action<SubscriptionConfiguration> configure)
         {
-            Subscribe(configure, (b, c) => new AtLeastOnceConsumer(_model, b, c));
+            SubscribeByAtLeastOnce(configure, NoFallbackStrategy.Instance);
+        }
+
+        public void SubscribeByAtLeastOnce(Action<SubscriptionConfiguration> configure,
+                                           IFallbackStrategy fallbackStrategy)
+        {
+            Subscribe(configure, (b, c) => new AtLeastOnceConsumer(_model, b, c), fallbackStrategy);
         }
 
         internal static MessageQueue New(IModel model,
@@ -51,11 +64,12 @@ namespace Carrot
         }
 
         private void Subscribe(Action<SubscriptionConfiguration> configure,
-                               Func<IConsumedMessageBuilder, SubscriptionConfiguration, ConsumerBase> func)
+                               Func<IConsumedMessageBuilder, SubscriptionConfiguration, ConsumerBase> func,
+                               IFallbackStrategy fallbackStrategy)
         {
-            var configuration = new SubscriptionConfiguration();
+            var configuration = new SubscriptionConfiguration(fallbackStrategy);
             configure(configuration);
-            IConsumedMessageBuilder builder = new ConsumedMessageBuilder(new SerializerFactory(), _resolver);
+            var builder = new ConsumedMessageBuilder(new SerializerFactory(), _resolver);
 
             _model.BasicConsume(_name, false, func(builder, configuration));
         }

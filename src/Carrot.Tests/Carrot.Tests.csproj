@@ -71,6 +71,7 @@
       <Link>Properties\CommonAssemblyInfo.cs</Link>
     </Compile>
     <Compile Include="AmqpEntities.cs" />
+    <Compile Include="ApplyingFallbackStrategy.cs" />
     <Compile Include="AtLeastOnceReplying.cs" />
     <Compile Include="AtMostOnceReplying.cs" />
     <Compile Include="ConsumedMessageBuilding.cs" />

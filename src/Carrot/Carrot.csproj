@@ -66,6 +66,9 @@
     <Compile Include="Exchange.cs" />
     <Compile Include="Extensions\DateTimeOffsetExtensions.cs" />
     <Compile Include="Extensions\TaskExtensions.cs" />
+    <Compile Include="Fallback\DeadLetterStrategy.cs" />
+    <Compile Include="Fallback\IFallbackStrategy.cs" />
+    <Compile Include="Fallback\NoFallbackStrategy.cs" />
     <Compile Include="IConsumer.cs" />
     <Compile Include="IDateTimeProvider.cs" />
     <Compile Include="INewId.cs" />

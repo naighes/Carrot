@@ -63,7 +63,8 @@ namespace Carrot.Tests
         [Fact]
         public void OnCorruptedMessage()
         {
-            var result = new CorruptedMessage(FakeBasicDeliverEventArgs()).ConsumeAsync(null).Result;
+            var result = new CorruptedMessage(FakeBasicDeliverEventArgs()).ConsumeAsync(new SubscriptionConfiguration())
+                                                                          .Result;
             var actual = Assert.IsType<CorruptedMessageConsumingFailure>(result);
             Assert.Equal(0, actual.Exceptions.Length);
         }
@@ -71,7 +72,8 @@ namespace Carrot.Tests
         [Fact]
         public void OnUnresolvedMessage()
         {
-            var result = new UnresolvedMessage(FakeBasicDeliverEventArgs()).ConsumeAsync(null).Result;
+            var result = new UnresolvedMessage(FakeBasicDeliverEventArgs()).ConsumeAsync(new SubscriptionConfiguration())
+                                                                           .Result;
             var actual = Assert.IsType<UnresolvedMessageConsumingFailure>(result);
             Assert.Equal(0, actual.Exceptions.Length);
         }
@@ -79,7 +81,8 @@ namespace Carrot.Tests
         [Fact]
         public void OnUnsupportedMessage()
         {
-            var result = new UnsupportedMessage(FakeBasicDeliverEventArgs()).ConsumeAsync(null).Result;
+            var result = new UnsupportedMessage(FakeBasicDeliverEventArgs()).ConsumeAsync(new SubscriptionConfiguration())
+                                                                            .Result;
             var actual = Assert.IsType<UnsupportedMessageConsumingFailure>(result);
             Assert.Equal(0, actual.Exceptions.Length);
         }

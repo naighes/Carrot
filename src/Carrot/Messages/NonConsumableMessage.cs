@@ -1,6 +1,7 @@
 using System;
 using System.Threading.Tasks;
 using Carrot.Configuration;
+using Carrot.Fallback;
 using RabbitMQ.Client.Events;
 
 namespace Carrot.Messages
@@ -19,7 +20,7 @@ namespace Carrot.Messages
 
         internal override Task<AggregateConsumingResult> ConsumeAsync(SubscriptionConfiguration configuration)
         {
-            return Task.FromResult<AggregateConsumingResult>(Result());
+            return Task.FromResult<AggregateConsumingResult>(Result(configuration.FallbackStrategy));
         }
 
         internal override Boolean Match(Type type)
@@ -27,6 +28,6 @@ namespace Carrot.Messages
             return false;
         }
 
-        protected abstract ConsumingFailureBase Result();
+        protected abstract ConsumingFailureBase Result(IFallbackStrategy fallbackStrategy);
     }
 }

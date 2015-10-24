@@ -41,7 +41,7 @@ namespace Carrot.Tests
 
             internal Task CallConsumeInternal(BasicDeliverEventArgs args)
             {
-                return this.ConsumeInternalAsync(args);
+                return ConsumeInternalAsync(args);
             }
         }
     }
