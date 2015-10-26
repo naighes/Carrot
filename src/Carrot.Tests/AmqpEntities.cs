@@ -8,12 +8,18 @@ namespace Carrot.Tests
     public class AmqpEntities
     {
         [Fact]
-        public void Declaration()
+        public void DeclarationWithDefaultDurability()
         {
             var model = new Mock<IModel>();
-            var e1 = new Exchange("e", "direct", false);
+            var e1 = new Exchange("e", "direct");
             e1.Declare(model.Object);
             model.Verify(_ => _.ExchangeDeclare(e1.Name, e1.Type, false));
+        }
+
+        [Fact]
+        public void DeclarationWithExplicitDurability()
+        {
+            var model = new Mock<IModel>();
             var e2 = new Exchange("e", "topic", true);
             e2.Declare(model.Object);
             model.Verify(_ => _.ExchangeDeclare(e2.Name, e2.Type, true));
