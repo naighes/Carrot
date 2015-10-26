@@ -92,7 +92,7 @@ namespace Carrot.Serialization
 
             internal class MediaTypeHeaderQualityComparer : IComparer<MediaTypeHeader>
             {
-                internal static MediaTypeHeaderQualityComparer Instance = new MediaTypeHeaderQualityComparer();
+                internal static readonly MediaTypeHeaderQualityComparer Instance = new MediaTypeHeaderQualityComparer();
 
                 private MediaTypeHeaderQualityComparer()
                 {
