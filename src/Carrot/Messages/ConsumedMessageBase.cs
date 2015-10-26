@@ -1,6 +1,7 @@
 using System;
 using System.Threading.Tasks;
 using Carrot.Configuration;
+using Carrot.Extensions;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 
@@ -8,15 +9,11 @@ namespace Carrot.Messages
 {
     public abstract class ConsumedMessageBase
     {
-        protected readonly HeaderCollection Headers;
-        protected readonly UInt64 DeliveryTag;
-        protected readonly Boolean Redelivered;
+        protected readonly BasicDeliverEventArgs Args;
 
         protected ConsumedMessageBase(BasicDeliverEventArgs args)
         {
-            Headers = HeaderCollection.Parse(args);
-            DeliveryTag = args.DeliveryTag;
-            Redelivered = args.Redelivered;
+            Args = args;
         }
 
         internal abstract Object Content { get; }
@@ -32,19 +29,31 @@ namespace Carrot.Messages
                                                              Content.GetType(),
                                                              typeof(TMessage)));
 
-            return new ConsumedMessage<TMessage>(content, Headers);
+            return new ConsumedMessage<TMessage>(content, HeaderCollection.Parse(Args));
         }
 
         internal abstract Boolean Match(Type type);
 
         internal void Acknowledge(IModel model)
         {
-            model.BasicAck(DeliveryTag, false);
+            model.BasicAck(Args.DeliveryTag, false);
         }
 
         internal void Requeue(IModel model)
         {
-            model.BasicNack(DeliveryTag, false, true);
+            model.BasicNack(Args.DeliveryTag, false, true);
+        }
+
+        internal void ForwardTo(IModel model, Func<String, String> exchangeNameBuilder)
+        {
+            var exchange = Exchange.DurableDirect(exchangeNameBuilder(Args.Exchange));
+            exchange.Declare(model);
+            var properties = Args.BasicProperties.Copy();
+            properties.Persistent = true;
+            model.BasicPublish(exchange.Name,
+                               String.Empty,
+                               properties,
+                               Args.Body);
         }
     }
 }

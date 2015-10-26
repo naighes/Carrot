@@ -2,7 +2,7 @@ using RabbitMQ.Client;
 
 namespace Carrot.Messages
 {
-    public class OutboundMessage<TMessage> : IMessage<TMessage>
+    public class OutboundMessage<TMessage> : Message<TMessage>
         where TMessage : class
     {
         private readonly TMessage _content;
@@ -13,12 +13,12 @@ namespace Carrot.Messages
             _content = content;
         }
 
-        public HeaderCollection Headers
+        public override HeaderCollection Headers
         {
             get { return _headers; }
         }
 
-        public TMessage Content
+        public override TMessage Content
         {
             get { return _content; }
         }

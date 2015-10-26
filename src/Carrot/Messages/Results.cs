@@ -1,4 +1,5 @@
 using System;
+using Carrot.Fallback;
 using RabbitMQ.Client;
 
 namespace Carrot.Messages
@@ -62,11 +63,15 @@ namespace Carrot.Messages
 
     public abstract class ConsumingFailureBase : AggregateConsumingResult
     {
+        private readonly IFallbackStrategy _fallbackStrategy;
         private readonly Exception[] _exceptions;
 
-        protected ConsumingFailureBase(ConsumedMessageBase message, params Exception[] exceptions)
+        protected ConsumingFailureBase(ConsumedMessageBase message,
+                                       IFallbackStrategy fallbackStrategy,
+                                       params Exception[] exceptions)
             : base(message)
         {
+            _fallbackStrategy = fallbackStrategy;
             _exceptions = exceptions;
         }
 
@@ -77,7 +82,7 @@ namespace Carrot.Messages
 
         internal override AggregateConsumingResult Reply(IModel model)
         {
-            // TODO: on error send to deadletterexchange
+            _fallbackStrategy.Apply(model, Message);
             return base.Reply(model);
         }
     }
@@ -85,16 +90,19 @@ namespace Carrot.Messages
     public class ReiteratedConsumingFailure : ConsumingFailureBase
     {
         internal ReiteratedConsumingFailure(ConsumedMessageBase message,
+                                            IFallbackStrategy fallbackStrategy,
                                             params Exception[] exceptions)
-            : base(message, exceptions)
+            : base(message, fallbackStrategy, exceptions)
         {
         }
     }
 
     public class ConsumingFailure : ConsumingFailureBase
     {
-        internal ConsumingFailure(ConsumedMessageBase message, params Exception[] exceptions)
-            : base(message, exceptions)
+        internal ConsumingFailure(ConsumedMessageBase message,
+                                  IFallbackStrategy fallbackStrategy,
+                                  params Exception[] exceptions)
+            : base(message, fallbackStrategy, exceptions)
         {
         }
 
@@ -107,24 +115,24 @@ namespace Carrot.Messages
 
     internal class UnsupportedMessageConsumingFailure : ConsumingFailureBase
     {
-        internal UnsupportedMessageConsumingFailure(ConsumedMessageBase message)
-            : base(message)
+        internal UnsupportedMessageConsumingFailure(ConsumedMessageBase message, IFallbackStrategy fallbackStrategy)
+            : base(message, fallbackStrategy)
         {
         }
     }
 
     internal class UnresolvedMessageConsumingFailure : ConsumingFailureBase
     {
-        internal UnresolvedMessageConsumingFailure(ConsumedMessageBase message)
-            : base(message)
+        internal UnresolvedMessageConsumingFailure(ConsumedMessageBase message, IFallbackStrategy fallbackStrategy)
+            : base(message, fallbackStrategy)
         {
         }
     }
 
     internal class CorruptedMessageConsumingFailure : ConsumingFailureBase
     {
-        internal CorruptedMessageConsumingFailure(ConsumedMessageBase message)
-            : base(message)
+        internal CorruptedMessageConsumingFailure(ConsumedMessageBase message, IFallbackStrategy fallbackStrategy)
+            : base(message, fallbackStrategy)
         {
         }
     }

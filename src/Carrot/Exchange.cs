@@ -111,7 +111,7 @@ namespace Carrot
 
         internal void Declare(IModel model)
         {
-            model.ExchangeDeclare(Name, Type, true);
+            model.ExchangeDeclare(Name, Type, Durable);
         }
 
         internal void Bind(MessageQueue queue, IModel model, String routingKey = "")

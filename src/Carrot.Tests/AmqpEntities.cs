@@ -1,10 +1,24 @@
 using System;
+using Moq;
+using RabbitMQ.Client;
 using Xunit;
 
 namespace Carrot.Tests
 {
     public class AmqpEntities
     {
+        [Fact]
+        public void Declaration()
+        {
+            var model = new Mock<IModel>();
+            var e1 = new Exchange("e", "direct", false);
+            e1.Declare(model.Object);
+            model.Verify(_ => _.ExchangeDeclare(e1.Name, e1.Type, false));
+            var e2 = new Exchange("e", "topic", true);
+            e2.Declare(model.Object);
+            model.Verify(_ => _.ExchangeDeclare(e2.Name, e2.Type, true));
+        }
+
         [Fact]
         public void BuildingDirectExchange()
         {
