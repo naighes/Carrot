@@ -69,7 +69,7 @@ namespace Carrot.Tests
             strategy.Apply(model.Object, message);
             model.Verify(_ => _.BasicPublish(expected,
                                              String.Empty,
-                                             args.BasicProperties,
+                                             It.Is<IBasicProperties>(properties => properties.Persistent == true),
                                              args.Body),
                          Times.Once);
             model.Verify(_ => _.ExchangeDeclare(expected, "direct", true));

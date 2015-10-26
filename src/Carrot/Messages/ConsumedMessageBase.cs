@@ -1,6 +1,7 @@
 using System;
 using System.Threading.Tasks;
 using Carrot.Configuration;
+using Carrot.Extensions;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 
@@ -47,9 +48,11 @@ namespace Carrot.Messages
         {
             var exchange = Exchange.DurableDirect(exchangeNameBuilder(Args.Exchange));
             exchange.Declare(model);
+            var properties = Args.BasicProperties.Copy();
+            properties.Persistent = true;
             model.BasicPublish(exchange.Name,
                                String.Empty,
-                               Args.BasicProperties,
+                               properties,
                                Args.Body);
         }
     }

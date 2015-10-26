@@ -80,6 +80,7 @@
     <Compile Include="MediaTypeParsing.cs" />
     <Compile Include="MessageBuilding.cs" />
     <Compile Include="MessageHeaders.cs" />
+    <Compile Include="MessageProperties.cs" />
     <Compile Include="MessageResolving.cs" />
     <Compile Include="OutboundEnveloping.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

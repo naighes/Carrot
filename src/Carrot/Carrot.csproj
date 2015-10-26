@@ -64,6 +64,7 @@
     <Compile Include="Consumer.cs" />
     <Compile Include="ConsumerBase.cs" />
     <Compile Include="Exchange.cs" />
+    <Compile Include="Extensions\BasicPropertiesExtensions.cs" />
     <Compile Include="Extensions\DateTimeOffsetExtensions.cs" />
     <Compile Include="Extensions\TaskExtensions.cs" />
     <Compile Include="Fallback\DeadLetterStrategy.cs" />

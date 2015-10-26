@@ -11,7 +11,7 @@ namespace Carrot.Messages
 
         Object IMessage.Content
         {
-            get { return this.Content; }
+            get { return Content; }
         }
     }
 }
