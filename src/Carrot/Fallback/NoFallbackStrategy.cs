@@ -5,7 +5,7 @@ namespace Carrot.Fallback
 {
     internal class NoFallbackStrategy : IFallbackStrategy
     {
-        internal static IFallbackStrategy Instance = new NoFallbackStrategy();
+        internal static readonly IFallbackStrategy Instance = new NoFallbackStrategy();
 
         private NoFallbackStrategy() { }
 
