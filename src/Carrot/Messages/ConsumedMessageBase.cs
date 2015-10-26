@@ -45,7 +45,9 @@ namespace Carrot.Messages
 
         internal void ForwardTo(IModel model, Func<String, String> exchangeNameBuilder)
         {
-            model.BasicPublish(exchangeNameBuilder(Args.Exchange),
+            var exchange = Exchange.DurableDirect(exchangeNameBuilder(Args.Exchange));
+            exchange.Declare(model);
+            model.BasicPublish(exchange.Name,
                                String.Empty,
                                Args.BasicProperties,
                                Args.Body);

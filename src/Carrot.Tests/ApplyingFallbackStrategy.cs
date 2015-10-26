@@ -60,17 +60,19 @@ namespace Carrot.Tests
         [Fact]
         public void DeadLetterExchangeStrategy()
         {
+            const String expected = "source_exchange-DeadLetter";
             var args = FakeBasicDeliverEventArgs();
             args.Exchange = "source_exchange";
             var message = new FakeConsumedMessage(null, args);
             var strategy = new DeadLetterStrategy(_ => String.Format("{0}-DeadLetter", _));
             var model = new Mock<IModel>();
             strategy.Apply(model.Object, message);
-            model.Verify(_ => _.BasicPublish("source_exchange-DeadLetter",
+            model.Verify(_ => _.BasicPublish(expected,
                                              String.Empty,
                                              args.BasicProperties,
                                              args.Body),
                          Times.Once);
+            model.Verify(_ => _.ExchangeDeclare(expected, "direct", true));
         }
 
         private static BasicDeliverEventArgs FakeBasicDeliverEventArgs()
