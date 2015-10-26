@@ -1,6 +1,6 @@
 namespace Carrot.Messages
 {
-    public class ConsumedMessage<TMessage> : IMessage<TMessage>
+    public class ConsumedMessage<TMessage> : Message<TMessage>
         where TMessage : class
     {
         private readonly TMessage _content;
@@ -12,12 +12,12 @@ namespace Carrot.Messages
             _headers = headers;
         }
 
-        public TMessage Content
+        public override TMessage Content
         {
             get { return _content; }
         }
 
-        public HeaderCollection Headers
+        public override HeaderCollection Headers
         {
             get { return _headers; }
         }

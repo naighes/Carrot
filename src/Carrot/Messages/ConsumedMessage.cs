@@ -42,7 +42,7 @@ namespace Carrot.Messages
                                     .Select(_ => _.Exception)
                                     .ToArray();
 
-            if (Redelivered)
+            if (Args.Redelivered)
                 return new ReiteratedConsumingFailure(this, fallbackStrategy, exceptions);
 
             return new ConsumingFailure(this, fallbackStrategy, exceptions);

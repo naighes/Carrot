@@ -82,7 +82,7 @@ namespace Carrot.Messages
 
         internal override AggregateConsumingResult Reply(IModel model)
         {
-            _fallbackStrategy.Apply(model);
+            _fallbackStrategy.Apply(model, Message);
             return base.Reply(model);
         }
     }

@@ -1,9 +1,10 @@
+using System;
+
 namespace Carrot.Messages
 {
-    public interface IMessage<out TMessage>
-        where TMessage : class
+    public interface IMessage
     {
-        TMessage Content { get; }
+        Object Content { get; }
 
         HeaderCollection Headers { get; }
     }

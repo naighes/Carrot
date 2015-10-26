@@ -23,7 +23,7 @@ namespace Carrot.Tests
             var result = message.ConsumeAsync(new SubscriptionConfiguration(strategy.Object)).Result;
             Assert.IsType<Success>(result);
             result.Reply(model.Object);
-            strategy.Verify(_ => _.Apply(model.Object), Times.Never);
+            strategy.Verify(_ => _.Apply(model.Object, message), Times.Never);
         }
 
         [Fact]
@@ -38,7 +38,7 @@ namespace Carrot.Tests
             var result = message.ConsumeAsync(configuration).Result;
             Assert.IsType<ConsumingFailure>(result);
             result.Reply(model.Object);
-            strategy.Verify(_ => _.Apply(model.Object), Times.Never);
+            strategy.Verify(_ => _.Apply(model.Object, message), Times.Never);
         }
 
         [Fact]
@@ -54,7 +54,23 @@ namespace Carrot.Tests
             var result = message.ConsumeAsync(configuration).Result;
             Assert.IsType<ReiteratedConsumingFailure>(result);
             result.Reply(model.Object);
-            strategy.Verify(_ => _.Apply(model.Object), Times.Once);
+            strategy.Verify(_ => _.Apply(model.Object, message), Times.Once);
+        }
+
+        [Fact]
+        public void DeadLetterExchangeStrategy()
+        {
+            var args = FakeBasicDeliverEventArgs();
+            args.Exchange = "source_exchange";
+            var message = new FakeConsumedMessage(null, args);
+            var strategy = new DeadLetterStrategy(_ => String.Format("{0}-DeadLetter", _));
+            var model = new Mock<IModel>();
+            strategy.Apply(model.Object, message);
+            model.Verify(_ => _.BasicPublish("source_exchange-DeadLetter",
+                                             String.Empty,
+                                             args.BasicProperties,
+                                             args.Body),
+                         Times.Once);
         }
 
         private static BasicDeliverEventArgs FakeBasicDeliverEventArgs()
