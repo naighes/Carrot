@@ -106,6 +106,17 @@ namespace Carrot.Tests
         }
 
         [Fact]
+        public void BuildingDurableExchange()
+        {
+            var ex = new Exchange("some name", "some type");
+            var durableEx = ex.Durable();
+            Assert.False(ex.IsDurable);
+            Assert.True(durableEx.IsDurable);
+            Assert.Equal(ex.Name, durableEx.Name);
+            Assert.Equal(ex.Type, durableEx.Type);
+        }
+
+        [Fact]
         public void Equality()
         {
             const String name = "one_exchange";

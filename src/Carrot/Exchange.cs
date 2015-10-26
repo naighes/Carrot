@@ -91,6 +91,11 @@ namespace Carrot
             return new Exchange(name, "headers", true);
         }
 
+        public Exchange Durable()
+        {
+            return new Exchange(Name, Type, true);
+        }
+
         public Boolean Equals(Exchange other)
         {
             return String.Equals(Name, other.Name);
