@@ -11,12 +11,12 @@ namespace Carrot.Configuration
         private readonly IFallbackStrategy _fallbackStrategy;
         private readonly IDictionary<Type, ISet<IConsumer>> _subscriptions = new Dictionary<Type, ISet<IConsumer>>();
 
-        public SubscriptionConfiguration()
+        internal SubscriptionConfiguration()
             : this(NoFallbackStrategy.Instance)
         {
         }
 
-        public SubscriptionConfiguration(IFallbackStrategy fallbackStrategy)
+        internal SubscriptionConfiguration(IFallbackStrategy fallbackStrategy)
         {
             _fallbackStrategy = fallbackStrategy;
         }
