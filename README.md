@@ -7,7 +7,7 @@ Carrot is a .NET lightweight library that provides a couple of facilities over R
 Getting started
 ====
 
-Just mark your POCO message contracts with `MessageBinding` attribute: 
+Just mark your POCO message contracts with `MessageBinding` attribute:
 
     [MessageBinding("urn:message:foo")]
     public class Foo
@@ -41,9 +41,9 @@ Create an instance of `AmqpChannel` providing the RabbitMQ host as input.
 You're up 'n running! Do not forget to call `AmqpChannel.Dispose()` when your application exits.
 
 Please note that exchanges are not durable by default.
-You can rely on proper methods in case:
+You can create durable exchange by calling the `Durable` instance method on it.
 
-    var exchange = Exchange.DurableDirect("source_exchange");
+    var durableExchange = Exchange.Direct("source_exchange").Durable();
 
 You can publish messages as the following:
 
