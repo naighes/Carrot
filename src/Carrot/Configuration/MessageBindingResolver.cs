@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
-namespace Carrot.Messaging
+namespace Carrot.Configuration
 {
     public class MessageBindingResolver : IMessageTypeResolver
     {
@@ -12,7 +12,7 @@ namespace Carrot.Messaging
         public MessageBindingResolver(params Assembly[] assemblies)
         {
             _internalMap = assemblies.SelectMany(_ => _.GetTypes())
-                                     .Where(_ => _.GetCustomAttribute<MessageBindingAttribute>(false) != null)
+                                     .Where(_ => _.GetCustomAttribute<MessageBindingAttribute>(true) != null)
                                      .ToDictionary(_ => _.GetCustomAttribute<MessageBindingAttribute>(false)
                                                          .MessageType,
                                                    _ => _);

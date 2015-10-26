@@ -3,66 +3,129 @@ using RabbitMQ.Client;
 
 namespace Carrot.Messages
 {
-    internal abstract class AggregateConsumingResult
+    #region publishing
+
+    public interface IPublishResult { }
+
+    public class FailurePublishing : IPublishResult
     {
-        internal abstract void Reply(IModel model);
-    }
+        public readonly Exception Exception;
 
-    internal class Success : AggregateConsumingResult
-    {
-        private readonly ConsumedMessageBase _message;
-
-        internal Success(ConsumedMessageBase message)
+        internal FailurePublishing(Exception exception)
         {
-            _message = message;
-        }
-
-        internal override void Reply(IModel model)
-        {
-            _message.Acknowledge(model);
+            Exception = exception;
         }
     }
 
-    internal class ReiteratedConsumingFailure : ConsumingFailureBase
+    public class SuccessfulPublishing : IPublishResult
     {
-        internal ReiteratedConsumingFailure(ConsumedMessageBase message, params Exception[] exceptions)
-            : base(message, exceptions)
+        public readonly String MessageId;
+        public readonly Int64 Timestamp;
+
+        private SuccessfulPublishing(String messageId, Int64 timestamp)
         {
+            MessageId = messageId;
+            Timestamp = timestamp;
         }
 
-        internal override void Reply(IModel model)
+        internal static SuccessfulPublishing FromBasicProperties(IBasicProperties properties)
         {
-            Message.Acknowledge(model);
+            return new SuccessfulPublishing(properties.MessageId, properties.Timestamp.UnixTime);
         }
     }
 
-    internal class ConsumingFailure : ConsumingFailureBase
-    {
-        internal ConsumingFailure(ConsumedMessageBase message, params Exception[] exceptions)
-            : base(message, exceptions)
-        {
-        }
+    #endregion
 
-        internal override void Reply(IModel model)
-        {
-            Message.Requeue(model);
-        }
-    }
-
-    internal abstract class ConsumingFailureBase : AggregateConsumingResult
+    public abstract class AggregateConsumingResult
     {
         protected readonly ConsumedMessageBase Message;
+
+        protected AggregateConsumingResult(ConsumedMessageBase message)
+        {
+            Message = message;
+        }
+
+        internal virtual AggregateConsumingResult Reply(IModel model)
+        {
+            Message.Acknowledge(model);
+            return this;
+        }
+    }
+
+    public class Success : AggregateConsumingResult
+    {
+        internal Success(ConsumedMessageBase message)
+            : base(message)
+        {
+        }
+    }
+
+    public abstract class ConsumingFailureBase : AggregateConsumingResult
+    {
         private readonly Exception[] _exceptions;
 
         protected ConsumingFailureBase(ConsumedMessageBase message, params Exception[] exceptions)
+            : base(message)
         {
-            Message = message;
             _exceptions = exceptions;
         }
 
         internal Exception[] Exceptions
         {
             get { return _exceptions ?? new Exception[] { }; }
+        }
+
+        internal override AggregateConsumingResult Reply(IModel model)
+        {
+            // TODO: on error send to deadletterexchange
+            return base.Reply(model);
+        }
+    }
+
+    public class ReiteratedConsumingFailure : ConsumingFailureBase
+    {
+        internal ReiteratedConsumingFailure(ConsumedMessageBase message,
+                                            params Exception[] exceptions)
+            : base(message, exceptions)
+        {
+        }
+    }
+
+    public class ConsumingFailure : ConsumingFailureBase
+    {
+        internal ConsumingFailure(ConsumedMessageBase message, params Exception[] exceptions)
+            : base(message, exceptions)
+        {
+        }
+
+        internal override AggregateConsumingResult Reply(IModel model)
+        {
+            Message.Requeue(model);
+            return this;
+        }
+    }
+
+    internal class UnsupportedMessageConsumingFailure : ConsumingFailureBase
+    {
+        internal UnsupportedMessageConsumingFailure(ConsumedMessageBase message)
+            : base(message)
+        {
+        }
+    }
+
+    internal class UnresolvedMessageConsumingFailure : ConsumingFailureBase
+    {
+        internal UnresolvedMessageConsumingFailure(ConsumedMessageBase message)
+            : base(message)
+        {
+        }
+    }
+
+    internal class CorruptedMessageConsumingFailure : ConsumingFailureBase
+    {
+        internal CorruptedMessageConsumingFailure(ConsumedMessageBase message)
+            : base(message)
+        {
         }
     }
 }

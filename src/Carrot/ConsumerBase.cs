@@ -1,9 +1,11 @@
 using System;
 using System.Threading.Tasks;
+using Carrot.Configuration;
+using Carrot.Messages;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 
-namespace Carrot.Messaging
+namespace Carrot
 {
     public abstract class ConsumerBase : DefaultBasicConsumer
     {
@@ -46,9 +48,14 @@ namespace Carrot.Messaging
                                Body = body
                            };
 
-            ConsumeInternal(args);
+            ConsumeInternalAsync(args);
         }
 
-        protected abstract Task ConsumeInternal(BasicDeliverEventArgs args);
+        protected abstract Task<AggregateConsumingResult> ConsumeInternalAsync(BasicDeliverEventArgs args);
+
+        protected Task<AggregateConsumingResult> ConsumeAsync(BasicDeliverEventArgs args)
+        {
+            return Builder.Build(args).ConsumeAsync(Configuration);
+        }
     }
 }

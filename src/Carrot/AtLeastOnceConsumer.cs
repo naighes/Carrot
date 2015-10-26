@@ -1,10 +1,11 @@
 using System.Threading.Tasks;
+using Carrot.Configuration;
+using Carrot.Messages;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 
-namespace Carrot.Messaging
+namespace Carrot
 {
-    // TODO: plug consumer type
     public class AtLeastOnceConsumer : ConsumerBase
     {
         internal AtLeastOnceConsumer(IModel model,
@@ -14,11 +15,9 @@ namespace Carrot.Messaging
         {
         }
 
-        protected override Task ConsumeInternal(BasicDeliverEventArgs args)
+        protected override Task<AggregateConsumingResult> ConsumeInternalAsync(BasicDeliverEventArgs args)
         {
-            return Builder.Build(args)
-                          .ConsumeAsync(Configuration)
-                          .ContinueWith(_ => _.Result.Reply(Model));
+            return ConsumeAsync(args).ContinueWith(_ => _.Result.Reply(Model));
         }
     }
 }

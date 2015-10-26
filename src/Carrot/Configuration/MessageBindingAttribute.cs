@@ -1,8 +1,8 @@
 using System;
 
-namespace Carrot.Messaging
+namespace Carrot.Configuration
 {
-    [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
+    [AttributeUsage(AttributeTargets.Class)]
     public class MessageBindingAttribute : Attribute
     {
         private readonly String _messageType;

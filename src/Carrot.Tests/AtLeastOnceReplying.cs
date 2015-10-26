@@ -1,7 +1,7 @@
 using System;
 using System.Threading.Tasks;
+using Carrot.Configuration;
 using Carrot.Messages;
-using Carrot.Messaging;
 using Moq;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
@@ -116,7 +116,7 @@ namespace Carrot.Tests
 
             internal Task CallConsumeInternal(BasicDeliverEventArgs args)
             {
-                return ConsumeInternal(args);
+                return this.ConsumeInternalAsync(args);
             }
         }
     }

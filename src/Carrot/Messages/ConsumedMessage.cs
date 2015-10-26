@@ -1,11 +1,13 @@
 using System;
 using System.Linq;
 using System.Threading.Tasks;
-using Carrot.Messaging;
+using Carrot.Configuration;
 using RabbitMQ.Client.Events;
 
 namespace Carrot.Messages
 {
+    using System.Collections.Generic;
+
     public class ConsumedMessage : ConsumedMessageBase
     {
         private readonly Object _content;
@@ -21,14 +23,6 @@ namespace Carrot.Messages
             get { return _content; }
         }
 
-        private static AggregateConsumingResult AggregateResult(Task<ConsumingResult[]> task,
-                                                                ConsumedMessageBase message)
-        {
-            return task.Result.OfType<Failure>().Any()
-                    ? message.BuildErrorResult(task.Result)
-                    : new Messages.Success(message);
-        }
-
         internal override Boolean Match(Type type)
         {
             return Content != null && type.IsInstanceOfType(Content);
@@ -37,8 +31,28 @@ namespace Carrot.Messages
         internal override Task<AggregateConsumingResult> ConsumeAsync(SubscriptionConfiguration configuration)
         {
             return Task.WhenAll(configuration.FindSubscriptions(this)
-                                             .Select(_ => new OuterConsumer(_.Value).ConsumeAsync(this)))
+                                             .Select(_ => new OuterConsumer(_).ConsumeAsync(this)))
                        .ContinueWith(_ => AggregateResult(_, this));
+        }
+
+        private AggregateConsumingResult BuildErrorResult(IEnumerable<ConsumingResult> results)
+        {
+            var exceptions = results.OfType<Failure>()
+                                    .Select(_ => _.Exception)
+                                    .ToArray();
+
+            if (Redelivered)
+                return new ReiteratedConsumingFailure(this, exceptions);
+
+            return new ConsumingFailure(this, exceptions);
+        }
+
+        private AggregateConsumingResult AggregateResult(Task<ConsumingResult[]> task,
+                                                         ConsumedMessageBase message)
+        {
+            return task.Result.OfType<Failure>().Any()
+                    ? BuildErrorResult(task.Result)
+                    : new Messages.Success(message);
         }
 
         internal abstract class ConsumingResult

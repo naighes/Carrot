@@ -2,7 +2,7 @@ using System.Threading.Tasks;
 using Carrot.Extensions;
 using Carrot.Messages;
 
-namespace Carrot.Messaging
+namespace Carrot
 {
     internal class OuterConsumer
     {

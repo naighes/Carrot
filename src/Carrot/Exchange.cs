@@ -2,16 +2,18 @@ using System;
 using System.Collections.Generic;
 using RabbitMQ.Client;
 
-namespace Carrot.Messaging
+namespace Carrot
 {
     public struct Exchange
     {
         internal readonly String Type;
         internal readonly String Name;
+        internal readonly Boolean Durable;
 
-        internal Exchange(String name, String type)
+        internal Exchange(String name, String type, Boolean durable = false)
         {
             Type = type;
+            Durable = durable;
             Name = name;
         }
 
@@ -33,12 +35,28 @@ namespace Carrot.Messaging
             return new Exchange(name, "direct");
         }
 
+        public static Exchange DurableDirect(String name)
+        {
+            if (name == null)
+                throw new ArgumentNullException("name");
+
+            return new Exchange(name, "direct", true);
+        }
+
         public static Exchange Fanout(String name)
         {
             if (name == null)
                 throw new ArgumentNullException("name");
 
             return new Exchange(name, "fanout");
+        }
+
+        public static Exchange DurableFanout(String name)
+        {
+            if (name == null)
+                throw new ArgumentNullException("name");
+
+            return new Exchange(name, "fanout", true);
         }
 
         public static Exchange Topic(String name)
@@ -49,12 +67,28 @@ namespace Carrot.Messaging
             return new Exchange(name, "topic");
         }
 
+        public static Exchange DurableTopic(String name)
+        {
+            if (name == null)
+                throw new ArgumentNullException("name");
+
+            return new Exchange(name, "topic", true);
+        }
+
         public static Exchange Headers(String name)
         {
             if (name == null)
                 throw new ArgumentNullException("name");
 
             return new Exchange(name, "headers");
+        }
+
+        public static Exchange DurableHeaders(String name)
+        {
+            if (name == null)
+                throw new ArgumentNullException("name");
+
+            return new Exchange(name, "headers", true);
         }
 
         public Boolean Equals(Exchange other)

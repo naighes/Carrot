@@ -1,16 +1,10 @@
-using System;
 using System.Text;
-using Carrot.Messages;
+using Carrot.Configuration;
 using Carrot.Serialization;
 using RabbitMQ.Client.Events;
 
-namespace Carrot.Messaging
+namespace Carrot.Messages
 {
-    public interface IConsumedMessageBuilder
-    {
-        ConsumedMessageBase Build(BasicDeliverEventArgs args);
-    }
-
     public class ConsumedMessageBuilder : IConsumedMessageBuilder
     {
         private readonly ISerializerFactory _serializerFactory;
@@ -34,17 +28,18 @@ namespace Carrot.Messaging
             if (serializer is NullSerializer)
                 return new UnsupportedMessage(args);
 
-            Object content;
-
-            try
-            {
-                content = serializer.Deserialize(args.Body,
-                                                 messageType.RuntimeType,
-                                                 Encoding(args));
-            }
+            try { return Content(args, serializer, messageType); }
             catch { return new CorruptedMessage(args); }
+        }
 
-            return new ConsumedMessage(content, args);
+        private static ConsumedMessage Content(BasicDeliverEventArgs args,
+                                               ISerializer serializer,
+                                               MessageType messageType)
+        {
+            return new ConsumedMessage(serializer.Deserialize(args.Body,
+                                                              messageType.RuntimeType,
+                                                              Encoding(args)),
+                                       args);
         }
 
         private static Encoding Encoding(BasicDeliverEventArgs args)

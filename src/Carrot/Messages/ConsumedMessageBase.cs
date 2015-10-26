@@ -1,7 +1,6 @@
 using System;
-using System.Linq;
 using System.Threading.Tasks;
-using Carrot.Messaging;
+using Carrot.Configuration;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 
@@ -46,18 +45,6 @@ namespace Carrot.Messages
         internal void Requeue(IModel model)
         {
             model.BasicNack(DeliveryTag, false, true);
-        }
-
-        internal AggregateConsumingResult BuildErrorResult(ConsumedMessage.ConsumingResult[] results)
-        {
-            var exceptions = results.OfType<ConsumedMessage.Failure>()
-                                    .Select(_ => _.Exception)
-                                    .ToArray();
-
-            if (Redelivered)
-                return new ReiteratedConsumingFailure(this, exceptions);
-
-            return new ConsumingFailure(this, exceptions);
         }
     }
 }

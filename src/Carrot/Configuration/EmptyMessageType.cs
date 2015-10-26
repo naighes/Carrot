@@ -1,4 +1,4 @@
-namespace Carrot.Messaging
+namespace Carrot.Configuration
 {
     public class EmptyMessageType : MessageType
     {

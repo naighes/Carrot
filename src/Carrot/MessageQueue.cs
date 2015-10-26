@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
+using Carrot.Configuration;
+using Carrot.Messages;
 using Carrot.Serialization;
 using RabbitMQ.Client;
 
-namespace Carrot.Messaging
+namespace Carrot
 {
     public class MessageQueue
     {
@@ -23,6 +25,16 @@ namespace Carrot.Messaging
             get { return _name; }
         }
 
+        public void SubscribeByAtMostOnce(Action<SubscriptionConfiguration> configure)
+        {
+            Subscribe(configure, (b, c) => new AtMostOnceConsumer(_model, b, c));
+        }
+
+        public void SubscribeByAtLeastOnce(Action<SubscriptionConfiguration> configure)
+        {
+            Subscribe(configure, (b, c) => new AtLeastOnceConsumer(_model, b, c));
+        }
+
         internal static MessageQueue New(IModel model,
                                          IMessageTypeResolver resolver,
                                          String name,
@@ -38,14 +50,14 @@ namespace Carrot.Messaging
             return queue;
         }
 
-        public void ConfigureSubscriptions(Action<SubscriptionConfiguration> configure)
+        private void Subscribe(Action<SubscriptionConfiguration> configure,
+                               Func<IConsumedMessageBuilder, SubscriptionConfiguration, ConsumerBase> func)
         {
             var configuration = new SubscriptionConfiguration();
             configure(configuration);
-            var builder = new ConsumedMessageBuilder(new SerializerFactory(), _resolver);
-            _model.BasicConsume(_name,
-                                false,
-                                new AtLeastOnceConsumer(_model, builder, configuration));
+            IConsumedMessageBuilder builder = new ConsumedMessageBuilder(new SerializerFactory(), _resolver);
+
+            _model.BasicConsume(_name, false, func(builder, configuration));
         }
     }
 }

@@ -2,7 +2,7 @@ using System;
 using System.Threading.Tasks;
 using Carrot.Messages;
 
-namespace Carrot.Messaging
+namespace Carrot
 {
     public interface IConsumer
     {

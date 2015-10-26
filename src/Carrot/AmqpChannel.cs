@@ -1,11 +1,12 @@
 using System;
 using System.Threading.Tasks;
+using Carrot.Configuration;
 using Carrot.Messages;
 using Carrot.Serialization;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Framing.Impl;
 
-namespace Carrot.Messaging
+namespace Carrot
 {
     public interface IChannel : IDisposable
     {
@@ -75,13 +76,6 @@ namespace Carrot.Messaging
             return envelope.PublishAsync(_model, exchange, routingKey);
         }
 
-        private static IModel CreateModel(IConnection connection)
-        {
-            var model = connection.CreateModel();
-            model.ConfirmSelect();
-            return model;
-        }
-
         public void Dispose()
         {
             if (_model != null)
@@ -89,6 +83,13 @@ namespace Carrot.Messaging
 
             if (_connection != null)
                 _connection.Dispose();
+        }
+
+        private static IModel CreateModel(IConnection connection)
+        {
+            var model = connection.CreateModel();
+            model.ConfirmSelect();
+            return model;
         }
     }
 }

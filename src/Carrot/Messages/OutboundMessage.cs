@@ -1,9 +1,7 @@
-using Carrot.Messaging;
 using RabbitMQ.Client;
 
 namespace Carrot.Messages
 {
-    // TODO: have to look at something like "media formatters".
     public class OutboundMessage<TMessage> : IMessage<TMessage>
         where TMessage : class
     {

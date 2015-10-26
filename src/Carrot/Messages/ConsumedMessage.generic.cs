@@ -1,4 +1,4 @@
-namespace Carrot.Messaging
+namespace Carrot.Messages
 {
     public class ConsumedMessage<TMessage> : IMessage<TMessage>
         where TMessage : class

@@ -1,6 +1,6 @@
 using System;
 
-namespace Carrot.Messaging
+namespace Carrot.Configuration
 {
     public class MessageType : IEquatable<MessageType>
     {

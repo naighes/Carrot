@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using RabbitMQ.Client;
-using RabbitMQ.Client.Framing;
+using System.Text;
+using Carrot.Serialization;
 using Xunit;
 
 namespace Carrot.Tests
@@ -12,8 +12,8 @@ namespace Carrot.Tests
         [Fact]
         public void ContentTypeParsing()
         {
-            const String input = "text/plain; q=0.5, text/html, text/x-dvi; q=0.8,application/vnd.checkmate+json;version=2;q=0.1";
-            var types = new ContentNegotiator().Negotiate(new BasicProperties { ContentType = input });
+            const String contentType = "text/plain; q=0.5, text/html, text/x-dvi; q=0.8,application/vnd.checkmate+json;version=2;q=0.1";
+            var types = new ContentNegotiator().Negotiate(contentType);
 
             var first = types.First();
             Assert.Equal(ContentNegotiator.MediaType.Parse("text/html"), first.Type);
@@ -31,151 +31,49 @@ namespace Carrot.Tests
             var mediaType = ContentNegotiator.MediaType.Parse("application/vnd.checkmate+json");
             Assert.Equal(mediaType, fourth.Type);
             Assert.Equal(0.1f, fourth.Quality);
-
-            Assert.Equal("checkmate", mediaType.Vendor);
-            Assert.Equal("json", mediaType.Suffix);
-        }
-    }
-
-    public class ContentNegotiator
-    {
-        public SortedSet<MediaTypeHeader> Negotiate(IBasicProperties properties)
-        {
-            return new SortedSet<MediaTypeHeader>(properties.ContentType
-                                                            .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
-                                                            .Select(_ => MediaTypeHeader.Parse(_.Trim()))
-                                                            .OrderByDescending(_ => _.Quality),
-                                                  MediaTypeHeader.MediaTypeHeaderQualityComparer.Instance);
         }
 
-        public struct MediaTypeHeader
+        [Fact]
+        public void CustomMap()
         {
-            private const Single DefaultQuality = 1.0f;
-
-            internal readonly MediaType Type;
-            internal readonly Single Quality;
-
-            private MediaTypeHeader(MediaType type, Single quality)
-            {
-                Type = type;
-                Quality = quality;
-            }
-
-            internal static MediaTypeHeader Parse(String source)
-            {
-                var type = default(MediaType);
-                var quality = DefaultQuality;
-
-                foreach (var s in source.Split(new[] { ';' },
-                                               StringSplitOptions.RemoveEmptyEntries)
-                                        .Select(_ => _.Trim()))
-                    if (s.StartsWith("q", StringComparison.Ordinal))
-                        quality = Single.Parse(s.Substring(s.IndexOf('=') + 1)
-                                                .TrimStart());
-                    else if (s.IndexOf('=') == -1) 
-                        type = MediaType.Parse(s);
-
-                return new MediaTypeHeader(type, quality);
-            }
-
-            internal class MediaTypeHeaderQualityComparer : IComparer<MediaTypeHeader>
-            {
-                internal static MediaTypeHeaderQualityComparer Instance = new MediaTypeHeaderQualityComparer();
-
-                private MediaTypeHeaderQualityComparer()
-                {
-                }
-
-                public Int32 Compare(MediaTypeHeader x, MediaTypeHeader y)
-                {
-                    return x.Quality.CompareTo(y.Quality) * -1;
-                }
-            }
+            const String contentType = "application/dummy";
+            var map = new Dictionary<String, ISerializer>
+                          {
+                              { contentType, new FakeSerializer() }
+                          };
+            var factory = new SerializerFactory(map);
+            var serializer = factory.Create(contentType);
+            Assert.IsType<FakeSerializer>(serializer);
         }
 
-        public struct MediaType
+        [Fact]
+        public void DefaultSerializer()
         {
-            public readonly String Type;
-            public readonly String Vendor;
-            public readonly String Suffix;
+            const String contentType = "application/json";
+            var factory = new SerializerFactory();
+            var serializer = factory.Create(contentType);
+            Assert.IsType<JsonSerializer>(serializer);
+        }
 
-            private MediaType(String type, String vendor = null, String suffix = null)
+        [Fact]
+        public void NotFound()
+        {
+            const String contentType = "application/unknow";
+            var factory = new SerializerFactory();
+            var serializer = factory.Create(contentType);
+            Assert.IsType<NullSerializer>(serializer);
+        }
+
+        internal class FakeSerializer : ISerializer
+        {
+            public object Deserialize(Byte[] body, Type type, Encoding encoding = null)
             {
-                Type = type;
-                Vendor = vendor;
-                Suffix = suffix;
+                throw new NotImplementedException();
             }
 
-            public static Boolean operator ==(MediaType left, MediaType right)
+            public string Serialize(Object obj)
             {
-                return left.Equals(right);
-            }
-
-            public static Boolean operator !=(MediaType left, MediaType right)
-            {
-                return !left.Equals(right);
-            }
-
-            public Boolean Equals(MediaType other)
-            {
-                return String.Equals(Type, other.Type) && 
-                       String.Equals(Vendor, other.Vendor) && 
-                       String.Equals(Suffix, other.Suffix);
-            }
-
-            public override Boolean Equals(Object obj)
-            {
-                if (ReferenceEquals(null, obj))
-                    return false;
-
-                return obj is MediaType && Equals((MediaType)obj);
-            }
-
-            public override Int32 GetHashCode()
-            {
-                unchecked
-                {
-                    var hashCode = Type != null ? Type.GetHashCode() : 0;
-                    hashCode = (hashCode * 397) ^ (Vendor != null ? Vendor.GetHashCode() : 0);
-                    hashCode = (hashCode * 397) ^ (Suffix != null ? Suffix.GetHashCode() : 0);
-                    return hashCode;
-                }
-            }
-
-            internal static MediaType Parse(String source)
-            {
-                if (source == null)
-                    throw new ArgumentNullException("source");
-
-                var strings = source.Split(new[] { '/' }, StringSplitOptions.RemoveEmptyEntries)
-                                    .Select(_ => _.Trim())
-                                    .ToArray();
-
-                var type = strings[0];
-
-                if (strings.Length <= 0)
-                    return new MediaType(type);
-
-                return new MediaType(type, 
-                                     ParseSegment(strings[1].Trim(), "vnd.", "+"), 
-                                     ParseSegment(strings[1].Trim(), "+"));
-            }
-
-            private static String ParseSegment(String source, String startKey, String endKey = null)
-            {
-                var index = source.IndexOf(startKey, StringComparison.Ordinal);
-
-                if (index == -1)
-                    return null;
-
-                var start = index + startKey.Length;
-
-                if (endKey == null)
-                    return source.Substring(start, source.Length - start);
-
-                var end = source.IndexOf(endKey, start, StringComparison.Ordinal);
-
-                return end != -1 ? source.Substring(start, end - start) : null;
+                throw new NotImplementedException();
             }
         }
     }
