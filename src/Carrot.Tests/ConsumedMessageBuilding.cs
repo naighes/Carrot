@@ -18,7 +18,7 @@ namespace Carrot.Tests
             const String type = "fake-type";
             var serializerFactory = new Mock<ISerializerFactory>();
             var resolver = new Mock<IMessageTypeResolver>();
-            resolver.Setup(_ => _.Resolve(type)).Returns(EmptyMessageType.Instance);
+            resolver.Setup(_ => _.Resolve(type)).Returns(EmptyMessageBinding.Instance);
             var builder = new ConsumedMessageBuilder(serializerFactory.Object, resolver.Object);
             var message = builder.Build(new BasicDeliverEventArgs
                                             {
@@ -55,7 +55,7 @@ namespace Carrot.Tests
                       .Throws(new Exception("boom"));
             serializerFactory.Setup(_ => _.Create(contentType)).Returns(serializer.Object);
             var resolver = new Mock<IMessageTypeResolver>();
-            resolver.Setup(_ => _.Resolve(type)).Returns(new MessageType(type, runtimeType));
+            resolver.Setup(_ => _.Resolve(type)).Returns(new MessageBinding(type, runtimeType));
             var builder = new ConsumedMessageBuilder(serializerFactory.Object, resolver.Object);
             var message = builder.Build(new BasicDeliverEventArgs
                                             {

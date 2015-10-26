@@ -7,7 +7,7 @@ namespace Carrot.Configuration
 {
     public class MessageBindingResolver : IMessageTypeResolver
     {
-        private readonly IDictionary<String, Type> _internalMap;
+        private readonly IDictionary<String, Tuple<Type, Int32>> _internalMap;
 
         public MessageBindingResolver(params Assembly[] assemblies)
         {
@@ -15,27 +15,35 @@ namespace Carrot.Configuration
                                      .Where(_ => _.GetCustomAttribute<MessageBindingAttribute>(true) != null)
                                      .ToDictionary(_ => _.GetCustomAttribute<MessageBindingAttribute>(false)
                                                          .MessageType,
-                                                   _ => _);
+                                                   _ => new Tuple<Type, Int32>(_,
+                                                                               _.GetCustomAttribute<MessageBindingAttribute>(false).ExpiresAfter));
         }
 
-        public MessageType Resolve(String source)
+        public MessageBinding Resolve(String source)
         {
             if (source == null)
                 throw new ArgumentNullException("source");
 
             return _internalMap.ContainsKey(source)
-                       ? new MessageType(source, _internalMap[source])
-                       : EmptyMessageType.Instance;
+                       ? BuildMessageBinding(source, _internalMap[source].Item1, _internalMap[source].Item2)
+                       : EmptyMessageBinding.Instance;
         }
 
-        public MessageType Resolve<TMessage>() where TMessage : class
+        public MessageBinding Resolve<TMessage>() where TMessage : class
         {
             var type = typeof(TMessage);
             var attribute = type.GetCustomAttribute<MessageBindingAttribute>();
 
-            return attribute != null
-                ? new MessageType(attribute.MessageType, type)
-                : new MessageType(String.Format("urn:message:{0}", type.FullName), type);
+            return BuildMessageBinding(attribute != null ? attribute.MessageType : String.Format("urn:message:{0}", type.FullName),
+                                       type,
+                                       attribute != null ? attribute.ExpiresAfter : -1);
+        }
+
+        private static MessageBinding BuildMessageBinding(String source, Type type, Int32 expiresAfter)
+        {
+            return new MessageBinding(source,
+                                      type,
+                                      expiresAfter == -1 ? null : new TimeSpan?(TimeSpan.FromSeconds(expiresAfter)));
         }
     }
 }

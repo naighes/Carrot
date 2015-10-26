@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Text;
 using System.Threading.Tasks;
 using Carrot.Configuration;
@@ -57,15 +58,23 @@ namespace Carrot.Messages
         protected virtual void HydrateProperties(IBasicProperties properties)
         {
             _message.HydrateProperties(properties);
+
             properties.MessageId = _newId.Next();
             properties.Timestamp = new AmqpTimestamp(_dateTimeProvider.UtcNow().ToUnixTimestamp());
-            properties.Type = _resolver.Resolve<TMessage>().RawName;
+            var binding = _resolver.Resolve<TMessage>();
+            properties.Type = binding.RawName;
 
             if (properties.ContentEncoding == null)
                 properties.ContentEncoding = DefaultContentEncoding;
 
             if (properties.ContentType == null)
                 properties.ContentType = DefaultContentType;
+
+            if (binding.ExpiresAfter.HasValue)
+                properties.Expiration = binding.ExpiresAfter
+                                               .GetValueOrDefault()
+                                               .TotalMilliseconds
+                                               .ToString(CultureInfo.InvariantCulture);
         }
 
         private static BasicProperties BuildBasicProperties()

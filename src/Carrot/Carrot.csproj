@@ -55,11 +55,11 @@
     <Compile Include="AmqpChannel.cs" />
     <Compile Include="AtLeastOnceConsumer.cs" />
     <Compile Include="AtMostOnceConsumer.cs" />
-    <Compile Include="Configuration\EmptyMessageType.cs" />
+    <Compile Include="Configuration\EmptyMessageBinding.cs" />
     <Compile Include="Configuration\IMessageTypeResolver.cs" />
     <Compile Include="Configuration\MessageBindingAttribute.cs" />
     <Compile Include="Configuration\MessageBindingResolver.cs" />
-    <Compile Include="Configuration\MessageType.cs" />
+    <Compile Include="Configuration\MessageBinding.cs" />
     <Compile Include="Configuration\SubscriptionConfiguration.cs" />
     <Compile Include="Consumer.cs" />
     <Compile Include="ConsumerBase.cs" />
