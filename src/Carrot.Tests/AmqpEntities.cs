@@ -32,7 +32,7 @@ namespace Carrot.Tests
             var exchange = Exchange.Direct(name);
             Assert.Equal(name, exchange.Name);
             Assert.Equal("direct", exchange.Type);
-            Assert.Equal(false, exchange.Durable);
+            Assert.Equal(false, exchange.IsDurable);
         }
 
         [Fact]
@@ -42,7 +42,7 @@ namespace Carrot.Tests
             var exchange = Exchange.DurableDirect(name);
             Assert.Equal(name, exchange.Name);
             Assert.Equal("direct", exchange.Type);
-            Assert.Equal(true, exchange.Durable);
+            Assert.Equal(true, exchange.IsDurable);
         }
 
         [Fact]
@@ -52,7 +52,7 @@ namespace Carrot.Tests
             var exchange = Exchange.Fanout(name);
             Assert.Equal(name, exchange.Name);
             Assert.Equal("fanout", exchange.Type);
-            Assert.Equal(false, exchange.Durable);
+            Assert.Equal(false, exchange.IsDurable);
         }
 
         [Fact]
@@ -62,7 +62,7 @@ namespace Carrot.Tests
             var exchange = Exchange.DurableFanout(name);
             Assert.Equal(name, exchange.Name);
             Assert.Equal("fanout", exchange.Type);
-            Assert.Equal(true, exchange.Durable);
+            Assert.Equal(true, exchange.IsDurable);
         }
 
         [Fact]
@@ -72,7 +72,7 @@ namespace Carrot.Tests
             var exchange = Exchange.Topic(name);
             Assert.Equal(name, exchange.Name);
             Assert.Equal("topic", exchange.Type);
-            Assert.Equal(false, exchange.Durable);
+            Assert.Equal(false, exchange.IsDurable);
         }
 
         [Fact]
@@ -82,7 +82,7 @@ namespace Carrot.Tests
             var exchange = Exchange.DurableTopic(name);
             Assert.Equal(name, exchange.Name);
             Assert.Equal("topic", exchange.Type);
-            Assert.Equal(true, exchange.Durable);
+            Assert.Equal(true, exchange.IsDurable);
         }
 
         [Fact]
@@ -92,7 +92,7 @@ namespace Carrot.Tests
             var exchange = Exchange.Headers(name);
             Assert.Equal(name, exchange.Name);
             Assert.Equal("headers", exchange.Type);
-            Assert.Equal(false, exchange.Durable);
+            Assert.Equal(false, exchange.IsDurable);
         }
 
         [Fact]
@@ -102,7 +102,7 @@ namespace Carrot.Tests
             var exchange = Exchange.DurableHeaders(name);
             Assert.Equal(name, exchange.Name);
             Assert.Equal("headers", exchange.Type);
-            Assert.Equal(true, exchange.Durable);
+            Assert.Equal(true, exchange.IsDurable);
         }
 
         [Fact]

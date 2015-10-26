@@ -8,12 +8,12 @@ namespace Carrot
     {
         internal readonly String Type;
         internal readonly String Name;
-        internal readonly Boolean Durable;
+        internal readonly Boolean IsDurable;
 
-        internal Exchange(String name, String type, Boolean durable = false)
+        internal Exchange(String name, String type, Boolean isDurable = false)
         {
             Type = type;
-            Durable = durable;
+            IsDurable = isDurable;
             Name = name;
         }
 
@@ -111,7 +111,7 @@ namespace Carrot
 
         internal void Declare(IModel model)
         {
-            model.ExchangeDeclare(Name, Type, Durable);
+            model.ExchangeDeclare(Name, Type, IsDurable);
         }
 
         internal void Bind(MessageQueue queue, IModel model, String routingKey = "")
