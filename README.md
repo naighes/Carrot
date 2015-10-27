@@ -60,6 +60,14 @@ If you need durable messaging, make use of `DurableOutboundMessage<T>`:
     channel.PublishAsync(new DurableOutboundMessage<Foo>(new Foo { Bar = 2 }),
                          exchange);
 
+## Building from Source ##
+
+Clone the source down to your machine.
+
+    git clone https://github.com/naighes/Carrot.wiki.git
+
+Run `build.bat`
+
 ## Resources ##
 
 - Carrot can be installed from [NuGet](https://www.nuget.org/packages/Carrot "Carrot")
