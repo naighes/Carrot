@@ -12,7 +12,8 @@ namespace Carrot
     {
         Task<IPublishResult> PublishAsync<TMessage>(OutboundMessage<TMessage> message,
                                                     Exchange exchange,
-                                                    String routingKey = "") where TMessage : class;
+                                                    String routingKey = "",
+                                                    TaskFactory taskFactory = null) where TMessage : class;
 
         MessageQueue Bind(String name, Exchange exchange, String routingKey = "");
     }
@@ -71,14 +72,15 @@ namespace Carrot
 
         public Task<IPublishResult> PublishAsync<TMessage>(OutboundMessage<TMessage> message,
                                                            Exchange exchange,
-                                                           String routingKey = "") where TMessage : class
+                                                           String routingKey = "",
+                                                           TaskFactory taskFactory = null) where TMessage : class
         {
             var envelope = new OutboundMessageEnvelope<TMessage>(message,
                                                                  _serializerFactory,
                                                                  _dateTimeProvider,
                                                                  _newId,
                                                                  _resolver);
-            return envelope.PublishAsync(_model, exchange, routingKey);
+            return envelope.PublishAsync(_model, exchange, routingKey, taskFactory);
         }
 
         public void Dispose()

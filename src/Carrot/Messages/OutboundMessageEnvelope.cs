@@ -35,24 +35,27 @@ namespace Carrot.Messages
             _resolver = resolver;
         }
 
-        internal Task<IPublishResult> PublishAsync(IModel model, Exchange exchange, String routingKey = "")
+        internal Task<IPublishResult> PublishAsync(IModel model,
+                                                   Exchange exchange,
+                                                   String routingKey = "",
+                                                   TaskFactory taskFactory = null)
         {
             var properties = BuildBasicProperties();
             HydrateProperties(properties);
 
             var encoding = Encoding.GetEncoding(properties.ContentEncoding);
             var serializer = _serializerFactory.Create(properties.ContentType);
+            var factory = taskFactory ?? Task.Factory;
 
-            return Task.Factory
-                       .StartNew(_ =>
-                                 {
-                                     model.BasicPublish(exchange.Name,
-                                                        routingKey,
-                                                        (IBasicProperties)_,
-                                                        encoding.GetBytes(serializer.Serialize(_message.Content)));
-                                 },
-                                 properties)
-                       .ContinueWith<IPublishResult>(Result);
+            return factory.StartNew(_ =>
+                                    {
+                                        model.BasicPublish(exchange.Name,
+                                                           routingKey,
+                                                           (IBasicProperties)_,
+                                                           encoding.GetBytes(serializer.Serialize(_message.Content)));
+                                    },
+                                    properties)
+                          .ContinueWith<IPublishResult>(Result);
         }
 
         protected virtual void HydrateProperties(IBasicProperties properties)
