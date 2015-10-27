@@ -13,6 +13,8 @@ namespace Carrot
         Task<IPublishResult> PublishAsync<TMessage>(OutboundMessage<TMessage> message,
                                                     Exchange exchange,
                                                     String routingKey = "") where TMessage : class;
+
+        MessageQueue Bind(String name, Exchange exchange, String routingKey = "");
     }
 
     public class AmqpChannel : IChannel
@@ -39,7 +41,10 @@ namespace Carrot
             _resolver = resolver;
         }
 
-        public static AmqpChannel New(String endpointUrl, IMessageTypeResolver resolver)
+        public static AmqpChannel New(String endpointUrl,
+                                      IMessageTypeResolver resolver,
+                                      UInt32 prefetchSize = 0,
+                                      UInt16 prefetchCount = 0)
         {
             var connectionFactory = new ConnectionFactory
                                         {
@@ -50,7 +55,7 @@ namespace Carrot
             var connection = (AutorecoveringConnection)connectionFactory.CreateConnection();
 
             return new AmqpChannel(connection,
-                                   CreateModel(connection),
+                                   CreateModel(connection, prefetchSize, prefetchCount),
                                    new DateTimeProvider(),
                                    new NewGuid(),
                                    new SerializerFactory(),
@@ -85,10 +90,11 @@ namespace Carrot
                 _connection.Dispose();
         }
 
-        private static IModel CreateModel(IConnection connection)
+        private static IModel CreateModel(IConnection connection, UInt32 prefetchSize, UInt16 prefetchCount)
         {
             var model = connection.CreateModel();
-            model.ConfirmSelect();
+            model.ConfirmSelect(); // TODO: should not be by default.
+            model.BasicQos(prefetchSize, prefetchCount, false);
             return model;
         }
     }
