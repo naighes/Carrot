@@ -4,8 +4,12 @@ Carrot is a .NET lightweight library that provides a couple of facilities over R
 
 [![install from nuget](https://img.shields.io/nuget/v/Carrot.svg?style=flat-square)](https://www.nuget.org/packages/Carrot)[![downloads](http://img.shields.io/nuget/dt/Carrot.svg?style=flat-square)](https://www.nuget.org/packages/Carrot)
 
-Getting started
-====
+## What is it? ##
+
+Prompted by the need for an easy-to-use RabbitMQ access component not requiring lots of boilerplate code in order to accomplish basic operations with RabbitMQ broker.
+Inspired by [MassTransit](https://github.com/MassTransit/MassTransit "MassTransit").
+
+## Getting started ##
 
 Just mark your POCO message contracts with `MessageBinding` attribute:
 
@@ -55,3 +59,9 @@ If you need durable messaging, make use of `DurableOutboundMessage<T>`:
 
     channel.PublishAsync(new DurableOutboundMessage<Foo>(new Foo { Bar = 2 }),
                          exchange);
+
+## Resources ##
+
+- Carrot can be installed from [NuGet](https://www.nuget.org/packages/Carrot "Carrot")
+- Find more information in the [wiki](https://github.com/naighes/Carrot/wiki "Carrot wiki")
+- Follow [@nicolabaldi on Twitter](https://twitter.com/nicolabaldi "@nicolabaldi") for updates
