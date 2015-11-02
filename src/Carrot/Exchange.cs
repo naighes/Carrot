@@ -4,7 +4,7 @@ using RabbitMQ.Client;
 
 namespace Carrot
 {
-    public struct Exchange
+    public class Exchange : IEquatable<Exchange>
     {
         internal readonly String Type;
         internal readonly String Name;
@@ -15,16 +15,6 @@ namespace Carrot
             Type = type;
             IsDurable = isDurable;
             Name = name;
-        }
-
-        public static Boolean operator ==(Exchange left, Exchange right)
-        {
-            return left.Equals(right);
-        }
-
-        public static Boolean operator !=(Exchange left, Exchange right)
-        {
-            return !left.Equals(right);
         }
 
         public static Exchange Direct(String name)
@@ -59,13 +49,24 @@ namespace Carrot
             return new Exchange(name, "headers");
         }
 
-        public Exchange Durable()
+        public static Boolean operator ==(Exchange left, Exchange right)
         {
-            return new Exchange(Name, Type, true);
+            return Equals(left, right);
+        }
+
+        public static Boolean operator !=(Exchange left, Exchange right)
+        {
+            return !Equals(left, right);
         }
 
         public Boolean Equals(Exchange other)
         {
+            if (ReferenceEquals(null, other))
+                return false;
+
+            if (ReferenceEquals(this, other))
+                return true;
+
             return String.Equals(Name, other.Name);
         }
 
@@ -74,12 +75,21 @@ namespace Carrot
             if (ReferenceEquals(null, obj))
                 return false;
 
-            return obj is Exchange && Equals((Exchange)obj);
+            if (ReferenceEquals(this, obj))
+                return true;
+
+            var other = obj as Exchange;
+            return other != null && Equals(other);
         }
 
         public override Int32 GetHashCode()
         {
             return Name.GetHashCode();
+        }
+
+        public Exchange Durable()
+        {
+            return new Exchange(Name, Type, true);
         }
 
         internal void Declare(IModel model)
