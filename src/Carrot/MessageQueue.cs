@@ -78,10 +78,10 @@ namespace Carrot
         public void SubscribeByAtMostOnce(Action<SubscriptionConfiguration> configure,
                                           IFallbackStrategy fallbackStrategy)
         {
+            var builder = new ConsumedMessageBuilder(_serializerFactory, _resolver);
             Subscribe(configure,
-                      (b, c) => new AtMostOnceConsumer(_model, b, c),
-                      fallbackStrategy,
-                      _serializerFactory);
+                      _ => new AtMostOnceConsumingPromise(this, builder, _),
+                      fallbackStrategy);
         }
 
         public void SubscribeByAtLeastOnce(Action<SubscriptionConfiguration> configure)
@@ -92,10 +92,10 @@ namespace Carrot
         public void SubscribeByAtLeastOnce(Action<SubscriptionConfiguration> configure,
                                            IFallbackStrategy fallbackStrategy)
         {
+            var builder = new ConsumedMessageBuilder(_serializerFactory, _resolver);
             Subscribe(configure,
-                      (b, c) => new AtLeastOnceConsumer(_model, b, c),
-                      fallbackStrategy,
-                      _serializerFactory);
+                      _ => new AtLeastOnceConsumingPromise(this, builder, _),
+                      fallbackStrategy);
         }
 
         internal static MessageQueue New(IModel model,
@@ -115,15 +115,72 @@ namespace Carrot
         }
 
         private void Subscribe(Action<SubscriptionConfiguration> configure,
-                               Func<IConsumedMessageBuilder, SubscriptionConfiguration, ConsumerBase> func,
-                               IFallbackStrategy fallbackStrategy,
-                               ISerializerFactory serializerFactory)
+                               Func<SubscriptionConfiguration, ConsumingPromise> promise,
+                               IFallbackStrategy fallbackStrategy)
         {
             var configuration = new SubscriptionConfiguration(fallbackStrategy);
             configure(configuration);
-            var builder = new ConsumedMessageBuilder(serializerFactory, _resolver);
-
-            _model.BasicConsume(_name, false, func(builder, configuration));
+            promise(configuration).Declare(_model);
         }
+    }
+
+    internal class AtMostOnceConsumingPromise : ConsumingPromise
+    {
+        internal AtMostOnceConsumingPromise(MessageQueue queue,
+                                            IConsumedMessageBuilder builder,
+                                            SubscriptionConfiguration configuration)
+            : base(queue, builder, configuration)
+        {
+        }
+
+        protected override ConsumerBase BuildConsumer(IModel model,
+                                                      IConsumedMessageBuilder builder,
+                                                      SubscriptionConfiguration configuration)
+        {
+            return new AtMostOnceConsumer(model, builder, configuration);
+        }
+    }
+
+    internal class AtLeastOnceConsumingPromise : ConsumingPromise
+    {
+        internal AtLeastOnceConsumingPromise(MessageQueue queue,
+                                             IConsumedMessageBuilder builder,
+                                             SubscriptionConfiguration configuration)
+            : base(queue, builder, configuration)
+        {
+        }
+
+        protected override ConsumerBase BuildConsumer(IModel model,
+                                                      IConsumedMessageBuilder builder,
+                                                      SubscriptionConfiguration configuration)
+        {
+            return new AtLeastOnceConsumer(model, builder, configuration);
+        }
+    }
+
+    internal abstract class ConsumingPromise
+    {
+        private readonly MessageQueue _queue;
+        private readonly IConsumedMessageBuilder _builder;
+        private readonly SubscriptionConfiguration _configuration;
+
+        internal ConsumingPromise(MessageQueue queue,
+                                  IConsumedMessageBuilder builder,
+                                  SubscriptionConfiguration configuration)
+        {
+            _queue = queue;
+            _builder = builder;
+            _configuration = configuration;
+        }
+
+        internal void Declare(IModel model)
+        {
+            var consumer = BuildConsumer(model, _builder, _configuration);
+            model.BasicConsume(_queue.Name, false, consumer);
+        }
+
+        protected abstract ConsumerBase BuildConsumer(IModel model,
+                                                      IConsumedMessageBuilder builder,
+                                                      SubscriptionConfiguration configuration);
     }
 }
