@@ -95,11 +95,10 @@ namespace Carrot.Tests
             var exchange = Exchange.Direct("exchange");
             var model = new Mock<IModel>();
             var queue = new MessageQueue("queue",
-                                         model.Object,
                                          new Mock<IMessageTypeResolver>().Object,
                                          new Mock<ISerializerFactory>().Object);
-            exchange.Bind(queue, model.Object, "key");
-            Assert.Throws<ArgumentException>(() => exchange.Bind(queue, model.Object, "key"));
+            exchange.Bind(queue, "key");
+            Assert.Throws<ArgumentException>(() => exchange.Bind(queue, "key"));
         }
     }
 }

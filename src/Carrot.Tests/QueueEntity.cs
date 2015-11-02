@@ -1,7 +1,6 @@
 using Carrot.Configuration;
 using Carrot.Serialization;
 using Moq;
-using RabbitMQ.Client;
 using Xunit;
 
 namespace Carrot.Tests
@@ -12,11 +11,9 @@ namespace Carrot.Tests
         public void Equality()
         {
             var q1 = new MessageQueue("queue",
-                                      new Mock<IModel>().Object,
                                       new Mock<IMessageTypeResolver>().Object,
                                       new Mock<ISerializerFactory>().Object);
             var q2 = new MessageQueue("queue",
-                                      new Mock<IModel>().Object,
                                       new Mock<IMessageTypeResolver>().Object,
                                       new Mock<ISerializerFactory>().Object);
 
@@ -24,7 +21,6 @@ namespace Carrot.Tests
             Assert.Equal(q1.GetHashCode(), q2.GetHashCode());
 
             var q3 = new MessageQueue("queue_3",
-                                      new Mock<IModel>().Object,
                                       new Mock<IMessageTypeResolver>().Object,
                                       new Mock<ISerializerFactory>().Object);
 

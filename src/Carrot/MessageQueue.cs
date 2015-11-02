@@ -11,7 +11,6 @@ namespace Carrot
     public class MessageQueue : IEquatable<MessageQueue>
     {
         private readonly String _name;
-        private readonly IModel _model;
         private readonly IMessageTypeResolver _resolver;
         private readonly ISerializerFactory _serializerFactory;
 
@@ -19,12 +18,10 @@ namespace Carrot
 
         // TODO: restore private
         internal MessageQueue(String name,
-                              IModel model,
                               IMessageTypeResolver resolver,
                               ISerializerFactory serializerFactory)
         {
             _name = name;
-            _model = model;
             _resolver = resolver;
             _serializerFactory = serializerFactory;
         }
@@ -72,59 +69,55 @@ namespace Carrot
             return _name.GetHashCode();
         }
 
-        public ConsumingPromise SubscribeByAtMostOnce(Action<SubscriptionConfiguration> configure)
+        public void SubscribeByAtMostOnce(Action<SubscriptionConfiguration> configure)
         {
-            return SubscribeByAtMostOnce(configure, NoFallbackStrategy.Instance);
+            SubscribeByAtMostOnce(configure, NoFallbackStrategy.Instance);
         }
 
-        public ConsumingPromise SubscribeByAtMostOnce(Action<SubscriptionConfiguration> configure,
-                                                      IFallbackStrategy fallbackStrategy)
+        public void SubscribeByAtMostOnce(Action<SubscriptionConfiguration> configure,
+                                          IFallbackStrategy fallbackStrategy)
         {
-            return Subscribe(configure,
-                             (b, c) => new AtMostOnceConsumingPromise(this, b, c),
-                             fallbackStrategy);
+            Subscribe(configure,
+                      (b, c) => new AtMostOnceConsumingPromise(this, b, c),
+                      fallbackStrategy);
         }
 
-        public ConsumingPromise SubscribeByAtLeastOnce(Action<SubscriptionConfiguration> configure)
+        public void SubscribeByAtLeastOnce(Action<SubscriptionConfiguration> configure)
         {
-            return SubscribeByAtLeastOnce(configure, NoFallbackStrategy.Instance);
+            SubscribeByAtLeastOnce(configure, NoFallbackStrategy.Instance);
         }
 
-        public ConsumingPromise SubscribeByAtLeastOnce(Action<SubscriptionConfiguration> configure,
-                                                       IFallbackStrategy fallbackStrategy)
-        {
-            return Subscribe(configure,
-                            (b, c) => new AtLeastOnceConsumingPromise(this, b, c),
-                            fallbackStrategy);
-        }
-
-        internal static MessageQueue New(IModel model,
-                                         IMessageTypeResolver resolver,
-                                         ISerializerFactory serializerFactory,
-                                         String name,
-                                         Exchange exchange,
-                                         String routingKey = "")
-        {
-            var queue = new MessageQueue(name, model, resolver, serializerFactory);
-
-            exchange.Declare(model);
-            model.QueueDeclare(name, true, false, false, new Dictionary<String, Object>());
-            exchange.Bind(queue, model, routingKey);
-
-            return queue;
-        }
-
-        private ConsumingPromise Subscribe(Action<SubscriptionConfiguration> configure,
-                                           Func<IConsumedMessageBuilder, SubscriptionConfiguration, ConsumingPromise> func,
+        public void SubscribeByAtLeastOnce(Action<SubscriptionConfiguration> configure,
                                            IFallbackStrategy fallbackStrategy)
+        {
+            Subscribe(configure,
+                      (b, c) => new AtLeastOnceConsumingPromise(this, b, c),
+                      fallbackStrategy);
+        }
+
+        internal static MessageQueue New(IMessageTypeResolver resolver,
+                                         ISerializerFactory serializerFactory,
+                                         String name)
+        {
+            return new MessageQueue(name, resolver, serializerFactory);
+        }
+
+        internal void Declare(IModel model)
+        {
+            model.QueueDeclare(Name, true, false, false, new Dictionary<String, Object>());
+
+            foreach (var promise in _promises)
+                promise.Declare(model);
+        }
+
+        private void Subscribe(Action<SubscriptionConfiguration> configure,
+                               Func<IConsumedMessageBuilder, SubscriptionConfiguration, ConsumingPromise> func,
+                               IFallbackStrategy fallbackStrategy)
         {
             var builder = new ConsumedMessageBuilder(_serializerFactory, _resolver);
             var configuration = new SubscriptionConfiguration(fallbackStrategy);
             configure(configuration);
-            var promise = func(builder, configuration);
-            _promises.Add(promise);
-            promise.Declare(_model); // TODO: should be deferred.
-            return promise;
+            _promises.Add(func(builder, configuration));
         }
     }
 }
