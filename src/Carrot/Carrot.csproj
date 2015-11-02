@@ -55,16 +55,17 @@
     <Compile Include="AmqpChannel.cs" />
     <Compile Include="AtLeastOnceConsumer.cs" />
     <Compile Include="AtMostOnceConsumer.cs" />
-    <Compile Include="Configuration\EmptyMessageType.cs" />
+    <Compile Include="Configuration\EmptyMessageBinding.cs" />
     <Compile Include="Configuration\IMessageTypeResolver.cs" />
     <Compile Include="Configuration\MessageBindingAttribute.cs" />
     <Compile Include="Configuration\MessageBindingResolver.cs" />
-    <Compile Include="Configuration\MessageType.cs" />
+    <Compile Include="Configuration\MessageBinding.cs" />
     <Compile Include="Configuration\SubscriptionConfiguration.cs" />
     <Compile Include="Consumer.cs" />
     <Compile Include="ConsumerBase.cs" />
     <Compile Include="Exchange.cs" />
     <Compile Include="Extensions\BasicPropertiesExtensions.cs" />
+    <Compile Include="Extensions\ConsumerExtensions.cs" />
     <Compile Include="Extensions\DateTimeOffsetExtensions.cs" />
     <Compile Include="Extensions\TaskExtensions.cs" />
     <Compile Include="Fallback\DeadLetterStrategy.cs" />
@@ -90,7 +91,6 @@
     <Compile Include="Messages\UnresolvedMessage.cs" />
     <Compile Include="Messages\UnsupportedMessage.cs" />
     <Compile Include="Messages\ConsumedMessage.generic.cs" />
-    <Compile Include="OuterConsumer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Serialization\ContentNegotiator.cs" />
     <Compile Include="Serialization\ISerializer.cs" />

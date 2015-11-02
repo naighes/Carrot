@@ -4,8 +4,8 @@ namespace Carrot.Configuration
 {
     public interface IMessageTypeResolver
     {
-        MessageType Resolve(String source);
+        MessageBinding Resolve(String source);
 
-        MessageType Resolve<TMessage>() where TMessage : class;
+        MessageBinding Resolve<TMessage>() where TMessage : class;
     }
 }

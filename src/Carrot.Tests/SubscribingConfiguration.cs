@@ -22,6 +22,18 @@ namespace Carrot.Tests
         }
 
         [Fact]
+        public void TwoSubscriptionsForTheSameMessage()
+        {
+            var configuration = new SubscriptionConfiguration();
+            configuration.Consumes(new FakeConsumer(_ => null));
+            configuration.Consumes(new FakeConsumer(_ => null));
+            var args = FakeBasicDeliverEventArgs();
+            var message = new FakeConsumedMessage(new Foo(), args);
+            var subscriptions = configuration.FindSubscriptions(message);
+            Assert.Equal(2, subscriptions.Count());
+        }
+
+        [Fact]
         public void NoSubscriptions()
         {
             var configuration = new SubscriptionConfiguration();

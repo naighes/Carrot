@@ -8,12 +8,12 @@ namespace Carrot
     {
         internal readonly String Type;
         internal readonly String Name;
-        internal readonly Boolean Durable;
+        internal readonly Boolean IsDurable;
 
-        internal Exchange(String name, String type, Boolean durable = false)
+        internal Exchange(String name, String type, Boolean isDurable = false)
         {
             Type = type;
-            Durable = durable;
+            IsDurable = isDurable;
             Name = name;
         }
 
@@ -35,28 +35,12 @@ namespace Carrot
             return new Exchange(name, "direct");
         }
 
-        public static Exchange DurableDirect(String name)
-        {
-            if (name == null)
-                throw new ArgumentNullException("name");
-
-            return new Exchange(name, "direct", true);
-        }
-
         public static Exchange Fanout(String name)
         {
             if (name == null)
                 throw new ArgumentNullException("name");
 
             return new Exchange(name, "fanout");
-        }
-
-        public static Exchange DurableFanout(String name)
-        {
-            if (name == null)
-                throw new ArgumentNullException("name");
-
-            return new Exchange(name, "fanout", true);
         }
 
         public static Exchange Topic(String name)
@@ -67,14 +51,6 @@ namespace Carrot
             return new Exchange(name, "topic");
         }
 
-        public static Exchange DurableTopic(String name)
-        {
-            if (name == null)
-                throw new ArgumentNullException("name");
-
-            return new Exchange(name, "topic", true);
-        }
-
         public static Exchange Headers(String name)
         {
             if (name == null)
@@ -83,12 +59,9 @@ namespace Carrot
             return new Exchange(name, "headers");
         }
 
-        public static Exchange DurableHeaders(String name)
+        public Exchange Durable()
         {
-            if (name == null)
-                throw new ArgumentNullException("name");
-
-            return new Exchange(name, "headers", true);
+            return new Exchange(Name, Type, true);
         }
 
         public Boolean Equals(Exchange other)
@@ -111,7 +84,7 @@ namespace Carrot
 
         internal void Declare(IModel model)
         {
-            model.ExchangeDeclare(Name, Type, Durable);
+            model.ExchangeDeclare(Name, Type, IsDurable);
         }
 
         internal void Bind(MessageQueue queue, IModel model, String routingKey = "")

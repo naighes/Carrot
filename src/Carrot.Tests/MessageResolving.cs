@@ -12,9 +12,9 @@ namespace Carrot.Tests
             const String source = "urn:message:foo";
             var type = typeof(Foo);
             var resolver = new MessageBindingResolver(type.Assembly);
-            var messageType = resolver.Resolve(source);
-            Assert.Equal(source, messageType.RawName);
-            Assert.Equal(type, messageType.RuntimeType);
+            var binding = resolver.Resolve(source);
+            Assert.Equal(source, binding.RawName);
+            Assert.Equal(type, binding.RuntimeType);
         }
 
         [Fact]
@@ -23,7 +23,7 @@ namespace Carrot.Tests
             const String source = "urn:message:no-resolve";
             var type = typeof(Foo);
             var resolver = new MessageBindingResolver(type.Assembly);
-            Assert.IsType<EmptyMessageType>(resolver.Resolve(source));
+            Assert.IsType<EmptyMessageBinding>(resolver.Resolve(source));
         }
 
         [Fact]
@@ -31,8 +31,9 @@ namespace Carrot.Tests
         {
             var type = typeof(Foo);
             var resolver = new MessageBindingResolver(type.Assembly);
-            var messageType = resolver.Resolve<Foo>();
-            Assert.Equal("urn:message:foo", messageType.RawName);
+            var binding = resolver.Resolve<Foo>();
+            Assert.Equal("urn:message:foo", binding.RawName);
+            Assert.False(binding.ExpiresAfter.HasValue);
         }
 
         [Fact]
@@ -40,8 +41,18 @@ namespace Carrot.Tests
         {
             var type = typeof(Bar);
             var resolver = new MessageBindingResolver(type.Assembly);
-            var messageType = resolver.Resolve<Bar>();
-            Assert.Equal("urn:message:Carrot.Tests.Bar", messageType.RawName);
+            var binding = resolver.Resolve<Bar>();
+            Assert.Equal("urn:message:Carrot.Tests.Bar", binding.RawName);
+        }
+
+        [Fact]
+        public void SettingExpiration()
+        {
+            var type = typeof(Buzz);
+            var resolver = new MessageBindingResolver(type.Assembly);
+            var binding = resolver.Resolve<Buzz>();
+            Assert.Equal("urn:message:buzz", binding.RawName);
+            Assert.Equal(TimeSpan.FromSeconds(19), binding.ExpiresAfter);
         }
     }
 }

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Text;
 using System.Threading.Tasks;
 using Carrot.Configuration;
@@ -34,38 +35,49 @@ namespace Carrot.Messages
             _resolver = resolver;
         }
 
-        internal Task<IPublishResult> PublishAsync(IModel model, Exchange exchange, String routingKey = "")
+        internal Task<IPublishResult> PublishAsync(IModel model,
+                                                   Exchange exchange,
+                                                   String routingKey = "",
+                                                   TaskFactory taskFactory = null)
         {
             var properties = BuildBasicProperties();
             HydrateProperties(properties);
 
             var encoding = Encoding.GetEncoding(properties.ContentEncoding);
             var serializer = _serializerFactory.Create(properties.ContentType);
+            var factory = taskFactory ?? Task.Factory;
 
-            return Task.Factory
-                       .StartNew(_ =>
-                                 {
-                                     model.BasicPublish(exchange.Name,
-                                                        routingKey,
-                                                        (IBasicProperties)_,
-                                                        encoding.GetBytes(serializer.Serialize(_message.Content)));
-                                 },
-                                 properties)
-                       .ContinueWith<IPublishResult>(Result);
+            return factory.StartNew(_ =>
+                                    {
+                                        model.BasicPublish(exchange.Name,
+                                                           routingKey,
+                                                           (IBasicProperties)_,
+                                                           encoding.GetBytes(serializer.Serialize(_message.Content)));
+                                    },
+                                    properties)
+                          .ContinueWith<IPublishResult>(Result);
         }
 
         protected virtual void HydrateProperties(IBasicProperties properties)
         {
             _message.HydrateProperties(properties);
+
             properties.MessageId = _newId.Next();
             properties.Timestamp = new AmqpTimestamp(_dateTimeProvider.UtcNow().ToUnixTimestamp());
-            properties.Type = _resolver.Resolve<TMessage>().RawName;
+            var binding = _resolver.Resolve<TMessage>();
+            properties.Type = binding.RawName;
 
             if (properties.ContentEncoding == null)
                 properties.ContentEncoding = DefaultContentEncoding;
 
             if (properties.ContentType == null)
                 properties.ContentType = DefaultContentType;
+
+            if (binding.ExpiresAfter.HasValue)
+                properties.Expiration = binding.ExpiresAfter
+                                               .GetValueOrDefault()
+                                               .TotalMilliseconds
+                                               .ToString(CultureInfo.InvariantCulture);
         }
 
         private static BasicProperties BuildBasicProperties()

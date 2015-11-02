@@ -27,7 +27,7 @@ namespace Carrot.Tests
             newId.Setup(_ => _.Next()).Returns(messageId);
             var model = new Mock<IModel>();
             var resolver = new Mock<IMessageTypeResolver>();
-            resolver.Setup(_ => _.Resolve<Foo>()).Returns(new MessageType("urn:message:fake", typeof(Foo)));
+            resolver.Setup(_ => _.Resolve<Foo>()).Returns(new MessageBinding("urn:message:fake", typeof(Foo)));
             var wrapper = new OutboundMessageEnvelope<Foo>(message,
                                                            serializerFactory.Object,
                                                            dateTimeProvider.Object,
@@ -58,7 +58,7 @@ namespace Carrot.Tests
                                             It.IsAny<Byte[]>()))
                  .Throws(exception);
             var resolver = new Mock<IMessageTypeResolver>();
-            resolver.Setup(_ => _.Resolve<Foo>()).Returns(new MessageType("urn:message:fake", typeof(Foo)));
+            resolver.Setup(_ => _.Resolve<Foo>()).Returns(new MessageBinding("urn:message:fake", typeof(Foo)));
             var wrapper = new OutboundMessageEnvelope<Foo>(message,
                                                            serializerFactory.Object,
                                                            dateTimeProvider.Object,
@@ -80,7 +80,7 @@ namespace Carrot.Tests
             var dateTimeProvider = new Mock<IDateTimeProvider>();
             dateTimeProvider.Setup(_ => _.UtcNow()).Returns(timestamp);
             var resolver = new Mock<IMessageTypeResolver>();
-            resolver.Setup(_ => _.Resolve<Foo>()).Returns(new MessageType("urn:message:fake", typeof(Foo)));
+            resolver.Setup(_ => _.Resolve<Foo>()).Returns(new MessageBinding("urn:message:fake", typeof(Foo)));
             var envelope = new OutboundMessageEnvelopeWrapper<Foo>(new OutboundMessage<Foo>(new Foo()),
                                                                    new Mock<ISerializerFactory>().Object,
                                                                    dateTimeProvider.Object,
@@ -156,12 +156,23 @@ namespace Carrot.Tests
             Assert.True(properties.Persistent);
         }
 
-        private OutboundMessageEnvelopeWrapper<TMessage> BuildDefaultEnvelope<TMessage>(OutboundMessage<TMessage> message)
+        [Fact]
+        public void MessageExpiration()
+        {
+            var expiresAfter = new TimeSpan?(TimeSpan.FromSeconds(18));
+            var envelope = BuildDefaultEnvelope(new DurableOutboundMessage<Bar>(new Bar()), expiresAfter);
+            var properties = new BasicProperties();
+            envelope.CallHydrateProperties(properties);
+            Assert.Equal("18000", properties.Expiration);
+        }
+
+        private static OutboundMessageEnvelopeWrapper<TMessage> BuildDefaultEnvelope<TMessage>(OutboundMessage<TMessage> message,
+                                                                                               TimeSpan? expiresAfter = null)
             where TMessage : class
         {
             var resolver = new Mock<IMessageTypeResolver>();
             resolver.Setup(_ => _.Resolve<TMessage>())
-                    .Returns(new MessageType("urn:message:fake", typeof(TMessage)));
+                    .Returns(new MessageBinding("urn:message:fake", typeof(TMessage), expiresAfter));
             return new OutboundMessageEnvelopeWrapper<TMessage>(message,
                                                                 new Mock<ISerializerFactory>().Object,
                                                                 new Mock<IDateTimeProvider>().Object,

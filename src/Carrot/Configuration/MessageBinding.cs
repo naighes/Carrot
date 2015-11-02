@@ -2,28 +2,30 @@ using System;
 
 namespace Carrot.Configuration
 {
-    public class MessageType : IEquatable<MessageType>
+    public class MessageBinding : IEquatable<MessageBinding>
     {
         public readonly String RawName;
         public readonly Type RuntimeType;
+        public readonly TimeSpan? ExpiresAfter;
 
-        internal MessageType(String rawName, Type runtimeType)
+        internal MessageBinding(String rawName, Type runtimeType, TimeSpan? expiresAfter = null)
         {
             RawName = rawName;
             RuntimeType = runtimeType;
+            ExpiresAfter = expiresAfter;
         }
 
-        public static Boolean operator ==(MessageType left, MessageType right)
+        public static Boolean operator ==(MessageBinding left, MessageBinding right)
         {
             return Equals(left, right);
         }
 
-        public static Boolean operator !=(MessageType left, MessageType right)
+        public static Boolean operator !=(MessageBinding left, MessageBinding right)
         {
             return !Equals(left, right);
         }
 
-        public Boolean Equals(MessageType other)
+        public Boolean Equals(MessageBinding other)
         {
             if (ReferenceEquals(null, other))
                 return false;
@@ -42,7 +44,7 @@ namespace Carrot.Configuration
             if (ReferenceEquals(this, obj))
                 return true;
 
-            var other = obj as MessageType;
+            var other = obj as MessageBinding;
             return other != null && Equals(other);
         }
 

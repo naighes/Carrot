@@ -4,10 +4,14 @@ Carrot is a .NET lightweight library that provides a couple of facilities over R
 
 [![install from nuget](https://img.shields.io/nuget/v/Carrot.svg?style=flat-square)](https://www.nuget.org/packages/Carrot)[![downloads](http://img.shields.io/nuget/dt/Carrot.svg?style=flat-square)](https://www.nuget.org/packages/Carrot)
 
-Getting started
-====
+## What is it? ##
 
-Just mark your POCO message contracts with `MessageBinding` attribute: 
+Prompted by the need for an easy-to-use RabbitMQ access component not requiring lots of boilerplate code in order to accomplish basic operations with RabbitMQ broker.
+Inspired by [MassTransit](https://github.com/MassTransit/MassTransit "MassTransit").
+
+## Getting started ##
+
+Just mark your POCO message contracts with `MessageBinding` attribute:
 
     [MessageBinding("urn:message:foo")]
     public class Foo
@@ -41,9 +45,9 @@ Create an instance of `AmqpChannel` providing the RabbitMQ host as input.
 You're up 'n running! Do not forget to call `AmqpChannel.Dispose()` when your application exits.
 
 Please note that exchanges are not durable by default.
-You can rely on proper methods in case:
+You can create durable exchange by calling the `Durable` instance method on it.
 
-    var exchange = Exchange.DurableDirect("source_exchange");
+    var durableExchange = Exchange.Direct("source_exchange").Durable();
 
 You can publish messages as the following:
 
@@ -55,3 +59,17 @@ If you need durable messaging, make use of `DurableOutboundMessage<T>`:
 
     channel.PublishAsync(new DurableOutboundMessage<Foo>(new Foo { Bar = 2 }),
                          exchange);
+
+## Building from Source ##
+
+Clone the source down to your machine.
+
+    git clone https://github.com/naighes/Carrot.wiki.git
+
+Run `build.bat`
+
+## Resources ##
+
+- Carrot can be installed from [NuGet](https://www.nuget.org/packages/Carrot "Carrot")
+- Find more information in the [wiki](https://github.com/naighes/Carrot/wiki "Carrot wiki")
+- Follow [@nicolabaldi on Twitter](https://twitter.com/nicolabaldi "@nicolabaldi") for updates

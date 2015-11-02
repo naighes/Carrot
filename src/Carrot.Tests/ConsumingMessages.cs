@@ -96,6 +96,9 @@ namespace Carrot.Tests
         }
     }
 
+    [MessageBinding("urn:message:buzz", ExpiresAfter = 19)]
+    public class Buzz { }
+
     [MessageBinding("urn:message:foo")]
     public class Foo { }
 

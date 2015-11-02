@@ -18,9 +18,9 @@ namespace Carrot.Messages
 
         public ConsumedMessageBase Build(BasicDeliverEventArgs args)
         {
-            var messageType = _resolver.Resolve(args.BasicProperties.Type);
+            var binding = _resolver.Resolve(args.BasicProperties.Type);
 
-            if (messageType is EmptyMessageType)
+            if (binding is EmptyMessageBinding)
                 return new UnresolvedMessage(args);
 
             var serializer = _serializerFactory.Create(args.BasicProperties.ContentType);
@@ -28,16 +28,16 @@ namespace Carrot.Messages
             if (serializer is NullSerializer)
                 return new UnsupportedMessage(args);
 
-            try { return Content(args, serializer, messageType); }
+            try { return Content(args, serializer, binding); }
             catch { return new CorruptedMessage(args); }
         }
 
         private static ConsumedMessage Content(BasicDeliverEventArgs args,
                                                ISerializer serializer,
-                                               MessageType messageType)
+                                               MessageBinding messageBinding)
         {
             return new ConsumedMessage(serializer.Deserialize(args.Body,
-                                                              messageType.RuntimeType,
+                                                              messageBinding.RuntimeType,
                                                               Encoding(args)),
                                        args);
         }

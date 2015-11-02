@@ -46,7 +46,7 @@ namespace Carrot.Messages
 
         internal void ForwardTo(IModel model, Func<String, String> exchangeNameBuilder)
         {
-            var exchange = Exchange.DurableDirect(exchangeNameBuilder(Args.Exchange));
+            var exchange = Exchange.Direct(exchangeNameBuilder(Args.Exchange)).Durable();
             exchange.Declare(model);
             var properties = Args.BasicProperties.Copy();
             properties.Persistent = true;
