@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Carrot.Configuration;
+using Carrot.Extensions;
 using Carrot.Fallback;
 using RabbitMQ.Client.Events;
 
@@ -31,7 +32,7 @@ namespace Carrot.Messages
         internal override Task<AggregateConsumingResult> ConsumeAsync(SubscriptionConfiguration configuration)
         {
             return Task.WhenAll(configuration.FindSubscriptions(this)
-                                             .Select(_ => new OuterConsumer(_).ConsumeAsync(this)))
+                                             .Select(_ => _.SafeConsumeAsync(this)))
                        .ContinueWith(_ => AggregateResult(_, this, configuration.FallbackStrategy));
         }
 
