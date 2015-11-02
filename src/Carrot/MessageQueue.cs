@@ -15,6 +15,8 @@ namespace Carrot
         private readonly IMessageTypeResolver _resolver;
         private readonly ISerializerFactory _serializerFactory;
 
+        private readonly ISet<ConsumingPromise> _promises = new HashSet<ConsumingPromise>();
+
         // TODO: restore private
         internal MessageQueue(String name,
                               IModel model,
@@ -70,32 +72,30 @@ namespace Carrot
             return _name.GetHashCode();
         }
 
-        public void SubscribeByAtMostOnce(Action<SubscriptionConfiguration> configure)
+        public ConsumingPromise SubscribeByAtMostOnce(Action<SubscriptionConfiguration> configure)
         {
-            SubscribeByAtMostOnce(configure, NoFallbackStrategy.Instance);
+            return SubscribeByAtMostOnce(configure, NoFallbackStrategy.Instance);
         }
 
-        public void SubscribeByAtMostOnce(Action<SubscriptionConfiguration> configure,
-                                          IFallbackStrategy fallbackStrategy)
+        public ConsumingPromise SubscribeByAtMostOnce(Action<SubscriptionConfiguration> configure,
+                                                      IFallbackStrategy fallbackStrategy)
         {
-            var builder = new ConsumedMessageBuilder(_serializerFactory, _resolver);
-            Subscribe(configure,
-                      _ => new AtMostOnceConsumingPromise(this, builder, _),
-                      fallbackStrategy);
+            return Subscribe(configure,
+                             (b, c) => new AtMostOnceConsumingPromise(this, b, c),
+                             fallbackStrategy);
         }
 
-        public void SubscribeByAtLeastOnce(Action<SubscriptionConfiguration> configure)
+        public ConsumingPromise SubscribeByAtLeastOnce(Action<SubscriptionConfiguration> configure)
         {
-            SubscribeByAtLeastOnce(configure, NoFallbackStrategy.Instance);
+            return SubscribeByAtLeastOnce(configure, NoFallbackStrategy.Instance);
         }
 
-        public void SubscribeByAtLeastOnce(Action<SubscriptionConfiguration> configure,
-                                           IFallbackStrategy fallbackStrategy)
+        public ConsumingPromise SubscribeByAtLeastOnce(Action<SubscriptionConfiguration> configure,
+                                                       IFallbackStrategy fallbackStrategy)
         {
-            var builder = new ConsumedMessageBuilder(_serializerFactory, _resolver);
-            Subscribe(configure,
-                      _ => new AtLeastOnceConsumingPromise(this, builder, _),
-                      fallbackStrategy);
+            return Subscribe(configure,
+                            (b, c) => new AtLeastOnceConsumingPromise(this, b, c),
+                            fallbackStrategy);
         }
 
         internal static MessageQueue New(IModel model,
@@ -114,13 +114,17 @@ namespace Carrot
             return queue;
         }
 
-        private void Subscribe(Action<SubscriptionConfiguration> configure,
-                               Func<SubscriptionConfiguration, ConsumingPromise> promise,
-                               IFallbackStrategy fallbackStrategy)
+        private ConsumingPromise Subscribe(Action<SubscriptionConfiguration> configure,
+                                           Func<IConsumedMessageBuilder, SubscriptionConfiguration, ConsumingPromise> func,
+                                           IFallbackStrategy fallbackStrategy)
         {
+            var builder = new ConsumedMessageBuilder(_serializerFactory, _resolver);
             var configuration = new SubscriptionConfiguration(fallbackStrategy);
             configure(configuration);
-            promise(configuration).Declare(_model);
+            var promise = func(builder, configuration);
+            _promises.Add(promise);
+            promise.Declare(_model); // TODO: should be deferred.
+            return promise;
         }
     }
 
@@ -158,7 +162,7 @@ namespace Carrot
         }
     }
 
-    internal abstract class ConsumingPromise
+    public abstract class ConsumingPromise
     {
         private readonly MessageQueue _queue;
         private readonly IConsumedMessageBuilder _builder;
