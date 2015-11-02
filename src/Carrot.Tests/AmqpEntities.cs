@@ -5,6 +5,8 @@ using Xunit;
 
 namespace Carrot.Tests
 {
+    using Carrot.Configuration;
+
     public class AmqpEntities
     {
         [Fact]
@@ -85,6 +87,18 @@ namespace Carrot.Tests
             Assert.Equal(a, b);
             var c = Exchange.Direct("another_name");
             Assert.NotEqual(a, c);
+        }
+
+        [Fact]
+        public void MultipleBinding()
+        {
+            var exchange = Exchange.Direct("exchange");
+            var model = new Mock<IModel>();
+            var queue = new MessageQueue("queue",
+                                         model.Object,
+                                         new Mock<IMessageTypeResolver>().Object);
+            exchange.Bind(queue, model.Object, "key");
+            Assert.Throws<ArgumentException>(() => exchange.Bind(queue, model.Object, "key"));
         }
     }
 }

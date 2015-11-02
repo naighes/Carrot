@@ -10,6 +10,8 @@ namespace Carrot
         internal readonly String Name;
         internal readonly Boolean IsDurable;
 
+        private readonly IDictionary<MessageQueue, String> _bindings = new Dictionary<MessageQueue, String>();
+
         internal Exchange(String name, String type, Boolean isDurable = false)
         {
             Type = type;
@@ -97,8 +99,12 @@ namespace Carrot
             model.ExchangeDeclare(Name, Type, IsDurable);
         }
 
+        // TODO: model will be removed from signature...
         internal void Bind(MessageQueue queue, IModel model, String routingKey = "")
         {
+            _bindings.Add(queue, routingKey);
+
+            // TODO: mode outside.
             model.QueueBind(queue.Name, Name, routingKey, new Dictionary<String, Object>());
         }
     }
