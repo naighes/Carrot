@@ -67,7 +67,7 @@ namespace Carrot
                                  Exchange exchange,
                                  String routingKey = "")
         {
-            return MessageQueue.New(_model, _resolver, name, exchange, routingKey);
+            return MessageQueue.New(_model, _resolver, _serializerFactory, name, exchange, routingKey);
         }
 
         public Task<IPublishResult> PublishAsync<TMessage>(OutboundMessage<TMessage> message,

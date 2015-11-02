@@ -13,13 +13,18 @@ namespace Carrot
         private readonly String _name;
         private readonly IModel _model;
         private readonly IMessageTypeResolver _resolver;
+        private readonly ISerializerFactory _serializerFactory;
 
         // TODO: restore private
-        internal MessageQueue(String name, IModel model, IMessageTypeResolver resolver)
+        internal MessageQueue(String name,
+                              IModel model,
+                              IMessageTypeResolver resolver,
+                              ISerializerFactory serializerFactory)
         {
             _name = name;
             _model = model;
             _resolver = resolver;
+            _serializerFactory = serializerFactory;
         }
 
         internal String Name
@@ -73,7 +78,10 @@ namespace Carrot
         public void SubscribeByAtMostOnce(Action<SubscriptionConfiguration> configure,
                                           IFallbackStrategy fallbackStrategy)
         {
-            Subscribe(configure, (b, c) => new AtMostOnceConsumer(_model, b, c), fallbackStrategy);
+            Subscribe(configure,
+                      (b, c) => new AtMostOnceConsumer(_model, b, c),
+                      fallbackStrategy,
+                      _serializerFactory);
         }
 
         public void SubscribeByAtLeastOnce(Action<SubscriptionConfiguration> configure)
@@ -84,16 +92,20 @@ namespace Carrot
         public void SubscribeByAtLeastOnce(Action<SubscriptionConfiguration> configure,
                                            IFallbackStrategy fallbackStrategy)
         {
-            Subscribe(configure, (b, c) => new AtLeastOnceConsumer(_model, b, c), fallbackStrategy);
+            Subscribe(configure,
+                      (b, c) => new AtLeastOnceConsumer(_model, b, c),
+                      fallbackStrategy,
+                      _serializerFactory);
         }
 
         internal static MessageQueue New(IModel model,
                                          IMessageTypeResolver resolver,
+                                         ISerializerFactory serializerFactory,
                                          String name,
                                          Exchange exchange,
                                          String routingKey = "")
         {
-            var queue = new MessageQueue(name, model, resolver);
+            var queue = new MessageQueue(name, model, resolver, serializerFactory);
 
             exchange.Declare(model);
             model.QueueDeclare(name, true, false, false, new Dictionary<String, Object>());
@@ -104,11 +116,12 @@ namespace Carrot
 
         private void Subscribe(Action<SubscriptionConfiguration> configure,
                                Func<IConsumedMessageBuilder, SubscriptionConfiguration, ConsumerBase> func,
-                               IFallbackStrategy fallbackStrategy)
+                               IFallbackStrategy fallbackStrategy,
+                               ISerializerFactory serializerFactory)
         {
             var configuration = new SubscriptionConfiguration(fallbackStrategy);
             configure(configuration);
-            var builder = new ConsumedMessageBuilder(new SerializerFactory(), _resolver);
+            var builder = new ConsumedMessageBuilder(serializerFactory, _resolver);
 
             _model.BasicConsume(_name, false, func(builder, configuration));
         }

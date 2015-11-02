@@ -1,12 +1,12 @@
 using System;
+using Carrot.Configuration;
+using Carrot.Serialization;
 using Moq;
 using RabbitMQ.Client;
 using Xunit;
 
 namespace Carrot.Tests
 {
-    using Carrot.Configuration;
-
     public class AmqpEntities
     {
         [Fact]
@@ -96,7 +96,8 @@ namespace Carrot.Tests
             var model = new Mock<IModel>();
             var queue = new MessageQueue("queue",
                                          model.Object,
-                                         new Mock<IMessageTypeResolver>().Object);
+                                         new Mock<IMessageTypeResolver>().Object,
+                                         new Mock<ISerializerFactory>().Object);
             exchange.Bind(queue, model.Object, "key");
             Assert.Throws<ArgumentException>(() => exchange.Bind(queue, model.Object, "key"));
         }
