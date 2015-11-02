@@ -8,13 +8,14 @@ using RabbitMQ.Client;
 
 namespace Carrot
 {
-    public class MessageQueue
+    public class MessageQueue : IEquatable<MessageQueue>
     {
         private readonly String _name;
         private readonly IModel _model;
         private readonly IMessageTypeResolver _resolver;
 
-        private MessageQueue(String name, IModel model, IMessageTypeResolver resolver)
+        // TODO: restore private
+        internal MessageQueue(String name, IModel model, IMessageTypeResolver resolver)
         {
             _name = name;
             _model = model;
@@ -24,6 +25,44 @@ namespace Carrot
         internal String Name
         {
             get { return _name; }
+        }
+
+        public static Boolean operator ==(MessageQueue left, MessageQueue right)
+        {
+            return Equals(left, right);
+        }
+
+        public static Boolean operator !=(MessageQueue left, MessageQueue right)
+        {
+            return !Equals(left, right);
+        }
+
+        public Boolean Equals(MessageQueue other)
+        {
+            if (ReferenceEquals(null, other))
+                return false;
+
+            if (ReferenceEquals(this, other))
+                return true;
+
+            return String.Equals(_name, other._name);
+        }
+
+        public override Boolean Equals(Object obj)
+        {
+            if (ReferenceEquals(null, obj))
+                return false;
+
+            if (ReferenceEquals(this, obj))
+                return true;
+
+            var other = obj as MessageQueue;
+            return other != null && Equals(other);
+        }
+
+        public override Int32 GetHashCode()
+        {
+            return _name.GetHashCode();
         }
 
         public void SubscribeByAtMostOnce(Action<SubscriptionConfiguration> configure)

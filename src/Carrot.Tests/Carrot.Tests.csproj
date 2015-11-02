@@ -84,6 +84,7 @@
     <Compile Include="MessageResolving.cs" />
     <Compile Include="OutboundEnveloping.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="QueueEntity.cs" />
     <Compile Include="SerializerBuilding.cs" />
     <Compile Include="SubscribingConfiguration.cs" />
   </ItemGroup>
