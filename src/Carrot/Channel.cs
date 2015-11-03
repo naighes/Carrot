@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Carrot.Configuration;
+using Carrot.Messages;
 using Carrot.Serialization;
 using RabbitMQ.Client;
 
@@ -60,7 +61,8 @@ namespace Carrot
                                  Exchange exchange,
                                  String routingKey = "")
         {
-            var queue = MessageQueue.New(_resolver, _serializerFactory, name);
+            var builder = new ConsumedMessageBuilder(_serializerFactory, _resolver);
+            var queue = MessageQueue.New(name, builder);
 
             if (!_exchanges.ContainsKey(exchange.Name))
                 _exchanges.Add(exchange.Name, exchange);

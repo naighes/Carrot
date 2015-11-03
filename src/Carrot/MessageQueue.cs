@@ -11,19 +11,14 @@ namespace Carrot
     public class MessageQueue : IEquatable<MessageQueue>
     {
         private readonly String _name;
-        private readonly IMessageTypeResolver _resolver;
-        private readonly ISerializerFactory _serializerFactory;
+        private readonly IConsumedMessageBuilder _builder;
 
         private readonly ISet<ConsumingPromise> _promises = new HashSet<ConsumingPromise>();
 
-        // TODO: restore private
-        internal MessageQueue(String name,
-                              IMessageTypeResolver resolver,
-                              ISerializerFactory serializerFactory)
+        private MessageQueue(String name, IConsumedMessageBuilder builder)
         {
             _name = name;
-            _resolver = resolver;
-            _serializerFactory = serializerFactory;
+            _builder = builder;
         }
 
         internal String Name
@@ -95,11 +90,9 @@ namespace Carrot
                       fallbackStrategy);
         }
 
-        internal static MessageQueue New(IMessageTypeResolver resolver,
-                                         ISerializerFactory serializerFactory,
-                                         String name)
+        internal static MessageQueue New(String name, IConsumedMessageBuilder builder)
         {
-            return new MessageQueue(name, resolver, serializerFactory);
+            return new MessageQueue(name, builder);
         }
 
         internal void Declare(IModel model)
@@ -114,10 +107,9 @@ namespace Carrot
                                Func<IConsumedMessageBuilder, SubscriptionConfiguration, ConsumingPromise> func,
                                IFallbackStrategy fallbackStrategy)
         {
-            var builder = new ConsumedMessageBuilder(_serializerFactory, _resolver);
             var configuration = new SubscriptionConfiguration(fallbackStrategy);
             configure(configuration);
-            _promises.Add(func(builder, configuration));
+            _promises.Add(func(_builder, configuration));
         }
     }
 }

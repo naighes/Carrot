@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
-using Carrot.Configuration;
-using Carrot.Serialization;
+using Carrot.Messages;
 using Moq;
 using RabbitMQ.Client;
 using Xunit;
@@ -102,9 +101,7 @@ namespace Carrot.Tests
         public void MultipleBinding()
         {
             var exchange = Exchange.Direct("exchange");
-            var queue = new MessageQueue("queue",
-                                         new Mock<IMessageTypeResolver>().Object,
-                                         new Mock<ISerializerFactory>().Object);
+            var queue = MessageQueue.New("queue", new Mock<IConsumedMessageBuilder>().Object);
             exchange.Bind(queue, "key");
             Assert.Throws<ArgumentException>(() => exchange.Bind(queue, "key"));
         }
