@@ -22,7 +22,7 @@ namespace Carrot
         internal void Declare(IModel model)
         {
             var consumer = BuildConsumer(model, _builder, _configuration);
-            model.BasicConsume(_queue.Name, false, consumer);
+            model.BasicConsume(_queue.Queue, false, consumer);
         }
 
         protected internal abstract ConsumerBase BuildConsumer(IModel model,

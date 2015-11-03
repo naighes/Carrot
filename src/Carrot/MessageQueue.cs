@@ -8,22 +8,20 @@ namespace Carrot
 {
     public class MessageQueue : IEquatable<MessageQueue>
     {
-        private readonly String _name;
-        private readonly Boolean _isDurable;
+        private readonly Queue _queue;
         private readonly IConsumedMessageBuilder _builder;
 
         private readonly ISet<ConsumingPromise> _promises = new HashSet<ConsumingPromise>();
 
-        private MessageQueue(String name, Boolean isDurable, IConsumedMessageBuilder builder)
+        private MessageQueue(Queue queue, IConsumedMessageBuilder builder)
         {
-            _name = name;
-            _isDurable = isDurable;
+            _queue = queue;
             _builder = builder;
         }
 
-        internal String Name
+        internal String Queue
         {
-            get { return _name; }
+            get { return _queue.Name; } // TODO: ugly: it's temporary.
         }
 
         public static Boolean operator ==(MessageQueue left, MessageQueue right)
@@ -44,7 +42,7 @@ namespace Carrot
             if (ReferenceEquals(this, other))
                 return true;
 
-            return String.Equals(_name, other._name);
+            return String.Equals(this._queue, other._queue);
         }
 
         public override Boolean Equals(Object obj)
@@ -61,7 +59,7 @@ namespace Carrot
 
         public override Int32 GetHashCode()
         {
-            return _name.GetHashCode();
+            return this._queue.GetHashCode();
         }
 
         public void SubscribeByAtMostOnce(Action<SubscriptionConfiguration> configure)
@@ -76,14 +74,14 @@ namespace Carrot
                       (b, c) => new AtLeastOnceConsumingPromise(this, b, c));
         }
 
-        internal static MessageQueue New(String name, IConsumedMessageBuilder builder)
+        internal static MessageQueue New(Queue queue, IConsumedMessageBuilder builder)
         {
-            return new MessageQueue(name, false, builder);
+            return new MessageQueue(queue, builder);
         }
 
         internal void Declare(IModel model)
         {
-            model.QueueDeclare(Name, _isDurable, false, false, new Dictionary<String, Object>());
+            _queue.Declare(model);
 
             foreach (var promise in _promises)
                 promise.Declare(model);

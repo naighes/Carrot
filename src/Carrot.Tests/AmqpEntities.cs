@@ -90,7 +90,7 @@ namespace Carrot.Tests
         public void MultipleBinding()
         {
             var exchange = Exchange.Direct("exchange");
-            var queue = MessageQueue.New("queue", new Mock<IConsumedMessageBuilder>().Object);
+            var queue = MessageQueue.New(Queue.New("queue"), new Mock<IConsumedMessageBuilder>().Object);
             exchange.Bind(queue, "key");
             Assert.Throws<ArgumentException>(() => exchange.Bind(queue, "key"));
         }

@@ -102,7 +102,7 @@ namespace Carrot
             {
                 var queue = binding.Key;
                 queue.Declare(model);
-                model.QueueBind(queue.Name, Name, binding.Value, new Dictionary<String, Object>());
+                model.QueueBind(queue.Queue, Name, binding.Value, new Dictionary<String, Object>());
             }
         }
 
