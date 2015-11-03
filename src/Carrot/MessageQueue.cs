@@ -9,13 +9,15 @@ namespace Carrot
     public class MessageQueue : IEquatable<MessageQueue>
     {
         private readonly String _name;
+        private readonly Boolean _durable;
         private readonly IConsumedMessageBuilder _builder;
 
         private readonly ISet<ConsumingPromise> _promises = new HashSet<ConsumingPromise>();
 
-        private MessageQueue(String name, IConsumedMessageBuilder builder)
+        private MessageQueue(String name, Boolean durable, IConsumedMessageBuilder builder)
         {
             _name = name;
+            _durable = durable;
             _builder = builder;
         }
 
@@ -76,12 +78,12 @@ namespace Carrot
 
         internal static MessageQueue New(String name, IConsumedMessageBuilder builder)
         {
-            return new MessageQueue(name, builder);
+            return new MessageQueue(name, false, builder);
         }
 
         internal void Declare(IModel model)
         {
-            model.QueueDeclare(Name, true, false, false, new Dictionary<String, Object>());
+            model.QueueDeclare(Name, _durable, false, false, new Dictionary<String, Object>());
 
             foreach (var promise in _promises)
                 promise.Declare(model);
