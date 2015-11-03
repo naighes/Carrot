@@ -107,5 +107,16 @@ namespace Carrot.Tests
                                              false,
                                              It.IsAny<IDictionary<String, Object>>()));
         }
+
+        [Fact]
+        public void QueueEquality()
+        {
+            const String name = "one_queue";
+            var a = Queue.New(name);
+            var b = Queue.New(name);
+            Assert.Equal(a, b);
+            var c = Queue.New("another_name");
+            Assert.NotEqual(a, c);
+        }
     }
 }
