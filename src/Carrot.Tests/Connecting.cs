@@ -33,7 +33,7 @@ namespace Carrot.Tests
                    .SubscribeByAtLeastOnce(_ => { _.Consumes(consumer); });
             channel.Connect();
             model.Verify(_ => _.QueueDeclare(queueName,
-                                             true,
+                                             false,
                                              false,
                                              false,
                                              It.IsAny<IDictionary<String, Object>>()));

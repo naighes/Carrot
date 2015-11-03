@@ -10,10 +10,10 @@ namespace Carrot.Tests
     public class AmqpEntities
     {
         [Fact]
-        public void DeclarationWithDefaultDurability()
+        public void ExchangeDeclarationWithDefaultDurability()
         {
             var model = new Mock<IModel>();
-            var e1 = new Exchange("e", "direct");
+            var e1 = Exchange.Direct("e");
             e1.Declare(model.Object);
             model.Verify(_ => _.ExchangeDeclare(e1.Name,
                                                 e1.Type,
@@ -23,10 +23,10 @@ namespace Carrot.Tests
         }
 
         [Fact]
-        public void DeclarationWithExplicitDurability()
+        public void ExchangeDeclarationWithExplicitDurability()
         {
             var model = new Mock<IModel>();
-            var e2 = new Exchange("e", "topic", true);
+            var e2 = Exchange.Topic("e").Durable();
             e2.Declare(model.Object);
             model.Verify(_ => _.ExchangeDeclare(e2.Name,
                                                 e2.Type,
@@ -76,18 +76,7 @@ namespace Carrot.Tests
         }
 
         [Fact]
-        public void BuildingDurableExchange()
-        {
-            var ex = new Exchange("some name", "some type");
-            var durableEx = ex.Durable();
-            Assert.False(ex.IsDurable);
-            Assert.True(durableEx.IsDurable);
-            Assert.Equal(ex.Name, durableEx.Name);
-            Assert.Equal(ex.Type, durableEx.Type);
-        }
-
-        [Fact]
-        public void Equality()
+        public void ExchangeEquality()
         {
             const String name = "one_exchange";
             var a = Exchange.Direct(name);
@@ -104,6 +93,19 @@ namespace Carrot.Tests
             var queue = MessageQueue.New("queue", new Mock<IConsumedMessageBuilder>().Object);
             exchange.Bind(queue, "key");
             Assert.Throws<ArgumentException>(() => exchange.Bind(queue, "key"));
+        }
+
+        [Fact]
+        public void QueueDeclarationWithDefaultDurability()
+        {
+            var model = new Mock<IModel>();
+            var e1 = Queue.New("q");
+            e1.Declare(model.Object);
+            model.Verify(_ => _.QueueDeclare(e1.Name,
+                                             false,
+                                             false,
+                                             false,
+                                             It.IsAny<IDictionary<String, Object>>()));
         }
     }
 }

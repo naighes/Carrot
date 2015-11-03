@@ -12,7 +12,7 @@ namespace Carrot
 
         private readonly IDictionary<MessageQueue, String> _bindings = new Dictionary<MessageQueue, String>();
 
-        internal Exchange(String name, String type, Boolean isDurable = false)
+        private Exchange(String name, String type, Boolean isDurable = false)
         {
             Type = type;
             IsDurable = isDurable;
