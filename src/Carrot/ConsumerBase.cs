@@ -9,16 +9,16 @@ namespace Carrot
 {
     public abstract class ConsumerBase : DefaultBasicConsumer
     {
-        protected readonly IConsumedMessageBuilder Builder;
-        protected readonly SubscriptionConfiguration Configuration;
+        private readonly IConsumedMessageBuilder _builder;
+        private readonly SubscriptionConfiguration _configuration;
 
         protected internal ConsumerBase(IModel model,
                                         IConsumedMessageBuilder builder,
                                         SubscriptionConfiguration configuration)
             : base(model)
         {
-            Builder = builder;
-            Configuration = configuration;
+            _builder = builder;
+            _configuration = configuration;
         }
 
         public override void HandleBasicDeliver(String consumerTag,
@@ -53,7 +53,7 @@ namespace Carrot
 
         protected internal Task<AggregateConsumingResult> ConsumeAsync(BasicDeliverEventArgs args)
         {
-            return Builder.Build(args).ConsumeAsync(Configuration);
+            return _builder.Build(args).ConsumeAsync(_configuration);
         }
 
         protected abstract Task<AggregateConsumingResult> ConsumeInternalAsync(BasicDeliverEventArgs args);
