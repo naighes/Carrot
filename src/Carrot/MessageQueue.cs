@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using Carrot.Configuration;
 using Carrot.Fallback;
 using Carrot.Messages;
-using Carrot.Serialization;
 using RabbitMQ.Client;
 
 namespace Carrot

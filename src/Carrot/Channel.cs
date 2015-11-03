@@ -9,7 +9,7 @@ namespace Carrot
 {
     public interface IChannel
     {
-        MessageQueue Bind(String name, Exchange exchange, String routingKey = "");
+        MessageQueue Bind(String queueName, Exchange exchange, String routingKey = "");
 
         IAmqpConnection Connect();
     }
@@ -57,12 +57,11 @@ namespace Carrot
                                prefetchCount);
         }
 
-        public MessageQueue Bind(String name,
+        public MessageQueue Bind(String queueName,
                                  Exchange exchange,
                                  String routingKey = "")
         {
-            var builder = new ConsumedMessageBuilder(_serializerFactory, _resolver);
-            var queue = MessageQueue.New(name, builder);
+            var queue = MessageQueue.New(queueName, new ConsumedMessageBuilder(_serializerFactory, _resolver));
 
             if (!_exchanges.ContainsKey(exchange.Name))
                 _exchanges.Add(exchange.Name, exchange);
