@@ -9,15 +9,15 @@ namespace Carrot
     public class MessageQueue : IEquatable<MessageQueue>
     {
         private readonly String _name;
-        private readonly Boolean _durable;
+        private readonly Boolean _isDurable;
         private readonly IConsumedMessageBuilder _builder;
 
         private readonly ISet<ConsumingPromise> _promises = new HashSet<ConsumingPromise>();
 
-        private MessageQueue(String name, Boolean durable, IConsumedMessageBuilder builder)
+        private MessageQueue(String name, Boolean isDurable, IConsumedMessageBuilder builder)
         {
             _name = name;
-            _durable = durable;
+            _isDurable = isDurable;
             _builder = builder;
         }
 
@@ -83,7 +83,7 @@ namespace Carrot
 
         internal void Declare(IModel model)
         {
-            model.QueueDeclare(Name, _durable, false, false, new Dictionary<String, Object>());
+            model.QueueDeclare(Name, _isDurable, false, false, new Dictionary<String, Object>());
 
             foreach (var promise in _promises)
                 promise.Declare(model);
