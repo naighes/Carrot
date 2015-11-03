@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using Carrot.Configuration;
-using Carrot.Fallback;
 using Carrot.Messages;
 using RabbitMQ.Client;
 
@@ -65,28 +64,14 @@ namespace Carrot
 
         public void SubscribeByAtMostOnce(Action<SubscriptionConfiguration> configure)
         {
-            SubscribeByAtMostOnce(configure, NoFallbackStrategy.Instance);
-        }
-
-        public void SubscribeByAtMostOnce(Action<SubscriptionConfiguration> configure,
-                                          IFallbackStrategy fallbackStrategy)
-        {
             Subscribe(configure,
-                      (b, c) => new AtMostOnceConsumingPromise(this, b, c),
-                      fallbackStrategy);
+                      (b, c) => new AtMostOnceConsumingPromise(this, b, c));
         }
 
         public void SubscribeByAtLeastOnce(Action<SubscriptionConfiguration> configure)
         {
-            SubscribeByAtLeastOnce(configure, NoFallbackStrategy.Instance);
-        }
-
-        public void SubscribeByAtLeastOnce(Action<SubscriptionConfiguration> configure,
-                                           IFallbackStrategy fallbackStrategy)
-        {
             Subscribe(configure,
-                      (b, c) => new AtLeastOnceConsumingPromise(this, b, c),
-                      fallbackStrategy);
+                      (b, c) => new AtLeastOnceConsumingPromise(this, b, c));
         }
 
         internal static MessageQueue New(String name, IConsumedMessageBuilder builder)
@@ -103,10 +88,9 @@ namespace Carrot
         }
 
         private void Subscribe(Action<SubscriptionConfiguration> configure,
-                               Func<IConsumedMessageBuilder, SubscriptionConfiguration, ConsumingPromise> func,
-                               IFallbackStrategy fallbackStrategy)
+                               Func<IConsumedMessageBuilder, SubscriptionConfiguration, ConsumingPromise> func)
         {
-            var configuration = new SubscriptionConfiguration(fallbackStrategy);
+            var configuration = new SubscriptionConfiguration();
             configure(configuration);
             _promises.Add(func(_builder, configuration));
         }

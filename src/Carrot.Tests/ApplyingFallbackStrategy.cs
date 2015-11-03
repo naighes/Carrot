@@ -20,7 +20,9 @@ namespace Carrot.Tests
             var strategy = new Mock<IFallbackStrategy>();
             var args = FakeBasicDeliverEventArgs();
             var message = new FakeConsumedMessage(new Object(), args);
-            var result = message.ConsumeAsync(new SubscriptionConfiguration(strategy.Object)).Result;
+            var configuration = new SubscriptionConfiguration();
+            configuration.FallbackBy(strategy.Object);
+            var result = message.ConsumeAsync(configuration).Result;
             Assert.IsType<Success>(result);
             result.Reply(model.Object);
             strategy.Verify(_ => _.Apply(model.Object, message), Times.Never);
@@ -33,7 +35,8 @@ namespace Carrot.Tests
             var strategy = new Mock<IFallbackStrategy>();
             var args = FakeBasicDeliverEventArgs();
             var message = new FakeConsumedMessage(new Object(), args);
-            var configuration = new SubscriptionConfiguration(strategy.Object);
+            var configuration = new SubscriptionConfiguration();
+            configuration.FallbackBy(strategy.Object);
             configuration.Consumes(new FakeConsumer(consumedMessage => { throw new Exception(); }));
             var result = message.ConsumeAsync(configuration).Result;
             Assert.IsType<ConsumingFailure>(result);
@@ -49,7 +52,8 @@ namespace Carrot.Tests
             var args = FakeBasicDeliverEventArgs();
             args.Redelivered = true;
             var message = new FakeConsumedMessage(new Object(), args);
-            var configuration = new SubscriptionConfiguration(strategy.Object);
+            var configuration = new SubscriptionConfiguration();
+            configuration.FallbackBy(strategy.Object);
             configuration.Consumes(new FakeConsumer(consumedMessage => { throw new Exception(); }));
             var result = message.ConsumeAsync(configuration).Result;
             Assert.IsType<ReiteratedConsumingFailure>(result);
