@@ -10,7 +10,7 @@ namespace Carrot
         internal readonly String Name;
         internal readonly Boolean IsDurable;
 
-        private readonly IDictionary<MessageQueue, String> _bindings = new Dictionary<MessageQueue, String>(); // TODO: posso avere più code sullo stesso exchange, ma con ruoting key differenti.
+        private readonly IDictionary<MessageQueue, String> _bindings = new Dictionary<MessageQueue, String>();
 
         internal Exchange(String name, String type, Boolean isDurable = false)
         {
@@ -96,13 +96,13 @@ namespace Carrot
 
         internal void Declare(IModel model)
         {
-            model.ExchangeDeclare(Name, Type, IsDurable);
+            model.ExchangeDeclare(Name, Type, IsDurable, false, new Dictionary<String, Object>());
 
             foreach (var binding in _bindings)
             {
                 var queue = binding.Key;
                 queue.Declare(model);
-                model.QueueBind(queue.Name, Name, binding.Value);
+                model.QueueBind(queue.Name, Name, binding.Value, new Dictionary<String, Object>());
             }
         }
 

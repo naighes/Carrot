@@ -7,7 +7,15 @@ using RabbitMQ.Client;
 
 namespace Carrot
 {
-    public class AmqpConnection : IDisposable
+    public interface IAmqpConnection : IDisposable
+    {
+        Task<IPublishResult> PublishAsync<TMessage>(OutboundMessage<TMessage> message,
+                                                    Exchange exchange,
+                                                    String routingKey = "",
+                                                    TaskFactory taskFactory = null) where TMessage : class;
+    }
+
+    public class AmqpConnection : IAmqpConnection
     {
         private readonly IConnection _connection;
         private readonly IModel _model;
@@ -16,12 +24,12 @@ namespace Carrot
         private readonly IDateTimeProvider _dateTimeProvider;
         private readonly IMessageTypeResolver _resolver;
 
-        public AmqpConnection(IConnection connection,
-                              IModel model,
-                              ISerializerFactory serializerFactory,
-                              INewId newId,
-                              IDateTimeProvider dateTimeProvider,
-                              IMessageTypeResolver resolver)
+        internal AmqpConnection(IConnection connection,
+                                IModel model,
+                                ISerializerFactory serializerFactory,
+                                INewId newId,
+                                IDateTimeProvider dateTimeProvider,
+                                IMessageTypeResolver resolver)
         {
             _connection = connection;
             _model = model;

@@ -74,6 +74,7 @@
     <Compile Include="ApplyingFallbackStrategy.cs" />
     <Compile Include="AtLeastOnceReplying.cs" />
     <Compile Include="AtMostOnceReplying.cs" />
+    <Compile Include="Connecting.cs" />
     <Compile Include="ConsumedMessageBuilding.cs" />
     <Compile Include="ConsumingMessages.cs" />
     <Compile Include="ContentNegotiating.cs" />

@@ -17,8 +17,7 @@ namespace Carrot.BasicSample
 
             var connection = channel.Connect();
 
-            connection.PublishAsync(new OutboundMessage<Foo>(new Foo { Bar = 2 }),
-                                    exchange);
+            connection.PublishAsync(new OutboundMessage<Foo>(new Foo { Bar = 2 }), exchange);
 
             Console.ReadLine();
 

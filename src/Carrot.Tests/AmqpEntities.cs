@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Carrot.Configuration;
 using Carrot.Serialization;
 using Moq;
@@ -15,7 +16,11 @@ namespace Carrot.Tests
             var model = new Mock<IModel>();
             var e1 = new Exchange("e", "direct");
             e1.Declare(model.Object);
-            model.Verify(_ => _.ExchangeDeclare(e1.Name, e1.Type, false));
+            model.Verify(_ => _.ExchangeDeclare(e1.Name,
+                                                e1.Type,
+                                                false,
+                                                false,
+                                                It.IsAny<IDictionary<String, Object>>()));
         }
 
         [Fact]
@@ -24,7 +29,11 @@ namespace Carrot.Tests
             var model = new Mock<IModel>();
             var e2 = new Exchange("e", "topic", true);
             e2.Declare(model.Object);
-            model.Verify(_ => _.ExchangeDeclare(e2.Name, e2.Type, true));
+            model.Verify(_ => _.ExchangeDeclare(e2.Name,
+                                                e2.Type,
+                                                true,
+                                                false,
+                                                It.IsAny<IDictionary<String, Object>>()));
         }
 
         [Fact]
@@ -93,7 +102,6 @@ namespace Carrot.Tests
         public void MultipleBinding()
         {
             var exchange = Exchange.Direct("exchange");
-            var model = new Mock<IModel>();
             var queue = new MessageQueue("queue",
                                          new Mock<IMessageTypeResolver>().Object,
                                          new Mock<ISerializerFactory>().Object);

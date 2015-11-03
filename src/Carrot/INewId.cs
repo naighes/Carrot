@@ -9,6 +9,8 @@ namespace Carrot
 
     internal class NewGuid : INewId
     {
+        internal NewGuid() { }
+
         public String Next()
         {
             return Guid.NewGuid().ToString();

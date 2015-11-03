@@ -10,7 +10,7 @@ namespace Carrot
     {
         MessageQueue Bind(String name, Exchange exchange, String routingKey = "");
 
-        AmqpConnection Connect();
+        IAmqpConnection Connect();
     }
 
     public class Channel : IChannel
@@ -25,13 +25,13 @@ namespace Carrot
 
         private readonly IDictionary<String, Exchange> _exchanges = new Dictionary<String, Exchange>();
 
-        private Channel(String endpointUrl,
-                        IDateTimeProvider dateTimeProvider,
-                        INewId newId,
-                        ISerializerFactory serializerFactory,
-                        IMessageTypeResolver resolver,
-                        UInt32 prefetchSize,
-                        UInt16 prefetchCount)
+        protected internal Channel(String endpointUrl,
+                                   IDateTimeProvider dateTimeProvider,
+                                   INewId newId,
+                                   ISerializerFactory serializerFactory,
+                                   IMessageTypeResolver resolver,
+                                   UInt32 prefetchSize,
+                                   UInt16 prefetchCount)
         {
             _endpointUrl = endpointUrl;
             _dateTimeProvider = dateTimeProvider;
@@ -70,15 +70,9 @@ namespace Carrot
             return queue;
         }
 
-        public AmqpConnection Connect()
+        public IAmqpConnection Connect()
         {
-            var connectionFactory = new ConnectionFactory
-            {
-                Uri = _endpointUrl,
-                AutomaticRecoveryEnabled = true,
-                TopologyRecoveryEnabled = true
-            };
-            var connection = connectionFactory.CreateConnection();
+            var connection = CreateConnection();
             var model = CreateModel(connection, _prefetchSize, _prefetchCount);
 
             foreach (var binding in _exchanges)
@@ -92,10 +86,23 @@ namespace Carrot
                                       _resolver);
         }
 
-        private static IModel CreateModel(IConnection connection, UInt32 prefetchSize, UInt16 prefetchCount)
+        protected internal virtual IConnection CreateConnection()
+        {
+            var connectionFactory = new ConnectionFactory
+                                        {
+                                            Uri = _endpointUrl,
+                                            AutomaticRecoveryEnabled = true,
+                                            TopologyRecoveryEnabled = true
+                                        };
+            return connectionFactory.CreateConnection();
+        }
+
+        protected internal virtual IModel CreateModel(IConnection connection,
+                                                      UInt32 prefetchSize,
+                                                      UInt16 prefetchCount)
         {
             var model = connection.CreateModel();
-            model.ConfirmSelect(); // TODO: should not be by default.
+            model.ConfirmSelect();
             model.BasicQos(prefetchSize, prefetchCount, false);
             return model;
         }
