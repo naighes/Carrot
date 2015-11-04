@@ -11,7 +11,7 @@ namespace Carrot
         internal readonly String Name;
         internal readonly Boolean IsDurable;
 
-        private readonly IDictionary<Queue, String> _bindings = new Dictionary<Queue, String>();
+        private readonly ISet<Binding> _bindings = new HashSet<Binding>();
 
         private Exchange(String name, String type, Boolean isDurable = false)
         {
@@ -97,7 +97,14 @@ namespace Carrot
 
         public void Bind(Queue queue, String routingKey = "")
         {
-            _bindings.Add(queue, routingKey);
+            if (queue == null)
+                throw new ArgumentNullException("queue");
+
+            if (routingKey == null)
+                throw new ArgumentNullException("routingKey");
+
+            if (!_bindings.Add(new Binding(queue, routingKey)))
+                throw new ArgumentException("binding duplication detected");
         }
 
         internal void Declare(IModel model, IConsumedMessageBuilder builder)
@@ -105,11 +112,7 @@ namespace Carrot
             model.ExchangeDeclare(Name, Type, IsDurable, false, new Dictionary<String, Object>());
 
             foreach (var binding in _bindings)
-            {
-                var queue = binding.Key;
-                queue.Declare(model, builder);
-                model.QueueBind(queue.Name, Name, binding.Value, new Dictionary<String, Object>());
-            }
+                binding.Declare(model, this);
         }
     }
 }

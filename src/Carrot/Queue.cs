@@ -16,6 +16,9 @@ namespace Carrot
 
         internal Queue(String name, Boolean isDurable = false)
         {
+            if (name == null)
+                throw new ArgumentNullException("name");
+
             _name = name;
             _isDurable = isDurable;
         }

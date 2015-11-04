@@ -52,6 +52,7 @@
     <Compile Include="..\CommonAssemblyInfo.cs">
       <Link>Properties\CommonAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="Binding.cs" />
     <Compile Include="Channel.cs" />
     <Compile Include="AmqpConnection.cs" />
     <Compile Include="AtLeastOnceConsumer.cs" />

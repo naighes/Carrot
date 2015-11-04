@@ -57,14 +57,12 @@ namespace Carrot
 
         public Queue DeclareQueue(String name)
         {
-            var queue = new Queue(name);
-            _queues.Add(queue);
-            return queue;
+            return DeclareQueue(name, false);
         }
 
         public Queue DeclareDurableQueue(String name)
         {
-            return new Queue(name, true);
+            return DeclareQueue(name, true);
         }
 
         public IAmqpConnection Connect()
@@ -88,13 +86,12 @@ namespace Carrot
 
         protected internal virtual IConnection CreateConnection()
         {
-            var connectionFactory = new ConnectionFactory
-                                        {
-                                            Uri = _endpointUrl,
-                                            AutomaticRecoveryEnabled = true,
-                                            TopologyRecoveryEnabled = true
-                                        };
-            return connectionFactory.CreateConnection();
+            return new ConnectionFactory
+                       {
+                           Uri = _endpointUrl,
+                           AutomaticRecoveryEnabled = true,
+                           TopologyRecoveryEnabled = true
+                       }.CreateConnection();
         }
 
         protected internal virtual IModel CreateModel(IConnection connection,
@@ -105,6 +102,13 @@ namespace Carrot
             model.ConfirmSelect();
             model.BasicQos(prefetchSize, prefetchCount, false);
             return model;
+        }
+
+        private Queue DeclareQueue(String name, Boolean isDurable)
+        {
+            var queue = new Queue(name, isDurable);
+            _queues.Add(queue);
+            return queue;
         }
     }
 }
