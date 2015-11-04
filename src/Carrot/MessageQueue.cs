@@ -1,6 +1,4 @@
 using System;
-using System.Collections.Generic;
-using Carrot.Configuration;
 using Carrot.Messages;
 using RabbitMQ.Client;
 
@@ -10,9 +8,6 @@ namespace Carrot
     {
         private readonly Queue _queue;
         private readonly IConsumedMessageBuilder _builder;
-
-        private readonly ISet<Func<IConsumedMessageBuilder, ConsumingPromise>> _promises =
-            new HashSet<Func<IConsumedMessageBuilder, ConsumingPromise>>();
 
         private MessageQueue(Queue queue, IConsumedMessageBuilder builder)
         {
@@ -63,18 +58,6 @@ namespace Carrot
             return _queue.GetHashCode();
         }
 
-        public void SubscribeByAtMostOnce(Action<SubscriptionConfiguration> configure)
-        {
-            Subscribe(configure,
-                      (b, c) => new AtMostOnceConsumingPromise(_queue, b, c));
-        }
-
-        public void SubscribeByAtLeastOnce(Action<SubscriptionConfiguration> configure)
-        {
-            Subscribe(configure,
-                      (b, c) => new AtLeastOnceConsumingPromise(_queue, b, c));
-        }
-
         internal static MessageQueue New(Queue queue, IConsumedMessageBuilder builder)
         {
             return new MessageQueue(queue, builder);
@@ -82,19 +65,7 @@ namespace Carrot
 
         internal void Declare(IModel model)
         {
-            _queue.Declare(model);
-
-            foreach (var promise in _promises)
-                promise(_builder).Declare(model);
-        }
-
-        private void Subscribe(Action<SubscriptionConfiguration> configure,
-                               Func<IConsumedMessageBuilder, SubscriptionConfiguration, ConsumingPromise> func)
-        {
-            var configuration = new SubscriptionConfiguration();
-            configure(configuration);
-            Func<IConsumedMessageBuilder, ConsumingPromise> f = _ => func(_, configuration);
-            _promises.Add(f);
+            _queue.Declare(model, _builder);
         }
     }
 }

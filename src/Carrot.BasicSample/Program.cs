@@ -13,9 +13,8 @@ namespace Carrot.BasicSample
 
             var exchange = Exchange.Direct("source_exchange");
             var queue = Queue.New("my_test_queue");
-
-            channel.Bind(queue, exchange)
-                   .SubscribeByAtLeastOnce(_ =>
+            channel.Bind(queue, exchange);
+            queue.SubscribeByAtLeastOnce(_ =>
                                            {
                                                _.Consumes(new FooConsumer());
                                            });

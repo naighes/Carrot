@@ -100,7 +100,7 @@ namespace Carrot.Tests
         {
             var model = new Mock<IModel>();
             var e1 = Queue.New("q");
-            e1.Declare(model.Object);
+            e1.Declare(model.Object, new Mock<IConsumedMessageBuilder>().Object);
             model.Verify(_ => _.QueueDeclare(e1.Name,
                                              false,
                                              false,
