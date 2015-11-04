@@ -75,7 +75,6 @@
     <Compile Include="IConsumer.cs" />
     <Compile Include="IDateTimeProvider.cs" />
     <Compile Include="INewId.cs" />
-    <Compile Include="MessageQueue.cs" />
     <Compile Include="Messages\ConsumedMessage.cs" />
     <Compile Include="Messages\ConsumedMessageBase.cs" />
     <Compile Include="Messages\ConsumedMessageBuilder.cs" />

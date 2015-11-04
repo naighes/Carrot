@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Carrot.Messages;
 using RabbitMQ.Client;
 
 namespace Carrot
@@ -10,7 +11,7 @@ namespace Carrot
         internal readonly String Name;
         internal readonly Boolean IsDurable;
 
-        private readonly IDictionary<MessageQueue, String> _bindings = new Dictionary<MessageQueue, String>();
+        private readonly IDictionary<Queue, String> _bindings = new Dictionary<Queue, String>();
 
         private Exchange(String name, String type, Boolean isDurable = false)
         {
@@ -94,21 +95,21 @@ namespace Carrot
             return new Exchange(Name, Type, true);
         }
 
-        internal void Declare(IModel model)
+        public void Bind(Queue queue, String routingKey = "")
+        {
+            _bindings.Add(queue, routingKey);
+        }
+
+        internal void Declare(IModel model, IConsumedMessageBuilder builder)
         {
             model.ExchangeDeclare(Name, Type, IsDurable, false, new Dictionary<String, Object>());
 
             foreach (var binding in _bindings)
             {
                 var queue = binding.Key;
-                queue.Declare(model);
-                model.QueueBind(queue.Queue, Name, binding.Value, new Dictionary<String, Object>());
+                queue.Declare(model, builder);
+                model.QueueBind(queue.Name, Name, binding.Value, new Dictionary<String, Object>());
             }
-        }
-
-        internal void Bind(MessageQueue queue, String routingKey = "")
-        {
-            _bindings.Add(queue, routingKey);
         }
     }
 }

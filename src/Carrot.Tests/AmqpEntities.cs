@@ -14,7 +14,7 @@ namespace Carrot.Tests
         {
             var model = new Mock<IModel>();
             var e1 = Exchange.Direct("e");
-            e1.Declare(model.Object);
+            e1.Declare(model.Object, new Mock<IConsumedMessageBuilder>().Object);
             model.Verify(_ => _.ExchangeDeclare(e1.Name,
                                                 e1.Type,
                                                 false,
@@ -27,7 +27,7 @@ namespace Carrot.Tests
         {
             var model = new Mock<IModel>();
             var e2 = Exchange.Topic("e").Durable();
-            e2.Declare(model.Object);
+            e2.Declare(model.Object, new Mock<IConsumedMessageBuilder>().Object);
             model.Verify(_ => _.ExchangeDeclare(e2.Name,
                                                 e2.Type,
                                                 true,
@@ -90,7 +90,7 @@ namespace Carrot.Tests
         public void MultipleBinding()
         {
             var exchange = Exchange.Direct("exchange");
-            var queue = MessageQueue.New(Queue.New("queue"), new Mock<IConsumedMessageBuilder>().Object);
+            var queue = Queue.New("queue");
             exchange.Bind(queue, "key");
             Assert.Throws<ArgumentException>(() => exchange.Bind(queue, "key"));
         }

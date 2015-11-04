@@ -2,6 +2,7 @@ using System;
 using System.Threading.Tasks;
 using Carrot.Configuration;
 using Carrot.Extensions;
+using Carrot.Serialization;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 
@@ -47,7 +48,8 @@ namespace Carrot.Messages
         internal void ForwardTo(IModel model, Func<String, String> exchangeNameBuilder)
         {
             var exchange = Exchange.Direct(exchangeNameBuilder(Args.Exchange)).Durable();
-            exchange.Declare(model);
+            // TODO: exchange declaration MUST be moved outside!
+            exchange.Declare(model, new ConsumedMessageBuilder(new SerializerFactory(), new MessageBindingResolver()));
             var properties = Args.BasicProperties.Copy();
             properties.Persistent = true;
             model.BasicPublish(exchange.Name,

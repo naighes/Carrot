@@ -1,7 +1,5 @@
 using System;
-using System.Collections.Generic;
 using Carrot.Configuration;
-using Carrot.Messages;
 using Carrot.Serialization;
 using RabbitMQ.Client;
 
@@ -9,8 +7,6 @@ namespace Carrot
 {
     public interface IChannel
     {
-        MessageQueue Bind(Queue queue, Exchange exchange, String routingKey = "");
-
         IAmqpConnection Connect();
     }
 
@@ -23,8 +19,6 @@ namespace Carrot
         private readonly IMessageTypeResolver _resolver;
         private readonly UInt32 _prefetchSize;
         private readonly UInt16 _prefetchCount;
-
-        private readonly IDictionary<String, Exchange> _exchanges = new Dictionary<String, Exchange>();
 
         protected internal Channel(String endpointUrl,
                                    IDateTimeProvider dateTimeProvider,
@@ -57,26 +51,13 @@ namespace Carrot
                                prefetchCount);
         }
 
-        public MessageQueue Bind(Queue queue,
-                                 Exchange exchange,
-                                 String routingKey = "")
-        {
-            if (!_exchanges.ContainsKey(exchange.Name))
-                _exchanges.Add(exchange.Name, exchange);
-
-            var binding = MessageQueue.New(queue, new ConsumedMessageBuilder(_serializerFactory, _resolver));
-            _exchanges[exchange.Name].Bind(binding, routingKey);
-
-            return binding;
-        }
-
         public IAmqpConnection Connect()
         {
             var connection = CreateConnection();
             var model = CreateModel(connection, _prefetchSize, _prefetchCount);
 
-            foreach (var binding in _exchanges)
-                binding.Value.Declare(model);
+            //foreach (var binding in _exchanges)
+            //    binding.Value.Declare(model, new ConsumedMessageBuilder(_serializerFactory, _resolver));
 
             return new AmqpConnection(connection,
                                       model,
