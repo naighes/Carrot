@@ -6,11 +6,11 @@ namespace Carrot
 {
     public abstract class ConsumingPromise
     {
-        private readonly MessageQueue _queue;
+        private readonly Queue _queue;
         private readonly IConsumedMessageBuilder _builder;
         private readonly SubscriptionConfiguration _configuration;
 
-        protected internal ConsumingPromise(MessageQueue queue,
+        protected internal ConsumingPromise(Queue queue,
                                             IConsumedMessageBuilder builder,
                                             SubscriptionConfiguration configuration)
         {
@@ -22,7 +22,7 @@ namespace Carrot
         internal void Declare(IModel model)
         {
             var consumer = BuildConsumer(model, _builder, _configuration);
-            model.BasicConsume(_queue.Queue, false, consumer);
+            model.BasicConsume(_queue.Name, false, consumer);
         }
 
         protected internal abstract ConsumerBase BuildConsumer(IModel model,
@@ -32,7 +32,7 @@ namespace Carrot
 
     internal class AtMostOnceConsumingPromise : ConsumingPromise
     {
-        internal AtMostOnceConsumingPromise(MessageQueue queue,
+        internal AtMostOnceConsumingPromise(Queue queue,
                                             IConsumedMessageBuilder builder,
                                             SubscriptionConfiguration configuration)
             : base(queue, builder, configuration)
@@ -49,7 +49,7 @@ namespace Carrot
 
     internal class AtLeastOnceConsumingPromise : ConsumingPromise
     {
-        internal AtLeastOnceConsumingPromise(MessageQueue queue,
+        internal AtLeastOnceConsumingPromise(Queue queue,
                                              IConsumedMessageBuilder builder,
                                              SubscriptionConfiguration configuration)
             : base(queue, builder, configuration)

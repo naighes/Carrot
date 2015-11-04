@@ -66,13 +66,13 @@ namespace Carrot
         public void SubscribeByAtMostOnce(Action<SubscriptionConfiguration> configure)
         {
             Subscribe(configure,
-                      (b, c) => new AtMostOnceConsumingPromise(this, b, c));
+                      (b, c) => new AtMostOnceConsumingPromise(_queue, b, c));
         }
 
         public void SubscribeByAtLeastOnce(Action<SubscriptionConfiguration> configure)
         {
             Subscribe(configure,
-                      (b, c) => new AtLeastOnceConsumingPromise(this, b, c));
+                      (b, c) => new AtLeastOnceConsumingPromise(_queue, b, c));
         }
 
         internal static MessageQueue New(Queue queue, IConsumedMessageBuilder builder)
