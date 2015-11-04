@@ -90,7 +90,7 @@ namespace Carrot.Tests
         public void MultipleBinding()
         {
             var exchange = Exchange.Direct("exchange");
-            var queue = Queue.New("queue");
+            var queue = new Queue("queue");
             exchange.Bind(queue, "key");
             Assert.Throws<ArgumentException>(() => exchange.Bind(queue, "key"));
         }
@@ -99,9 +99,9 @@ namespace Carrot.Tests
         public void QueueDeclarationWithDefaultDurability()
         {
             var model = new Mock<IModel>();
-            var e1 = Queue.New("q");
-            e1.Declare(model.Object, new Mock<IConsumedMessageBuilder>().Object);
-            model.Verify(_ => _.QueueDeclare(e1.Name,
+            var queue = new Queue("q");
+            queue.Declare(model.Object, new Mock<IConsumedMessageBuilder>().Object);
+            model.Verify(_ => _.QueueDeclare(queue.Name,
                                              false,
                                              false,
                                              false,
@@ -112,10 +112,10 @@ namespace Carrot.Tests
         public void QueueEquality()
         {
             const String name = "one_queue";
-            var a = Queue.New(name);
-            var b = Queue.New(name);
+            var a = new Queue(name);
+            var b = new Queue(name);
             Assert.Equal(a, b);
-            var c = Queue.New("another_name");
+            var c = new Queue("another_name");
             Assert.NotEqual(a, c);
         }
     }

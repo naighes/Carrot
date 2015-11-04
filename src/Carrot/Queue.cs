@@ -14,7 +14,7 @@ namespace Carrot
         private readonly ISet<Func<IConsumedMessageBuilder, ConsumingPromise>> _promises =
             new HashSet<Func<IConsumedMessageBuilder, ConsumingPromise>>();
 
-        private Queue(String name, Boolean isDurable)
+        internal Queue(String name, Boolean isDurable = false)
         {
             _name = name;
             _isDurable = isDurable;
@@ -25,14 +25,6 @@ namespace Carrot
             get { return _name; }
         }
 
-        public static Queue New(String name)
-        {
-            if (name == null)
-                throw new ArgumentNullException("name");
-
-            return new Queue(name, false);
-        }
-
         public static Boolean operator ==(Queue left, Queue right)
         {
             return Equals(left, right);
@@ -41,11 +33,6 @@ namespace Carrot
         public static Boolean operator !=(Queue left, Queue right)
         {
             return !Equals(left, right);
-        }
-
-        public Queue Durable()
-        {
-            return new Queue(Name, true);
         }
 
         public Boolean Equals(Queue other)

@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using Carrot.Configuration;
+using Carrot.Messages;
 using Carrot.Serialization;
 using RabbitMQ.Client;
 
@@ -19,6 +21,8 @@ namespace Carrot
         private readonly IMessageTypeResolver _resolver;
         private readonly UInt32 _prefetchSize;
         private readonly UInt16 _prefetchCount;
+
+        private readonly ISet<Queue> _queues = new HashSet<Queue>();
 
         protected internal Channel(String endpointUrl,
                                    IDateTimeProvider dateTimeProvider,
@@ -51,10 +55,25 @@ namespace Carrot
                                prefetchCount);
         }
 
+        public Queue DeclareQueue(String name)
+        {
+            var queue = new Queue(name);
+            _queues.Add(queue);
+            return queue;
+        }
+
+        public Queue DeclareDurableQueue(String name)
+        {
+            return new Queue(name, true);
+        }
+
         public IAmqpConnection Connect()
         {
             var connection = CreateConnection();
             var model = CreateModel(connection, _prefetchSize, _prefetchCount);
+
+            foreach (var queue in _queues)
+                queue.Declare(model, new ConsumedMessageBuilder(_serializerFactory, _resolver));
 
             //foreach (var binding in _exchanges)
             //    binding.Value.Declare(model, new ConsumedMessageBuilder(_serializerFactory, _resolver));
