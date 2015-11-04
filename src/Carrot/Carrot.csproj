@@ -52,7 +52,8 @@
     <Compile Include="..\CommonAssemblyInfo.cs">
       <Link>Properties\CommonAssemblyInfo.cs</Link>
     </Compile>
-    <Compile Include="AmqpChannel.cs" />
+    <Compile Include="Channel.cs" />
+    <Compile Include="AmqpConnection.cs" />
     <Compile Include="AtLeastOnceConsumer.cs" />
     <Compile Include="AtMostOnceConsumer.cs" />
     <Compile Include="Configuration\EmptyMessageBinding.cs" />
@@ -63,11 +64,11 @@
     <Compile Include="Configuration\SubscriptionConfiguration.cs" />
     <Compile Include="Consumer.cs" />
     <Compile Include="ConsumerBase.cs" />
+    <Compile Include="ConsumingPromise.cs" />
     <Compile Include="Exchange.cs" />
     <Compile Include="Extensions\BasicPropertiesExtensions.cs" />
     <Compile Include="Extensions\ConsumerExtensions.cs" />
     <Compile Include="Extensions\DateTimeOffsetExtensions.cs" />
-    <Compile Include="Extensions\TaskExtensions.cs" />
     <Compile Include="Fallback\DeadLetterStrategy.cs" />
     <Compile Include="Fallback\IFallbackStrategy.cs" />
     <Compile Include="Fallback\NoFallbackStrategy.cs" />

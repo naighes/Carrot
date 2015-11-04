@@ -1,13 +1,12 @@
 using System;
 using System.Collections.Generic;
+using Carrot.Extensions;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Framing;
 using Xunit;
 
 namespace Carrot.Tests
 {
-    using Carrot.Extensions;
-
     public class MessageProperties
     {
         [Fact]

@@ -12,9 +12,9 @@ namespace Carrot
         protected readonly IConsumedMessageBuilder Builder;
         protected readonly SubscriptionConfiguration Configuration;
 
-        protected ConsumerBase(IModel model,
-                               IConsumedMessageBuilder builder,
-                               SubscriptionConfiguration configuration)
+        protected internal ConsumerBase(IModel model,
+                                        IConsumedMessageBuilder builder,
+                                        SubscriptionConfiguration configuration)
             : base(model)
         {
             Builder = builder;
@@ -51,11 +51,11 @@ namespace Carrot
             ConsumeInternalAsync(args);
         }
 
-        protected abstract Task<AggregateConsumingResult> ConsumeInternalAsync(BasicDeliverEventArgs args);
-
-        protected Task<AggregateConsumingResult> ConsumeAsync(BasicDeliverEventArgs args)
+        protected internal Task<AggregateConsumingResult> ConsumeAsync(BasicDeliverEventArgs args)
         {
             return Builder.Build(args).ConsumeAsync(Configuration);
         }
+
+        protected abstract Task<AggregateConsumingResult> ConsumeInternalAsync(BasicDeliverEventArgs args);
     }
 }

@@ -8,19 +8,20 @@ namespace Carrot.BasicSample
     {
         private static void Main()
         {
-            var channel = AmqpChannel.New("amqp://guest:guest@localhost:5672/",
+            var channel = Channel.New("amqp://guest:guest@localhost:5672/",
                                           new MessageBindingResolver(typeof(Foo).Assembly));
             var exchange = Exchange.Direct("source_exchange");
 
             channel.Bind("my_test_queue", exchange)
                    .SubscribeByAtLeastOnce(_ => { _.Consumes(new FooConsumer()); });
 
-            channel.PublishAsync(new OutboundMessage<Foo>(new Foo { Bar = 2 }),
-                                 exchange);
+            var connection = channel.Connect();
+
+            connection.PublishAsync(new OutboundMessage<Foo>(new Foo { Bar = 2 }), exchange);
 
             Console.ReadLine();
 
-            channel.Dispose();
+            connection.Dispose();
         }
     }
 }

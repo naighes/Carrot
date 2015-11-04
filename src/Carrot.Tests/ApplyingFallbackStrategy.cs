@@ -72,7 +72,11 @@ namespace Carrot.Tests
                                              It.Is<IBasicProperties>(properties => properties.Persistent == true),
                                              args.Body),
                          Times.Once);
-            model.Verify(_ => _.ExchangeDeclare(expected, "direct", true));
+            model.Verify(_ => _.ExchangeDeclare(expected,
+                                                "direct",
+                                                true,
+                                                false,
+                                                It.IsAny<IDictionary<String, Object>>()));
         }
 
         private static BasicDeliverEventArgs FakeBasicDeliverEventArgs()
