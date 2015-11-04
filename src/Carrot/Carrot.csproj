@@ -52,7 +52,7 @@
     <Compile Include="..\CommonAssemblyInfo.cs">
       <Link>Properties\CommonAssemblyInfo.cs</Link>
     </Compile>
-    <Compile Include="Binding.cs" />
+    <Compile Include="ExchangeBinding.cs" />
     <Compile Include="Channel.cs" />
     <Compile Include="AmqpConnection.cs" />
     <Compile Include="AtLeastOnceConsumer.cs" />
@@ -73,6 +73,7 @@
     <Compile Include="Fallback\DeadLetterStrategy.cs" />
     <Compile Include="Fallback\IFallbackStrategy.cs" />
     <Compile Include="Fallback\NoFallbackStrategy.cs" />
+    <Compile Include="IChannel.cs" />
     <Compile Include="IConsumer.cs" />
     <Compile Include="IDateTimeProvider.cs" />
     <Compile Include="INewId.cs" />

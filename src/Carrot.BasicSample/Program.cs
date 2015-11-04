@@ -10,13 +10,10 @@ namespace Carrot.BasicSample
         {
             var channel = Channel.New("amqp://guest:guest@localhost:5672/",
                                       new MessageBindingResolver(typeof(Foo).Assembly));
-            var exchange = Exchange.Direct("source_exchange");
+            var exchange = channel.DeclareDirectExchange("source_exchange");
             var queue = channel.DeclareQueue("my_test_queue");
-            exchange.Bind(queue, "routing_key");
-            queue.SubscribeByAtLeastOnce(_ =>
-                                           {
-                                               _.Consumes(new FooConsumer());
-                                           });
+            channel.DeclareExchangeBinding(exchange, queue, "routing_key");
+            channel.SubscribeByAtLeastOnce(queue, _ => _.Consumes(new FooConsumer()));
 
             var connection = channel.Connect();
 

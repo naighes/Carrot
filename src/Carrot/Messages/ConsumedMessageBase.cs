@@ -47,15 +47,15 @@ namespace Carrot.Messages
 
         internal void ForwardTo(IModel model, Func<String, String> exchangeNameBuilder)
         {
-            var exchange = Exchange.Direct(exchangeNameBuilder(Args.Exchange)).Durable();
-            // TODO: exchange declaration MUST be moved outside!
-            exchange.Declare(model, new ConsumedMessageBuilder(new SerializerFactory(), new MessageBindingResolver()));
-            var properties = Args.BasicProperties.Copy();
-            properties.Persistent = true;
-            model.BasicPublish(exchange.Name,
-                               String.Empty,
-                               properties,
-                               Args.Body);
+            //var exchange = Exchange.Direct(exchangeNameBuilder(Args.Exchange)).Durable();
+            //// TODO: exchange declaration MUST be moved outside!
+            //exchange.Declare(model, new ConsumedMessageBuilder(new SerializerFactory(), new MessageBindingResolver()));
+            //var properties = Args.BasicProperties.Copy();
+            //properties.Persistent = true;
+            //model.BasicPublish(exchange.Name,
+            //                   String.Empty,
+            //                   properties,
+            //                   Args.Body);
         }
     }
 }

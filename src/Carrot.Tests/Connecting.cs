@@ -29,10 +29,10 @@ namespace Carrot.Tests
                                              0,
                                              0);
             var consumer = new FakeConsumer(_ => Task.Factory.StartNew(() => { }));
-            var queue = new Queue(queueName);
-            var exchange = Exchange.Direct(exchangeName);
-            exchange.Bind(queue, routingKey);
-            queue.SubscribeByAtLeastOnce(_ => { _.Consumes(consumer); });
+            var queue = channel.DeclareQueue(queueName);
+            var exchange = channel.DeclareDirectExchange(exchangeName);
+            channel.DeclareExchangeBinding(exchange, queue, routingKey);
+            channel.SubscribeByAtLeastOnce(queue, _ => { _.Consumes(consumer); });
             channel.Connect();
             model.Verify(_ => _.QueueDeclare(queueName,
                                              false,

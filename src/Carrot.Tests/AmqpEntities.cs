@@ -9,12 +9,19 @@ namespace Carrot.Tests
 {
     public class AmqpEntities
     {
+        private readonly Channel _channel;
+
+        public AmqpEntities()
+        {
+            _channel = new Channel(null, null, null, null, null, 0, 0);
+        }
+
         [Fact]
         public void ExchangeDeclarationWithDefaultDurability()
         {
             var model = new Mock<IModel>();
-            var e1 = Exchange.Direct("e");
-            e1.Declare(model.Object, new Mock<IConsumedMessageBuilder>().Object);
+            var e1 = _channel.DeclareDirectExchange("e");
+            e1.Declare(model.Object);
             model.Verify(_ => _.ExchangeDeclare(e1.Name,
                                                 e1.Type,
                                                 false,
@@ -26,8 +33,8 @@ namespace Carrot.Tests
         public void ExchangeDeclarationWithExplicitDurability()
         {
             var model = new Mock<IModel>();
-            var e2 = Exchange.Topic("e").Durable();
-            e2.Declare(model.Object, new Mock<IConsumedMessageBuilder>().Object);
+            var e2 = _channel.DeclareDurableTopicExchange("e");
+            e2.Declare(model.Object);
             model.Verify(_ => _.ExchangeDeclare(e2.Name,
                                                 e2.Type,
                                                 true,
@@ -39,7 +46,7 @@ namespace Carrot.Tests
         public void BuildingDirectExchange()
         {
             const String name = "one_exchange";
-            var exchange = Exchange.Direct(name);
+            var exchange = _channel.DeclareDirectExchange(name);
             Assert.Equal(name, exchange.Name);
             Assert.Equal("direct", exchange.Type);
             Assert.Equal(false, exchange.IsDurable);
@@ -49,7 +56,7 @@ namespace Carrot.Tests
         public void BuildingFanoutExchange()
         {
             const String name = "one_exchange";
-            var exchange = Exchange.Fanout(name);
+            var exchange = _channel.DeclareFanoutExchange(name);
             Assert.Equal(name, exchange.Name);
             Assert.Equal("fanout", exchange.Type);
             Assert.Equal(false, exchange.IsDurable);
@@ -59,7 +66,7 @@ namespace Carrot.Tests
         public void BuildingTopicExchange()
         {
             const String name = "one_exchange";
-            var exchange = Exchange.Topic(name);
+            var exchange = _channel.DeclareTopicExchange(name);
             Assert.Equal(name, exchange.Name);
             Assert.Equal("topic", exchange.Type);
             Assert.Equal(false, exchange.IsDurable);
@@ -69,7 +76,7 @@ namespace Carrot.Tests
         public void BuildingHeadersExchange()
         {
             const String name = "one_exchange";
-            var exchange = Exchange.Headers(name);
+            var exchange = _channel.DeclareHeadersExchange(name);
             Assert.Equal(name, exchange.Name);
             Assert.Equal("headers", exchange.Type);
             Assert.Equal(false, exchange.IsDurable);
@@ -79,27 +86,27 @@ namespace Carrot.Tests
         public void ExchangeEquality()
         {
             const String name = "one_exchange";
-            var a = Exchange.Direct(name);
-            var b = Exchange.Topic(name);
+            var a = new Exchange(name, "direct");
+            var b = new Exchange(name, "topic");
             Assert.Equal(a, b);
-            var c = Exchange.Direct("another_name");
+            var c = new Exchange("another_name", "direct");
             Assert.NotEqual(a, c);
         }
 
         [Fact]
         public void MultipleBinding()
         {
-            var exchange = Exchange.Direct("exchange");
-            var queue = new Queue("queue");
-            exchange.Bind(queue, "key");
-            Assert.Throws<ArgumentException>(() => exchange.Bind(queue, "key"));
+            var exchange = _channel.DeclareDirectExchange("exchange");
+            var queue = _channel.DeclareQueue("queue");
+            _channel.DeclareExchangeBinding(exchange, queue, "key");
+            Assert.Throws<ArgumentException>(() => _channel.DeclareExchangeBinding(exchange, queue, "key"));
         }
 
         [Fact]
         public void QueueDeclarationWithDefaultDurability()
         {
             var model = new Mock<IModel>();
-            var queue = new Queue("q");
+            var queue = _channel.DeclareQueue("q");
             queue.Declare(model.Object, new Mock<IConsumedMessageBuilder>().Object);
             model.Verify(_ => _.QueueDeclare(queue.Name,
                                              false,

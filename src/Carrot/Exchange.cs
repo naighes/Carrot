@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using Carrot.Messages;
 using RabbitMQ.Client;
 
 namespace Carrot
@@ -11,45 +10,17 @@ namespace Carrot
         internal readonly String Name;
         internal readonly Boolean IsDurable;
 
-        private readonly ISet<Binding> _bindings = new HashSet<Binding>();
-
-        private Exchange(String name, String type, Boolean isDurable = false)
+        internal Exchange(String name, String type, Boolean isDurable = false)
         {
+            if (name == null)
+                throw new ArgumentNullException("name");
+
+            if (type == null)
+                throw new ArgumentNullException("type");
+            
             Type = type;
             IsDurable = isDurable;
             Name = name;
-        }
-
-        public static Exchange Direct(String name)
-        {
-            if (name == null)
-                throw new ArgumentNullException("name");
-
-            return new Exchange(name, "direct");
-        }
-
-        public static Exchange Fanout(String name)
-        {
-            if (name == null)
-                throw new ArgumentNullException("name");
-
-            return new Exchange(name, "fanout");
-        }
-
-        public static Exchange Topic(String name)
-        {
-            if (name == null)
-                throw new ArgumentNullException("name");
-
-            return new Exchange(name, "topic");
-        }
-
-        public static Exchange Headers(String name)
-        {
-            if (name == null)
-                throw new ArgumentNullException("name");
-
-            return new Exchange(name, "headers");
         }
 
         public static Boolean operator ==(Exchange left, Exchange right)
@@ -90,29 +61,9 @@ namespace Carrot
             return Name.GetHashCode();
         }
 
-        public Exchange Durable()
-        {
-            return new Exchange(Name, Type, true);
-        }
-
-        public void Bind(Queue queue, String routingKey = "")
-        {
-            if (queue == null)
-                throw new ArgumentNullException("queue");
-
-            if (routingKey == null)
-                throw new ArgumentNullException("routingKey");
-
-            if (!_bindings.Add(new Binding(queue, routingKey)))
-                throw new ArgumentException("binding duplication detected");
-        }
-
-        internal void Declare(IModel model, IConsumedMessageBuilder builder)
+        internal void Declare(IModel model)
         {
             model.ExchangeDeclare(Name, Type, IsDurable, false, new Dictionary<String, Object>());
-
-            foreach (var binding in _bindings)
-                binding.Declare(model, this);
         }
     }
 }

@@ -7,11 +7,6 @@ using RabbitMQ.Client;
 
 namespace Carrot
 {
-    public interface IChannel
-    {
-        IAmqpConnection Connect();
-    }
-
     public class Channel : IChannel
     {
         private readonly String _endpointUrl;
@@ -23,6 +18,9 @@ namespace Carrot
         private readonly UInt16 _prefetchCount;
 
         private readonly ISet<Queue> _queues = new HashSet<Queue>();
+        private readonly ISet<Exchange> _exchanges = new HashSet<Exchange>();
+        private readonly ISet<ExchangeBinding> _bindings = new HashSet<ExchangeBinding>();
+        private readonly ISet<Func<IConsumedMessageBuilder, ConsumingPromise>> _promises = new HashSet<Func<IConsumedMessageBuilder, ConsumingPromise>>();
 
         protected internal Channel(String endpointUrl,
                                    IDateTimeProvider dateTimeProvider,
@@ -65,16 +63,78 @@ namespace Carrot
             return DeclareQueue(name, true);
         }
 
+        public Exchange DeclareDirectExchange(String name)
+        {
+            return DeclareExchange(name, "direct", false);
+        }
+
+        public Exchange DeclareDurableDirectExchange(String name)
+        {
+            return DeclareExchange(name, "direct", true);
+        }
+
+        public Exchange DeclareFanoutExchange(String name)
+        {
+            return DeclareExchange(name, "fanout", false);
+        }
+
+        public Exchange DeclareDurableFanoutExchange(String name)
+        {
+            return DeclareExchange(name, "fanout", true);
+        }
+
+        public Exchange DeclareTopicExchange(String name)
+        {
+            return DeclareExchange(name, "topic", false);
+        }
+
+        public Exchange DeclareDurableTopicExchange(String name)
+        {
+            return DeclareExchange(name, "topic", true);
+        }
+
+        public Exchange DeclareHeadersExchange(String name)
+        {
+            return DeclareExchange(name, "headers", false);
+        }
+
+        public Exchange DeclareDurableHeadersExchange(String name)
+        {
+            return DeclareExchange(name, "headers", true);
+        }
+
+        public void DeclareExchangeBinding(Exchange exchange, Queue queue, String routingKey = "")
+        {
+            if (exchange == null)
+                throw new ArgumentNullException("exchange");
+
+            if (queue == null)
+                throw new ArgumentNullException("queue");
+
+            if (routingKey == null)
+                throw new ArgumentNullException("routingKey");
+
+            if (!_bindings.Add(new ExchangeBinding(exchange, queue, routingKey)))
+                throw new ArgumentException("dupicate binding detected");
+        }
+
         public IAmqpConnection Connect()
         {
             var connection = CreateConnection();
             var model = CreateModel(connection, _prefetchSize, _prefetchCount);
+            var builder = new ConsumedMessageBuilder(_serializerFactory, _resolver);
+
+            foreach (var exchange in _exchanges)
+                exchange.Declare(model);
 
             foreach (var queue in _queues)
-                queue.Declare(model, new ConsumedMessageBuilder(_serializerFactory, _resolver));
+                queue.Declare(model, builder);
 
-            //foreach (var binding in _exchanges)
-            //    binding.Value.Declare(model, new ConsumedMessageBuilder(_serializerFactory, _resolver));
+            foreach (var binding in _bindings)
+                binding.Declare(model);
+
+            foreach (var promise in _promises)
+                promise(builder).Declare(model);
 
             return new AmqpConnection(connection,
                                       model,
@@ -82,6 +142,16 @@ namespace Carrot
                                       _newId,
                                       _dateTimeProvider,
                                       _resolver);
+        }
+
+        public void SubscribeByAtMostOnce(Queue queue, Action<SubscriptionConfiguration> configure)
+        {
+            Subscribe(configure, (b, c) => new AtMostOnceConsumingPromise(queue, b, c));
+        }
+
+        public void SubscribeByAtLeastOnce(Queue queue, Action<SubscriptionConfiguration> configure)
+        {
+            Subscribe(configure, (b, c) => new AtLeastOnceConsumingPromise(queue, b, c));
         }
 
         protected internal virtual IConnection CreateConnection()
@@ -104,11 +174,27 @@ namespace Carrot
             return model;
         }
 
+        private void Subscribe(Action<SubscriptionConfiguration> configure,
+                               Func<IConsumedMessageBuilder, SubscriptionConfiguration, ConsumingPromise> func)
+        {
+            var configuration = new SubscriptionConfiguration();
+            configure(configuration);
+            Func<IConsumedMessageBuilder, ConsumingPromise> f = _ => func(_, configuration);
+            _promises.Add(f);
+        }
+
         private Queue DeclareQueue(String name, Boolean isDurable)
         {
             var queue = new Queue(name, isDurable);
             _queues.Add(queue);
             return queue;
+        }
+
+        private Exchange DeclareExchange(String name, String type, Boolean isDurable)
+        {
+            var exchange = new Exchange(name, type, isDurable);
+            _exchanges.Add(exchange);
+            return exchange;
         }
     }
 }
