@@ -11,7 +11,8 @@ namespace Carrot
         private readonly Queue _queue;
         private readonly IConsumedMessageBuilder _builder;
 
-        private readonly ISet<ConsumingPromise> _promises = new HashSet<ConsumingPromise>();
+        private readonly ISet<Func<IConsumedMessageBuilder, ConsumingPromise>> _promises =
+            new HashSet<Func<IConsumedMessageBuilder, ConsumingPromise>>();
 
         private MessageQueue(Queue queue, IConsumedMessageBuilder builder)
         {
@@ -42,7 +43,7 @@ namespace Carrot
             if (ReferenceEquals(this, other))
                 return true;
 
-            return String.Equals(this._queue, other._queue);
+            return String.Equals(_queue, other._queue);
         }
 
         public override Boolean Equals(Object obj)
@@ -59,7 +60,7 @@ namespace Carrot
 
         public override Int32 GetHashCode()
         {
-            return this._queue.GetHashCode();
+            return _queue.GetHashCode();
         }
 
         public void SubscribeByAtMostOnce(Action<SubscriptionConfiguration> configure)
@@ -84,7 +85,7 @@ namespace Carrot
             _queue.Declare(model);
 
             foreach (var promise in _promises)
-                promise.Declare(model);
+                promise(_builder).Declare(model);
         }
 
         private void Subscribe(Action<SubscriptionConfiguration> configure,
@@ -92,7 +93,8 @@ namespace Carrot
         {
             var configuration = new SubscriptionConfiguration();
             configure(configuration);
-            _promises.Add(func(_builder, configuration));
+            Func<IConsumedMessageBuilder, ConsumingPromise> f = _ => func(_, configuration);
+            _promises.Add(f);
         }
     }
 }

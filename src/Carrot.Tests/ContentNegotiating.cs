@@ -71,7 +71,7 @@ namespace Carrot.Tests
                 throw new NotImplementedException();
             }
 
-            public string Serialize(Object obj)
+            public String Serialize(Object obj)
             {
                 throw new NotImplementedException();
             }

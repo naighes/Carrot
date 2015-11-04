@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Framing;
@@ -28,7 +29,7 @@ namespace Carrot.Extensions
             if (source.ReplyTo != null && source.ReplyToAddress != null)
                 result.ReplyToAddress = source.ReplyToAddress;
 
-            result.Headers = new Dictionary<string, object>();
+            result.Headers = new Dictionary<String, Object>();
 
             if (source.Headers != null)
                 foreach (var header in source.Headers)
