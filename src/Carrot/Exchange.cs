@@ -6,8 +6,8 @@ namespace Carrot
 {
     public struct Exchange
     {
+        public readonly String Name;
         internal readonly String Type;
-        internal readonly String Name;
         internal readonly Boolean IsDurable;
 
         internal Exchange(String name, String type, Boolean isDurable = false)

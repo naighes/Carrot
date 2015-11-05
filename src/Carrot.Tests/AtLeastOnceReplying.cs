@@ -17,7 +17,7 @@ namespace Carrot.Tests
 
         public AtLeastOnceReplying()
         {
-            _configuration = new ConsumingConfiguration(new Mock<IChannel>().Object, null);
+            _configuration = new ConsumingConfiguration(new Mock<IChannel>().Object, default(Queue));
         }
 
         [Fact]
