@@ -121,23 +121,25 @@ namespace Carrot
         public IAmqpConnection Connect()
         {
             var connection = CreateConnection();
-            var model = CreateModel(connection, _prefetchSize, _prefetchCount);
+            var inboundModel = CreateModel(connection, _prefetchSize, _prefetchCount);
+            var outboundModel = CreateModel(connection, 0, 0);
             var builder = new ConsumedMessageBuilder(_serializerFactory, _resolver);
 
             foreach (var exchange in _exchanges)
-                exchange.Declare(model);
+                exchange.Declare(inboundModel);
 
             foreach (var queue in _queues)
-                queue.Declare(model, builder);
+                queue.Declare(inboundModel, builder);
 
             foreach (var binding in _bindings)
-                binding.Declare(model);
+                binding.Declare(inboundModel);
 
             foreach (var promise in _promises)
-                promise(builder).Declare(model);
+                promise(builder).Declare(inboundModel);
 
             return new AmqpConnection(connection,
-                                      model,
+                                      outboundModel,
+                                      inboundModel,
                                       _serializerFactory,
                                       _newId,
                                       _dateTimeProvider,

@@ -18,21 +18,24 @@ namespace Carrot
     public class AmqpConnection : IAmqpConnection
     {
         private readonly IConnection _connection;
-        private readonly IModel _model;
+        private readonly IModel _inboundModel;
+        private readonly IModel _outboundModel;
         private readonly ISerializerFactory _serializerFactory;
         private readonly INewId _newId;
         private readonly IDateTimeProvider _dateTimeProvider;
         private readonly IMessageTypeResolver _resolver;
 
         internal AmqpConnection(IConnection connection,
-                                IModel model,
+                                IModel inboundModel,
+                                IModel outboundModel,
                                 ISerializerFactory serializerFactory,
                                 INewId newId,
                                 IDateTimeProvider dateTimeProvider,
                                 IMessageTypeResolver resolver)
         {
             _connection = connection;
-            _model = model;
+            _inboundModel = inboundModel;
+            _outboundModel = outboundModel;
             _serializerFactory = serializerFactory;
             _newId = newId;
             _dateTimeProvider = dateTimeProvider;
@@ -49,13 +52,16 @@ namespace Carrot
                                                                  _dateTimeProvider,
                                                                  _newId,
                                                                  _resolver);
-            return envelope.PublishAsync(_model, exchange, routingKey, taskFactory);
+            return envelope.PublishAsync(_outboundModel, exchange, routingKey, taskFactory);
         }
 
         public void Dispose()
         {
-            if (_model != null)
-                _model.Dispose();
+            if (_inboundModel != null)
+                _inboundModel.Dispose();
+
+            if (_outboundModel != null)
+                _outboundModel.Dispose();
 
             if (_connection != null)
                 _connection.Dispose();
