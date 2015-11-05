@@ -29,7 +29,7 @@ namespace Carrot.Messages
                                                              Content.GetType(),
                                                              typeof(TMessage)));
 
-            return new ConsumedMessage<TMessage>(content, HeaderCollection.Parse(Args));
+            return new ConsumedMessage<TMessage>(content, HeaderCollection.Parse(Args), Args.ConsumerTag);
         }
 
         internal abstract Boolean Match(Type type);

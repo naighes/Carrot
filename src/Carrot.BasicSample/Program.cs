@@ -13,9 +13,13 @@ namespace Carrot.BasicSample
             var exchange = channel.DeclareDirectExchange("source_exchange");
             var queue = channel.DeclareQueue("my_test_queue");
             channel.DeclareExchangeBinding(exchange, queue, "routing_key");
-            channel.SubscribeByAtLeastOnce(queue, _ => _.Consumes(new FooConsumer()));
+            channel.SubscribeByAtLeastOnce(queue, _ => _.Consumes(new FooConsumer1()));
+            channel.SubscribeByAtLeastOnce(queue, _ => _.Consumes(new FooConsumer2()));
             var connection = channel.Connect();
-            connection.PublishAsync(new OutboundMessage<Foo>(new Foo { Bar = 2 }), exchange);
+
+            for (var i = 0; i < 100; i++)
+                connection.PublishAsync(new OutboundMessage<Foo>(new Foo { Bar = i }), exchange);
+            
             Console.ReadLine();
             connection.Dispose();
         }

@@ -45,6 +45,21 @@ namespace Carrot.Tests
             Assert.Equal(timestamp, actual.Headers.Timestamp);
         }
 
+        [Fact]
+        public void ConsumerTag()
+        {
+            var content = new Foo();
+            const String consumerTag = "one-tag";
+            var args = new BasicDeliverEventArgs
+                           {
+                               ConsumerTag = consumerTag,
+                               BasicProperties = new BasicProperties()
+                           };
+            var message = new FakeConsumedMessage(content, args);
+            var actual = message.As<Foo>();
+            Assert.Equal(consumerTag, actual.ConsumerTag);
+        }
+
         private static BasicDeliverEventArgs FakeBasicDeliverEventArgs()
         {
             return new BasicDeliverEventArgs

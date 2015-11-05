@@ -48,7 +48,7 @@
       <Link>Properties\CommonAssemblyInfo.cs</Link>
     </Compile>
     <Compile Include="Foo.cs" />
-    <Compile Include="FooConsumer.cs" />
+    <Compile Include="FooConsumer1.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
