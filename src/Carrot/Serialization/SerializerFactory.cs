@@ -6,7 +6,7 @@ namespace Carrot.Serialization
 {
     public class SerializerFactory : ISerializerFactory
     {
-        private readonly ContentNegotiator _negotiator = new ContentNegotiator();
+        private readonly IContentNegotiator _negotiator;
         private readonly IDictionary<ContentNegotiator.MediaTypeHeader, ISerializer> _serializers;
 
         private readonly Dictionary<ContentNegotiator.MediaTypeHeader, ISerializer> _default = new Dictionary<ContentNegotiator.MediaTypeHeader, ISerializer>
@@ -15,7 +15,13 @@ namespace Carrot.Serialization
                                                    };
 
         public SerializerFactory(IDictionary<String, ISerializer> map = null)
+            : this(new ContentNegotiator(), map)
         {
+        }
+
+        public SerializerFactory(IContentNegotiator negotiator, IDictionary<String, ISerializer> map = null)
+        {
+            _negotiator = negotiator ?? new ContentNegotiator();
             _serializers = map != null
                                 ? MapSerializers(map)
                                 : _default;
