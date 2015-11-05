@@ -15,60 +15,58 @@ namespace Carrot.Tests
         [Fact]
         public void PublishingSuccessfully()
         {
-            // TODO
-            //var content = new Foo();
-            //var message = new OutboundMessage<Foo>(content);
-            //var serializerFactory = new Mock<ISerializerFactory>();
-            //var serializer = new Mock<ISerializer>();
-            //serializer.Setup(_ => _.Serialize(content)).Returns("{}");
-            //serializerFactory.Setup(_ => _.Create("application/json")).Returns(serializer.Object);
-            //var dateTimeProvider = new Mock<IDateTimeProvider>();
-            //var newId = new Mock<INewId>();
-            //const String messageId = "one-id";
-            //newId.Setup(_ => _.Next()).Returns(messageId);
-            //var model = new Mock<IModel>();
-            //var resolver = new Mock<IMessageTypeResolver>();
-            //resolver.Setup(_ => _.Resolve<Foo>()).Returns(new MessageBinding("urn:message:fake", typeof(Foo)));
-            //var wrapper = new OutboundMessageEnvelope<Foo>(message,
-            //                                               serializerFactory.Object,
-            //                                               dateTimeProvider.Object,
-            //                                               newId.Object,
-            //                                               resolver.Object);
-            //var result = Assert.IsType<SuccessfulPublishing>(wrapper.PublishAsync(model.Object,
-            //                                                                      Exchange.Direct("target_exchange")).Result);
-            //Assert.Equal(messageId, result.MessageId);
+            var content = new Foo();
+            var message = new OutboundMessage<Foo>(content);
+            var serializerFactory = new Mock<ISerializerFactory>();
+            var serializer = new Mock<ISerializer>();
+            serializer.Setup(_ => _.Serialize(content)).Returns("{}");
+            serializerFactory.Setup(_ => _.Create("application/json")).Returns(serializer.Object);
+            var dateTimeProvider = new Mock<IDateTimeProvider>();
+            var newId = new Mock<INewId>();
+            const String messageId = "one-id";
+            newId.Setup(_ => _.Next()).Returns(messageId);
+            var model = new Mock<IModel>();
+            var resolver = new Mock<IMessageTypeResolver>();
+            resolver.Setup(_ => _.Resolve<Foo>()).Returns(new MessageBinding("urn:message:fake", typeof(Foo)));
+            var wrapper = new OutboundMessageEnvelope<Foo>(message,
+                                                           serializerFactory.Object,
+                                                           dateTimeProvider.Object,
+                                                           newId.Object,
+                                                           resolver.Object);
+            var result = Assert.IsType<SuccessfulPublishing>(wrapper.PublishAsync(model.Object,
+                                                                                  new Exchange("target_exchange", "direct")).Result);
+            Assert.Equal(messageId, result.MessageId);
         }
 
         [Fact]
         public void PublishingFailed()
         {
-            // TODO
-            //const String exchange = "target_exchange";
-            //var content = new Foo();
-            //var message = new OutboundMessage<Foo>(content);
-            //var serializerFactory = new Mock<ISerializerFactory>();
-            //var serializer = new Mock<ISerializer>();
-            //serializer.Setup(_ => _.Serialize(content)).Returns("{}");
-            //serializerFactory.Setup(_ => _.Create("application/json")).Returns(serializer.Object);
-            //var dateTimeProvider = new Mock<IDateTimeProvider>();
-            //var newId = new Mock<INewId>();
-            //var model = new Mock<IModel>();
-            //var exception = new Exception();
-            //model.Setup(_ => _.BasicPublish(exchange,
-            //                                String.Empty,
-            //                                It.IsAny<IBasicProperties>(),
-            //                                It.IsAny<Byte[]>()))
-            //     .Throws(exception);
-            //var resolver = new Mock<IMessageTypeResolver>();
-            //resolver.Setup(_ => _.Resolve<Foo>()).Returns(new MessageBinding("urn:message:fake", typeof(Foo)));
-            //var wrapper = new OutboundMessageEnvelope<Foo>(message,
-            //                                               serializerFactory.Object,
-            //                                               dateTimeProvider.Object,
-            //                                               newId.Object,
-            //                                               resolver.Object);
-            //var result = Assert.IsType<FailurePublishing>(wrapper.PublishAsync(model.Object,
-            //                                                                   Exchange.Direct(exchange)).Result);
-            //Assert.Equal(result.Exception, exception);
+            const String exchange = "target_exchange";
+            var content = new Foo();
+            var message = new OutboundMessage<Foo>(content);
+            var serializerFactory = new Mock<ISerializerFactory>();
+            var serializer = new Mock<ISerializer>();
+            serializer.Setup(_ => _.Serialize(content)).Returns("{}");
+            serializerFactory.Setup(_ => _.Create("application/json")).Returns(serializer.Object);
+            var dateTimeProvider = new Mock<IDateTimeProvider>();
+            var newId = new Mock<INewId>();
+            var model = new Mock<IModel>();
+            var exception = new Exception();
+            model.Setup(_ => _.BasicPublish(exchange,
+                                            String.Empty,
+                                            It.IsAny<IBasicProperties>(),
+                                            It.IsAny<Byte[]>()))
+                 .Throws(exception);
+            var resolver = new Mock<IMessageTypeResolver>();
+            resolver.Setup(_ => _.Resolve<Foo>()).Returns(new MessageBinding("urn:message:fake", typeof(Foo)));
+            var wrapper = new OutboundMessageEnvelope<Foo>(message,
+                                                           serializerFactory.Object,
+                                                           dateTimeProvider.Object,
+                                                           newId.Object,
+                                                           resolver.Object);
+            var result = Assert.IsType<FailurePublishing>(wrapper.PublishAsync(model.Object,
+                                                                               new Exchange(exchange, "direct")).Result);
+            Assert.Equal(result.Exception, exception);
         }
 
         [Fact]

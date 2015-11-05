@@ -1,6 +1,5 @@
 ﻿using System;
 using Carrot.Configuration;
-using Carrot.Fallback;
 using Carrot.Messages;
 
 namespace Carrot.BasicSample
@@ -14,21 +13,10 @@ namespace Carrot.BasicSample
             var exchange = channel.DeclareDirectExchange("source_exchange");
             var queue = channel.DeclareQueue("my_test_queue");
             channel.DeclareExchangeBinding(exchange, queue, "routing_key");
-            channel.SubscribeByAtLeastOnce(queue,
-                                           _ =>
-                                           {
-                                               _.Consumes(new FooConsumer());
-                                               _.FallbackBy((c, q) => DeadLetterStrategy.New(c,
-                                                                                             q,
-                                                                                             __ => String.Format("{0}eee", __)));
-                                           });
-
+            channel.SubscribeByAtLeastOnce(queue, _ => _.Consumes(new FooConsumer()));
             var connection = channel.Connect();
-
             connection.PublishAsync(new OutboundMessage<Foo>(new Foo { Bar = 2 }), exchange);
-
             Console.ReadLine();
-
             connection.Dispose();
         }
     }
