@@ -5,9 +5,14 @@ using System.Linq;
 
 namespace Carrot.Serialization
 {
-    public class ContentNegotiator
+    public interface IContentNegotiator
     {
-        internal SortedSet<MediaTypeHeader> Negotiate(String contentType)
+        SortedSet<ContentNegotiator.MediaTypeHeader> Negotiate(String contentType);
+    }
+
+    public class ContentNegotiator : IContentNegotiator
+    {
+        public SortedSet<MediaTypeHeader> Negotiate(String contentType)
         {
             return new SortedSet<MediaTypeHeader>(contentType.Split(new[] { ',' },
                                                                     StringSplitOptions.RemoveEmptyEntries)
@@ -72,7 +77,7 @@ namespace Carrot.Serialization
                 return String.Format("{0};q={1}", Type, Quality.ToString(CultureInfo.InvariantCulture));
             }
 
-            internal static MediaTypeHeader Parse(String source)
+            public static MediaTypeHeader Parse(String source)
             {
                 var type = default(MediaType);
                 var quality = DefaultQuality;

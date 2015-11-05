@@ -42,13 +42,14 @@ namespace Carrot
 
         public static Channel New(String endpointUrl,
                                   IMessageTypeResolver resolver,
+                                  IContentNegotiator negotiator = null,
                                   UInt32 prefetchSize = 0,
                                   UInt16 prefetchCount = 0)
         {
             return new Channel(endpointUrl,
                                new DateTimeProvider(),
                                new NewGuid(),
-                               new SerializerFactory(),
+                               new SerializerFactory(negotiator),
                                resolver,
                                prefetchSize,
                                prefetchCount);
