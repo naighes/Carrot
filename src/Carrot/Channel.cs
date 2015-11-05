@@ -122,7 +122,7 @@ namespace Carrot
         public IAmqpConnection Connect()
         {
             var connection = CreateConnection();
-            var outboundModel = CreateModel(connection, 0, 0);
+            var outboundModel = CreateOutboundModel(connection);
 
             foreach (var exchange in _exchanges)
                 exchange.Declare(outboundModel);
@@ -168,12 +168,18 @@ namespace Carrot
                        }.CreateConnection();
         }
 
-        protected internal virtual IModel CreateModel(IConnection connection,
-                                                      UInt32 prefetchSize,
-                                                      UInt16 prefetchCount)
+        protected internal virtual IModel CreateOutboundModel(IConnection connection)
         {
             var model = connection.CreateModel();
             model.ConfirmSelect();
+            return model;
+        }
+
+        protected internal virtual IModel CreateInboundModel(IConnection connection,
+                                                             UInt32 prefetchSize,
+                                                             UInt16 prefetchCount)
+        {
+            var model = connection.CreateModel();
             model.BasicQos(prefetchSize, prefetchCount, false);
             return model;
         }
@@ -182,7 +188,7 @@ namespace Carrot
                                            Func<IConsumedMessageBuilder, ConsumingPromise> promise,
                                            IConsumedMessageBuilder builder)
         {
-            return promise(builder).Declare(CreateModel(connection, _prefetchSize, _prefetchCount));
+            return promise(builder).Declare(CreateInboundModel(connection, _prefetchSize, _prefetchCount));
         }
 
         private void Subscribe(Action<ConsumingConfiguration> configure,

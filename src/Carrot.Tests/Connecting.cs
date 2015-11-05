@@ -81,9 +81,14 @@ namespace Carrot.Tests
                 return _connection;
             }
 
-            protected internal override IModel CreateModel(IConnection connection,
-                                                           UInt32 prefetchSize,
-                                                           UInt16 prefetchCount)
+            protected internal override IModel CreateOutboundModel(IConnection connection)
+            {
+                return _model;
+            }
+
+            protected internal override IModel CreateInboundModel(IConnection connection,
+                                                                  UInt32 prefetchSize,
+                                                                  UInt16 prefetchCount)
             {
                 return _model;
             }
