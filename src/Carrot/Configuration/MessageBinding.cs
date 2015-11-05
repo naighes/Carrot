@@ -8,7 +8,12 @@ namespace Carrot.Configuration
         public readonly Type RuntimeType;
         public readonly TimeSpan? ExpiresAfter;
 
-        internal MessageBinding(String rawName, Type runtimeType, TimeSpan? expiresAfter = null)
+        public MessageBinding(String rawName, Type runtimeType)
+            : this(rawName, runtimeType, null)
+        {
+        }
+
+        internal MessageBinding(String rawName, Type runtimeType, TimeSpan? expiresAfter)
         {
             RawName = rawName;
             RuntimeType = runtimeType;
