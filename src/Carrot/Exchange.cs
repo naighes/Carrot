@@ -4,7 +4,7 @@ using RabbitMQ.Client;
 
 namespace Carrot
 {
-    public class Exchange : IEquatable<Exchange>
+    public struct Exchange : IEquatable<Exchange>
     {
         internal readonly String Type;
         internal readonly String Name;
@@ -17,7 +17,7 @@ namespace Carrot
 
             if (type == null)
                 throw new ArgumentNullException("type");
-            
+
             Type = type;
             IsDurable = isDurable;
             Name = name;
@@ -25,22 +25,16 @@ namespace Carrot
 
         public static Boolean operator ==(Exchange left, Exchange right)
         {
-            return Equals(left, right);
+            return left.Equals(right);
         }
 
         public static Boolean operator !=(Exchange left, Exchange right)
         {
-            return !Equals(left, right);
+            return !left.Equals(right);
         }
 
         public Boolean Equals(Exchange other)
         {
-            if (ReferenceEquals(null, other))
-                return false;
-
-            if (ReferenceEquals(this, other))
-                return true;
-
             return String.Equals(Name, other.Name);
         }
 
@@ -49,11 +43,7 @@ namespace Carrot
             if (ReferenceEquals(null, obj))
                 return false;
 
-            if (ReferenceEquals(this, obj))
-                return true;
-
-            var other = obj as Exchange;
-            return other != null && Equals(other);
+            return obj is Exchange && Equals((Exchange)obj);
         }
 
         public override Int32 GetHashCode()

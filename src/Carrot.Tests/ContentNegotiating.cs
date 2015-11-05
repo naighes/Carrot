@@ -66,7 +66,7 @@ namespace Carrot.Tests
 
         internal class FakeSerializer : ISerializer
         {
-            public object Deserialize(Byte[] body, Type type, Encoding encoding = null)
+            public Object Deserialize(Byte[] body, Type type, Encoding encoding = null)
             {
                 throw new NotImplementedException();
             }
