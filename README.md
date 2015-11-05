@@ -37,20 +37,26 @@ Create an instance of `Channel` providing the RabbitMQ host as input.
 
 	var channel = Channel.New("amqp://guest:guest@localhost:5672/",
                               new MessageBindingResolver(typeof(Foo).Assembly));
-    var exchange = Exchange.Direct("source_exchange");
 
-    channel.Bind("my_test_queue", exchange)
-           .SubscribeByAtLeastOnce(_ => { _.Consumes(new FooConsumer()); });
+Declare your AMQP entities as the following:
 
+    var exchange = channel.DeclareDirectExchange("source_exchange");
+	var queue = channel.DeclareQueue("my_test_queue");
+
+Bind entities, subscribe your queue and call `IChannel.Connect`:
+
+	channel.DeclareExchangeBinding(exchange, queue, "routing_key");
+	channel.SubscribeByAtLeastOnce(queue, _ => _.Consumes(new FooConsumer()));
 	var connection = channel.Connect();
 
 You're up 'n running!
 Do not forget to call `AmqpConnection.Dispose()` when your application exits.
 
-Please note that exchanges are not durable by default.
-You can create durable exchanges by calling the `Durable` instance method on it.
+Please note that exchanges, queues and messages are not durable by default.
+You can create durable entities by calling the proper builder methods.
 
-    var durableExchange = Exchange.Direct("source_exchange").Durable();
+    var durableExchange = channel.DeclareDurableDurectExchange.Direct("source_exchange");
+    var durableQueue = channel.DeclareDurableQueue.Direct("my_test_queue");
 
 You can publish messages as the following:
 
