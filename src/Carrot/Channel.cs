@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Carrot.Configuration;
 using Carrot.Messages;
 using Carrot.Serialization;
@@ -121,25 +122,22 @@ namespace Carrot
         public IAmqpConnection Connect()
         {
             var connection = CreateConnection();
-            var inboundModel = CreateModel(connection, _prefetchSize, _prefetchCount);
             var outboundModel = CreateModel(connection, 0, 0);
-            var builder = new ConsumedMessageBuilder(_serializerFactory, _resolver);
 
             foreach (var exchange in _exchanges)
-                exchange.Declare(inboundModel);
+                exchange.Declare(outboundModel);
 
             foreach (var queue in _queues)
-                queue.Declare(inboundModel, builder);
+                queue.Declare(outboundModel);
 
             foreach (var binding in _bindings)
-                binding.Declare(inboundModel);
+                binding.Declare(outboundModel);
 
-            foreach (var promise in _promises)
-                promise(builder).Declare(inboundModel);
+            var builder = new ConsumedMessageBuilder(_serializerFactory, _resolver);
 
             return new AmqpConnection(connection,
+                                      _promises.Select(_ => BuildConsumer(connection, _, builder)).ToList(),
                                       outboundModel,
-                                      inboundModel,
                                       _serializerFactory,
                                       _newId,
                                       _dateTimeProvider,
@@ -178,6 +176,13 @@ namespace Carrot
             model.ConfirmSelect();
             model.BasicQos(prefetchSize, prefetchCount, false);
             return model;
+        }
+
+        private ConsumerBase BuildConsumer(IConnection connection,
+                                           Func<IConsumedMessageBuilder, ConsumingPromise> promise,
+                                           IConsumedMessageBuilder builder)
+        {
+            return promise(builder).Declare(CreateModel(connection, _prefetchSize, _prefetchCount));
         }
 
         private void Subscribe(Action<ConsumingConfiguration> configure,

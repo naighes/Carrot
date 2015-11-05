@@ -19,10 +19,11 @@ namespace Carrot
             _configuration = configuration;
         }
 
-        internal void Declare(IModel model)
+        internal ConsumerBase Declare(IModel model)
         {
             var consumer = BuildConsumer(model, _builder, _configuration);
             model.BasicConsume(_queue.Name, false, consumer);
+            return consumer;
         }
 
         protected internal abstract ConsumerBase BuildConsumer(IModel model,

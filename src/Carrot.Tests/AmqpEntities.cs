@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using Carrot.Messages;
 using Moq;
 using RabbitMQ.Client;
 using Xunit;
@@ -107,7 +106,7 @@ namespace Carrot.Tests
         {
             var model = new Mock<IModel>();
             var queue = _channel.DeclareQueue("q");
-            queue.Declare(model.Object, new Mock<IConsumedMessageBuilder>().Object);
+            queue.Declare(model.Object);
             model.Verify(_ => _.QueueDeclare(queue.Name,
                                              false,
                                              false,

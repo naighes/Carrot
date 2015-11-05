@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Carrot.Configuration;
 using Carrot.Messages;
@@ -18,7 +19,7 @@ namespace Carrot
     public class AmqpConnection : IAmqpConnection
     {
         private readonly IConnection _connection;
-        private readonly IModel _inboundModel;
+        private readonly IEnumerable<ConsumerBase> _consumers;
         private readonly IModel _outboundModel;
         private readonly ISerializerFactory _serializerFactory;
         private readonly INewId _newId;
@@ -26,7 +27,7 @@ namespace Carrot
         private readonly IMessageTypeResolver _resolver;
 
         internal AmqpConnection(IConnection connection,
-                                IModel inboundModel,
+                                IEnumerable<ConsumerBase> consumers,
                                 IModel outboundModel,
                                 ISerializerFactory serializerFactory,
                                 INewId newId,
@@ -34,7 +35,7 @@ namespace Carrot
                                 IMessageTypeResolver resolver)
         {
             _connection = connection;
-            _inboundModel = inboundModel;
+            _consumers = consumers;
             _outboundModel = outboundModel;
             _serializerFactory = serializerFactory;
             _newId = newId;
@@ -57,8 +58,8 @@ namespace Carrot
 
         public void Dispose()
         {
-            if (_inboundModel != null)
-                _inboundModel.Dispose();
+            foreach (var consumer in _consumers)
+                consumer.Dispose();
 
             if (_outboundModel != null)
                 _outboundModel.Dispose();

@@ -7,7 +7,7 @@ using RabbitMQ.Client.Events;
 
 namespace Carrot
 {
-    public abstract class ConsumerBase : DefaultBasicConsumer
+    public abstract class ConsumerBase : DefaultBasicConsumer, IDisposable
     {
         private readonly IConsumedMessageBuilder _builder;
         private readonly ConsumingConfiguration _configuration;
@@ -49,6 +49,12 @@ namespace Carrot
                            };
 
             ConsumeInternalAsync(args);
+        }
+
+        public void Dispose()
+        {
+            if (Model != null)
+                Model.Dispose();
         }
 
         protected internal Task<AggregateConsumingResult> ConsumeAsync(BasicDeliverEventArgs args)

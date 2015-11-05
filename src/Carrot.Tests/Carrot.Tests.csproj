@@ -87,6 +87,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SerializerBuilding.cs" />
     <Compile Include="SubscribingConfiguration.cs" />
+    <Compile Include="ResourceManagement.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using Carrot.Messages;
 using RabbitMQ.Client;
 
 namespace Carrot
@@ -47,7 +46,7 @@ namespace Carrot
             return Name.GetHashCode();
         }
 
-        internal void Declare(IModel model, IConsumedMessageBuilder builder)
+        internal void Declare(IModel model)
         {
             model.QueueDeclare(Name, IsDurable, false, false, new Dictionary<String, Object>());
         }
