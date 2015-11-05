@@ -4,7 +4,7 @@ using RabbitMQ.Client;
 
 namespace Carrot
 {
-    public struct Exchange : IEquatable<Exchange>
+    public struct Exchange
     {
         internal readonly String Type;
         internal readonly String Name;
