@@ -13,11 +13,11 @@ namespace Carrot.Tests
 {
     public class ApplyingFallbackStrategy
     {
-        private readonly SubscriptionConfiguration _configuration;
+        private readonly ConsumingConfiguration _configuration;
 
         public ApplyingFallbackStrategy()
         {
-            _configuration = new SubscriptionConfiguration(new Mock<IChannel>().Object, null);
+            _configuration = new ConsumingConfiguration(new Mock<IChannel>().Object, null);
         }
 
         [Fact]

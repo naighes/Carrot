@@ -6,7 +6,7 @@ using Carrot.Messages;
 
 namespace Carrot.Configuration
 {
-    public class SubscriptionConfiguration
+    public class ConsumingConfiguration
     {
         private readonly IChannel _channel;
         private readonly Queue _queue;
@@ -14,7 +14,7 @@ namespace Carrot.Configuration
 
         private IFallbackStrategy _fallbackStrategy = NoFallbackStrategy.Instance;
 
-        internal SubscriptionConfiguration(IChannel channel, Queue queue)
+        internal ConsumingConfiguration(IChannel channel, Queue queue)
         {
             _channel = channel;
             _queue = queue;

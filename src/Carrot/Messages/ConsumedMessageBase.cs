@@ -18,7 +18,7 @@ namespace Carrot.Messages
 
         internal abstract Object Content { get; }
 
-        internal abstract Task<AggregateConsumingResult> ConsumeAsync(SubscriptionConfiguration configuration);
+        internal abstract Task<AggregateConsumingResult> ConsumeAsync(ConsumingConfiguration configuration);
 
         internal ConsumedMessage<TMessage> As<TMessage>() where TMessage : class
         {

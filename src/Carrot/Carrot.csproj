@@ -62,7 +62,7 @@
     <Compile Include="Configuration\MessageBindingAttribute.cs" />
     <Compile Include="Configuration\MessageBindingResolver.cs" />
     <Compile Include="Configuration\MessageBinding.cs" />
-    <Compile Include="Configuration\SubscriptionConfiguration.cs" />
+    <Compile Include="Configuration\ConsumingConfiguration.cs" />
     <Compile Include="Consumer.cs" />
     <Compile Include="ConsumerBase.cs" />
     <Compile Include="ConsumingPromise.cs" />

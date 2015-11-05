@@ -10,7 +10,7 @@ namespace Carrot
     {
         internal AtMostOnceConsumer(IModel model,
                                     IConsumedMessageBuilder builder,
-                                    SubscriptionConfiguration configuration)
+                                    ConsumingConfiguration configuration)
             : base(model, builder, configuration)
         {
         }

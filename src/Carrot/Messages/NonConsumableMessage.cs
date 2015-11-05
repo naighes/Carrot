@@ -18,7 +18,7 @@ namespace Carrot.Messages
             get { return null; }
         }
 
-        internal override Task<AggregateConsumingResult> ConsumeAsync(SubscriptionConfiguration configuration)
+        internal override Task<AggregateConsumingResult> ConsumeAsync(ConsumingConfiguration configuration)
         {
             return Task.FromResult<AggregateConsumingResult>(Result(configuration.FallbackStrategy));
         }

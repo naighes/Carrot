@@ -22,9 +22,7 @@ namespace Carrot.Fallback
                                             Queue queue,
                                             Func<String, String> exchangeNameBuilder)
         {
-            var exchangeName = exchangeNameBuilder(queue.Name);
-            var exchange = channel.DeclareDurableDirectExchange(exchangeName);
-            return new DeadLetterStrategy(exchange);
+            return new DeadLetterStrategy(channel.DeclareDurableDirectExchange(exchangeNameBuilder(queue.Name)));
         }
 
         public void Apply(IModel model, ConsumedMessageBase message)

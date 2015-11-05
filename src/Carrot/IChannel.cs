@@ -29,8 +29,8 @@ namespace Carrot
 
         void DeclareExchangeBinding(Exchange exchange, Queue queue, String routingKey = "");
 
-        void SubscribeByAtMostOnce(Queue queue, Action<SubscriptionConfiguration> configure);
+        void SubscribeByAtMostOnce(Queue queue, Action<ConsumingConfiguration> configure);
 
-        void SubscribeByAtLeastOnce(Queue queue, Action<SubscriptionConfiguration> configure);
+        void SubscribeByAtLeastOnce(Queue queue, Action<ConsumingConfiguration> configure);
     }
 }

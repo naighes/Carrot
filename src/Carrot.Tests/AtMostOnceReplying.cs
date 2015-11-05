@@ -12,11 +12,11 @@ namespace Carrot.Tests
 {
     public class AtMostOnceReplying
     {
-        private readonly SubscriptionConfiguration _configuration;
+        private readonly ConsumingConfiguration _configuration;
 
         public AtMostOnceReplying()
         {
-            _configuration = new SubscriptionConfiguration(new Mock<IChannel>().Object, null);
+            _configuration = new ConsumingConfiguration(new Mock<IChannel>().Object, null);
         }
 
         [Fact]
@@ -40,7 +40,7 @@ namespace Carrot.Tests
         {
             internal AtMostOnceConsumerWrapper(IModel model,
                                                IConsumedMessageBuilder builder,
-                                               SubscriptionConfiguration configuration)
+                                               ConsumingConfiguration configuration)
                 : base(model, builder, configuration)
             {
             }

@@ -144,14 +144,14 @@ namespace Carrot
                                       _resolver);
         }
 
-        public void SubscribeByAtMostOnce(Queue queue, Action<SubscriptionConfiguration> configure)
+        public void SubscribeByAtMostOnce(Queue queue, Action<ConsumingConfiguration> configure)
         {
             Subscribe(configure,
                       (b, c) => new AtMostOnceConsumingPromise(queue, b, c),
                       queue);
         }
 
-        public void SubscribeByAtLeastOnce(Queue queue, Action<SubscriptionConfiguration> configure)
+        public void SubscribeByAtLeastOnce(Queue queue, Action<ConsumingConfiguration> configure)
         {
             Subscribe(configure,
                       (b, c) => new AtLeastOnceConsumingPromise(queue, b, c),
@@ -178,11 +178,11 @@ namespace Carrot
             return model;
         }
 
-        private void Subscribe(Action<SubscriptionConfiguration> configure,
-                               Func<IConsumedMessageBuilder, SubscriptionConfiguration, ConsumingPromise> func,
+        private void Subscribe(Action<ConsumingConfiguration> configure,
+                               Func<IConsumedMessageBuilder, ConsumingConfiguration, ConsumingPromise> func,
                                Queue queue)
         {
-            var configuration = new SubscriptionConfiguration(this, queue);
+            var configuration = new ConsumingConfiguration(this, queue);
             configure(configuration);
             Func<IConsumedMessageBuilder, ConsumingPromise> f = _ => func(_, configuration);
             _promises.Add(f);

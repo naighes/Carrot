@@ -8,11 +8,11 @@ namespace Carrot
     {
         private readonly Queue _queue;
         private readonly IConsumedMessageBuilder _builder;
-        private readonly SubscriptionConfiguration _configuration;
+        private readonly ConsumingConfiguration _configuration;
 
         protected internal ConsumingPromise(Queue queue,
                                             IConsumedMessageBuilder builder,
-                                            SubscriptionConfiguration configuration)
+                                            ConsumingConfiguration configuration)
         {
             _queue = queue;
             _builder = builder;
@@ -27,21 +27,21 @@ namespace Carrot
 
         protected internal abstract ConsumerBase BuildConsumer(IModel model,
                                                                IConsumedMessageBuilder builder,
-                                                               SubscriptionConfiguration configuration);
+                                                               ConsumingConfiguration configuration);
     }
 
     internal class AtMostOnceConsumingPromise : ConsumingPromise
     {
         internal AtMostOnceConsumingPromise(Queue queue,
                                             IConsumedMessageBuilder builder,
-                                            SubscriptionConfiguration configuration)
+                                            ConsumingConfiguration configuration)
             : base(queue, builder, configuration)
         {
         }
 
         protected internal override ConsumerBase BuildConsumer(IModel model,
                                                                IConsumedMessageBuilder builder,
-                                                               SubscriptionConfiguration configuration)
+                                                               ConsumingConfiguration configuration)
         {
             return new AtMostOnceConsumer(model, builder, configuration);
         }
@@ -51,14 +51,14 @@ namespace Carrot
     {
         internal AtLeastOnceConsumingPromise(Queue queue,
                                              IConsumedMessageBuilder builder,
-                                             SubscriptionConfiguration configuration)
+                                             ConsumingConfiguration configuration)
             : base(queue, builder, configuration)
         {
         }
 
         protected internal override ConsumerBase BuildConsumer(IModel model,
                                                                IConsumedMessageBuilder builder,
-                                                               SubscriptionConfiguration configuration)
+                                                               ConsumingConfiguration configuration)
         {
             return new AtLeastOnceConsumer(model, builder, configuration);
         }

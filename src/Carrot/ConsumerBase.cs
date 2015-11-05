@@ -10,11 +10,11 @@ namespace Carrot
     public abstract class ConsumerBase : DefaultBasicConsumer
     {
         private readonly IConsumedMessageBuilder _builder;
-        private readonly SubscriptionConfiguration _configuration;
+        private readonly ConsumingConfiguration _configuration;
 
         protected internal ConsumerBase(IModel model,
                                         IConsumedMessageBuilder builder,
-                                        SubscriptionConfiguration configuration)
+                                        ConsumingConfiguration configuration)
             : base(model)
         {
             _builder = builder;

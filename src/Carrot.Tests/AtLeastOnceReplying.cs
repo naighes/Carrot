@@ -13,11 +13,11 @@ namespace Carrot.Tests
 {
     public class AtLeastOnceReplying
     {
-        private readonly SubscriptionConfiguration _configuration;
+        private readonly ConsumingConfiguration _configuration;
 
         public AtLeastOnceReplying()
         {
-            _configuration = new SubscriptionConfiguration(new Mock<IChannel>().Object, null);
+            _configuration = new ConsumingConfiguration(new Mock<IChannel>().Object, null);
         }
 
         [Fact]
@@ -82,7 +82,7 @@ namespace Carrot.Tests
 
         private static Mock<IModel> BuildModel(UInt64 deliveryTag,
                                                Func<ConsumedMessageBase, AggregateConsumingResult> func,
-                                               SubscriptionConfiguration configuration)
+                                               ConsumingConfiguration configuration)
         {
             var args = new BasicDeliverEventArgs
                            {
@@ -114,7 +114,7 @@ namespace Carrot.Tests
                 get { throw new NotImplementedException(); }
             }
 
-            internal override Task<AggregateConsumingResult> ConsumeAsync(SubscriptionConfiguration configuration)
+            internal override Task<AggregateConsumingResult> ConsumeAsync(ConsumingConfiguration configuration)
             {
                 return Task.FromResult(_result(this));
             }
@@ -129,7 +129,7 @@ namespace Carrot.Tests
         {
             internal AtLeastOnceConsumerWrapper(IModel model,
                                                 IConsumedMessageBuilder builder,
-                                                SubscriptionConfiguration configuration)
+                                                ConsumingConfiguration configuration)
                 : base(model, builder, configuration)
             {
             }

@@ -29,7 +29,7 @@ namespace Carrot.Messages
             return Content != null && type.IsInstanceOfType(Content);
         }
 
-        internal override Task<AggregateConsumingResult> ConsumeAsync(SubscriptionConfiguration configuration)
+        internal override Task<AggregateConsumingResult> ConsumeAsync(ConsumingConfiguration configuration)
         {
             return Task.WhenAll(configuration.FindSubscriptions(this)
                                              .Select(_ => _.SafeConsumeAsync(this)))
