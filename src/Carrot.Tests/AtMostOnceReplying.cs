@@ -12,6 +12,13 @@ namespace Carrot.Tests
 {
     public class AtMostOnceReplying
     {
+        private readonly SubscriptionConfiguration _configuration;
+
+        public AtMostOnceReplying()
+        {
+            _configuration = new SubscriptionConfiguration(new Mock<IChannel>().Object, null);
+        }
+
         [Fact]
         public void AcknowledgeThrows()
         {
@@ -19,8 +26,7 @@ namespace Carrot.Tests
             var model = new Mock<IModel>();
             model.Setup(_ => _.BasicAck(deliveryTag, false)).Throws(new Exception());
             var builder = new Mock<IConsumedMessageBuilder>();
-            var configuration = new SubscriptionConfiguration();
-            var consumer = new AtMostOnceConsumerWrapper(model.Object, builder.Object, configuration);
+            var consumer = new AtMostOnceConsumerWrapper(model.Object, builder.Object, _configuration);
             var args = new BasicDeliverEventArgs
                            {
                                DeliveryTag = deliveryTag,

@@ -8,23 +8,29 @@ namespace Carrot.Configuration
 {
     public class SubscriptionConfiguration
     {
+        private readonly IChannel _channel;
+        private readonly Queue _queue;
         private readonly IDictionary<Type, ISet<IConsumer>> _subscriptions = new Dictionary<Type, ISet<IConsumer>>();
 
         private IFallbackStrategy _fallbackStrategy = NoFallbackStrategy.Instance;
 
-        internal SubscriptionConfiguration() { }
+        internal SubscriptionConfiguration(IChannel channel, Queue queue)
+        {
+            _channel = channel;
+            _queue = queue;
+        }
 
         internal IFallbackStrategy FallbackStrategy
         {
             get { return _fallbackStrategy; }
         }
 
-        public void FallbackBy(IFallbackStrategy strategy)
+        public void FallbackBy(Func<IChannel, Queue, IFallbackStrategy> strategy)
         {
             if (strategy == null)
                 throw new ArgumentNullException("strategy");
 
-            _fallbackStrategy = strategy;
+            _fallbackStrategy = strategy(_channel, _queue);
         }
 
         public void Consumes<TMessage>(Consumer<TMessage> consumer) where TMessage : class

@@ -13,11 +13,20 @@ namespace Carrot.Tests
 {
     public class AtLeastOnceReplying
     {
+        private readonly SubscriptionConfiguration _configuration;
+
+        public AtLeastOnceReplying()
+        {
+            _configuration = new SubscriptionConfiguration(new Mock<IChannel>().Object, null);
+        }
+
         [Fact]
         public void ReplyOnSuccess()
         {
             const Int64 deliveryTag = 1234L;
-            var model = BuildModel(deliveryTag, _ => new Success(_));
+            var model = BuildModel(deliveryTag,
+                                   _ => new Success(_),
+                                   _configuration);
             model.Verify(_ => _.BasicAck(deliveryTag, false));
         }
 
@@ -25,7 +34,9 @@ namespace Carrot.Tests
         public void ReplyOnConsumingFailure()
         {
             const Int64 deliveryTag = 1234L;
-            var model = BuildModel(deliveryTag, _ => new ConsumingFailure(_, NoFallbackStrategy.Instance));
+            var model = BuildModel(deliveryTag,
+                                   _ => new ConsumingFailure(_, NoFallbackStrategy.Instance),
+                                   _configuration);
             model.Verify(_ => _.BasicNack(deliveryTag, false, true));
         }
 
@@ -33,7 +44,9 @@ namespace Carrot.Tests
         public void ReplyOnReiteratedConsumingFailure()
         {
             const Int64 deliveryTag = 1234L;
-            var model = BuildModel(deliveryTag, _ => new ReiteratedConsumingFailure(_, NoFallbackStrategy.Instance));
+            var model = BuildModel(deliveryTag,
+                                   _ => new ReiteratedConsumingFailure(_, NoFallbackStrategy.Instance),
+                                   _configuration);
             model.Verify(_ => _.BasicAck(deliveryTag, false));
         }
 
@@ -41,7 +54,9 @@ namespace Carrot.Tests
         public void ReplyOnCorruptedMessageConsumingFailure()
         {
             const Int64 deliveryTag = 1234L;
-            var model = BuildModel(deliveryTag, _ => new CorruptedMessageConsumingFailure(_, NoFallbackStrategy.Instance));
+            var model = BuildModel(deliveryTag,
+                                   _ => new CorruptedMessageConsumingFailure(_, NoFallbackStrategy.Instance),
+                                   _configuration);
             model.Verify(_ => _.BasicAck(deliveryTag, false));
         }
 
@@ -49,7 +64,9 @@ namespace Carrot.Tests
         public void ReplyOnUnresolvedMessageConsumingFailure()
         {
             const Int64 deliveryTag = 1234L;
-            var model = BuildModel(deliveryTag, _ => new UnresolvedMessageConsumingFailure(_, NoFallbackStrategy.Instance));
+            var model = BuildModel(deliveryTag,
+                                   _ => new UnresolvedMessageConsumingFailure(_, NoFallbackStrategy.Instance),
+                                   _configuration);
             model.Verify(_ => _.BasicAck(deliveryTag, false));
         }
 
@@ -57,19 +74,21 @@ namespace Carrot.Tests
         public void ReplyOnUnsupportedMessageConsumingFailure()
         {
             const Int64 deliveryTag = 1234L;
-            var model = BuildModel(deliveryTag, _ => new UnsupportedMessageConsumingFailure(_, NoFallbackStrategy.Instance));
+            var model = BuildModel(deliveryTag,
+                                   _ => new UnsupportedMessageConsumingFailure(_, NoFallbackStrategy.Instance),
+                                   _configuration);
             model.Verify(_ => _.BasicAck(deliveryTag, false));
         }
 
         private static Mock<IModel> BuildModel(UInt64 deliveryTag,
-                                               Func<ConsumedMessageBase, AggregateConsumingResult> func)
+                                               Func<ConsumedMessageBase, AggregateConsumingResult> func,
+                                               SubscriptionConfiguration configuration)
         {
             var args = new BasicDeliverEventArgs
                            {
                                DeliveryTag = deliveryTag,
                                BasicProperties = new BasicProperties()
                            };
-            var configuration = new SubscriptionConfiguration();
             var builder = new Mock<IConsumedMessageBuilder>();
             var message = new FakeConsumedMessage(args, func);
             builder.Setup(_ => _.Build(args)).Returns(message);

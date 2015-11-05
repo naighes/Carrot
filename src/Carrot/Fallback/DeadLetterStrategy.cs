@@ -6,21 +6,30 @@ namespace Carrot.Fallback
 {
     public class DeadLetterStrategy : IFallbackStrategy
     {
-        private readonly Func<String, String> _exchangeNameBuilder;
+        private readonly Exchange _exchange;
 
-        public DeadLetterStrategy()
-            : this(_ => String.Format("{0}::dle", _))
+        private DeadLetterStrategy(Exchange exchange)
         {
+            _exchange = exchange;
         }
 
-        public DeadLetterStrategy(Func<String, String> exchangeNameBuilder)
+        public static IFallbackStrategy New(IChannel channel, Queue queue)
         {
-            _exchangeNameBuilder = exchangeNameBuilder;
+            return New(channel, queue, _ => String.Format("{0}::dle", _));
+        }
+
+        public static IFallbackStrategy New(IChannel channel,
+                                            Queue queue,
+                                            Func<String, String> exchangeNameBuilder)
+        {
+            var exchangeName = exchangeNameBuilder(queue.Name);
+            var exchange = channel.DeclareDurableDirectExchange(exchangeName);
+            return new DeadLetterStrategy(exchange);
         }
 
         public void Apply(IModel model, ConsumedMessageBase message)
         {
-            message.ForwardTo(model, _exchangeNameBuilder);
+            message.ForwardTo(model, _exchange);
         }
     }
 }

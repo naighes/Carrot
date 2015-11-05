@@ -13,6 +13,13 @@ namespace Carrot.Tests
 {
     public class ApplyingFallbackStrategy
     {
+        private readonly SubscriptionConfiguration _configuration;
+
+        public ApplyingFallbackStrategy()
+        {
+            _configuration = new SubscriptionConfiguration(new Mock<IChannel>().Object, null);
+        }
+
         [Fact]
         public void OnSuccess()
         {
@@ -20,9 +27,8 @@ namespace Carrot.Tests
             var strategy = new Mock<IFallbackStrategy>();
             var args = FakeBasicDeliverEventArgs();
             var message = new FakeConsumedMessage(new Object(), args);
-            var configuration = new SubscriptionConfiguration();
-            configuration.FallbackBy(strategy.Object);
-            var result = message.ConsumeAsync(configuration).Result;
+            _configuration.FallbackBy((c, q) => strategy.Object);
+            var result = message.ConsumeAsync(_configuration).Result;
             Assert.IsType<Success>(result);
             result.Reply(model.Object);
             strategy.Verify(_ => _.Apply(model.Object, message), Times.Never);
@@ -35,10 +41,9 @@ namespace Carrot.Tests
             var strategy = new Mock<IFallbackStrategy>();
             var args = FakeBasicDeliverEventArgs();
             var message = new FakeConsumedMessage(new Object(), args);
-            var configuration = new SubscriptionConfiguration();
-            configuration.FallbackBy(strategy.Object);
-            configuration.Consumes(new FakeConsumer(consumedMessage => { throw new Exception(); }));
-            var result = message.ConsumeAsync(configuration).Result;
+            _configuration.FallbackBy((c, q) => strategy.Object);
+            _configuration.Consumes(new FakeConsumer(consumedMessage => { throw new Exception(); }));
+            var result = message.ConsumeAsync(_configuration).Result;
             Assert.IsType<ConsumingFailure>(result);
             result.Reply(model.Object);
             strategy.Verify(_ => _.Apply(model.Object, message), Times.Never);
@@ -52,10 +57,9 @@ namespace Carrot.Tests
             var args = FakeBasicDeliverEventArgs();
             args.Redelivered = true;
             var message = new FakeConsumedMessage(new Object(), args);
-            var configuration = new SubscriptionConfiguration();
-            configuration.FallbackBy(strategy.Object);
-            configuration.Consumes(new FakeConsumer(consumedMessage => { throw new Exception(); }));
-            var result = message.ConsumeAsync(configuration).Result;
+            _configuration.FallbackBy((c, q) => strategy.Object);
+            _configuration.Consumes(new FakeConsumer(consumedMessage => { throw new Exception(); }));
+            var result = message.ConsumeAsync(_configuration).Result;
             Assert.IsType<ReiteratedConsumingFailure>(result);
             result.Reply(model.Object);
             strategy.Verify(_ => _.Apply(model.Object, message), Times.Once);
@@ -64,23 +68,23 @@ namespace Carrot.Tests
         [Fact]
         public void DeadLetterExchangeStrategy()
         {
-            const String expected = "source_exchange-DeadLetter";
             var args = FakeBasicDeliverEventArgs();
-            args.Exchange = "source_exchange";
             var message = new FakeConsumedMessage(null, args);
-            var strategy = new DeadLetterStrategy(_ => String.Format("{0}-DeadLetter", _));
+            var channel = new Mock<IChannel>();
+            var queue = new Queue("queue_name");
+            Func<String, String> f = _ => String.Format("{0}-DeadLetter", _);
+            var dleName = f(queue.Name);
+            channel.Setup(_ => _.DeclareDurableDirectExchange(dleName)).Returns(new Exchange(dleName, "direct"));
+            var strategy = DeadLetterStrategy.New(channel.Object,
+                                                  queue,
+                                                  _ => String.Format("{0}-DeadLetter", _));
             var model = new Mock<IModel>();
             strategy.Apply(model.Object, message);
-            model.Verify(_ => _.BasicPublish(expected,
+            model.Verify(_ => _.BasicPublish(dleName,
                                              String.Empty,
                                              It.Is<IBasicProperties>(properties => properties.Persistent == true),
                                              args.Body),
                          Times.Once);
-            model.Verify(_ => _.ExchangeDeclare(expected,
-                                                "direct",
-                                                true,
-                                                false,
-                                                It.IsAny<IDictionary<String, Object>>()));
         }
 
         private static BasicDeliverEventArgs FakeBasicDeliverEventArgs()

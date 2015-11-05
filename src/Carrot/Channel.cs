@@ -146,12 +146,16 @@ namespace Carrot
 
         public void SubscribeByAtMostOnce(Queue queue, Action<SubscriptionConfiguration> configure)
         {
-            Subscribe(configure, (b, c) => new AtMostOnceConsumingPromise(queue, b, c));
+            Subscribe(configure,
+                      (b, c) => new AtMostOnceConsumingPromise(queue, b, c),
+                      queue);
         }
 
         public void SubscribeByAtLeastOnce(Queue queue, Action<SubscriptionConfiguration> configure)
         {
-            Subscribe(configure, (b, c) => new AtLeastOnceConsumingPromise(queue, b, c));
+            Subscribe(configure,
+                      (b, c) => new AtLeastOnceConsumingPromise(queue, b, c),
+                      queue);
         }
 
         protected internal virtual IConnection CreateConnection()
@@ -175,9 +179,10 @@ namespace Carrot
         }
 
         private void Subscribe(Action<SubscriptionConfiguration> configure,
-                               Func<IConsumedMessageBuilder, SubscriptionConfiguration, ConsumingPromise> func)
+                               Func<IConsumedMessageBuilder, SubscriptionConfiguration, ConsumingPromise> func,
+                               Queue queue)
         {
-            var configuration = new SubscriptionConfiguration();
+            var configuration = new SubscriptionConfiguration(this, queue);
             configure(configuration);
             Func<IConsumedMessageBuilder, ConsumingPromise> f = _ => func(_, configuration);
             _promises.Add(f);
