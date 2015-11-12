@@ -35,9 +35,18 @@ namespace Carrot.Messages
             get { return (Int64)_dictionary["timestamp"]; }
         }
 
-        internal IDictionary<String, Object> Headers
+        public Object this[String key]
         {
-            get { return _dictionary; }
+            get
+            {
+                if (key == null)
+                    throw new ArgumentNullException("key");
+
+                if (_reserverKeys.Contains(key))
+                    throw new InvalidOperationException(String.Format("key '{0}' is reserved", key));
+
+                return _dictionary[key];
+            }
         }
 
         public void AddHeader(String key, Object value)

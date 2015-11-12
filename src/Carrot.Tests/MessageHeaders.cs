@@ -13,9 +13,10 @@ namespace Carrot.Tests
         public void KeyComparison()
         {
             const String key = "foo";
+            const String value = "some-value";
             var collection = new HeaderCollection();
-            collection.AddHeader(key, "some-value");
-            Assert.True(collection.Headers.ContainsKey(key.ToUpperInvariant()));
+            collection.AddHeader(key, value);
+            Assert.Equal(value, collection[key.ToUpperInvariant()]);
         }
 
         [Fact]
@@ -34,7 +35,7 @@ namespace Carrot.Tests
 
             Assert.Null(properties.MessageId);
             Assert.Equal(new AmqpTimestamp(0L), properties.Timestamp);
-            Assert.True(collection.Headers.ContainsKey(key));
+            Assert.Equal(value, collection[key]);
         }
 
         [Fact]
@@ -47,6 +48,14 @@ namespace Carrot.Tests
 
             Assert.Throws<InvalidOperationException>(() => collection.RemoveHeader("message_id"));
             Assert.Throws<InvalidOperationException>(() => collection.RemoveHeader("timestamp"));
+        }
+
+        [Fact]
+        public void HeaderIndexer()
+        {
+            var collection = new HeaderCollection();
+            Assert.Throws<InvalidOperationException>(() => collection["message_id"]);
+            Assert.Throws<InvalidOperationException>(() => collection["timestamp"]);
         }
     }
 }
