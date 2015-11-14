@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Carrot.Configuration;
-using Carrot.Serialization;
 using Moq;
 using RabbitMQ.Client;
 using Xunit;
@@ -19,15 +18,12 @@ namespace Carrot.Tests
             const String routingKey = "routing_key";
 
             var model = new Mock<IModel>();
+            var configuration = new ChannelConfiguration();
+            configuration.GeneratesMessageIdBy(new Mock<INewId>().Object);
+            configuration.ResolveMessageTypeBy(new Mock<IMessageTypeResolver>().Object);
             var channel = new ChannelWrapper(new Mock<IConnection>().Object,
                                              model.Object,
-                                             "amqp://fake.url",
-                                             new Mock<IDateTimeProvider>().Object,
-                                             new Mock<INewId>().Object,
-                                             new Mock<ISerializerFactory>().Object,
-                                             new Mock<IMessageTypeResolver>().Object,
-                                             0,
-                                             0);
+                                             configuration);
             var consumer = new FakeConsumer(_ => Task.Factory.StartNew(() => { }));
             var queue = channel.DeclareQueue(queueName);
             var exchange = channel.DeclareDirectExchange(exchangeName);
@@ -57,20 +53,8 @@ namespace Carrot.Tests
 
             internal ChannelWrapper(IConnection connection,
                                     IModel model,
-                                    String endpointUrl,
-                                    IDateTimeProvider dateTimeProvider,
-                                    INewId newId,
-                                    ISerializerFactory serializerFactory,
-                                    IMessageTypeResolver resolver,
-                                    UInt32 prefetchSize,
-                                    UInt16 prefetchCount)
-                : base(endpointUrl,
-                       dateTimeProvider,
-                       newId,
-                       serializerFactory,
-                       resolver,
-                       prefetchSize,
-                       prefetchCount)
+                                    ChannelConfiguration configuration)
+                : base(configuration)
             {
                 _connection = connection;
                 _model = model;

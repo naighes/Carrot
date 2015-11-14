@@ -8,8 +8,17 @@ namespace Carrot.BasicSample
     {
         private static void Main()
         {
-            var channel = Channel.New("amqp://guest:guest@localhost:5672/",
-                                      new MessageBindingResolver(typeof(Foo).Assembly));
+            const String endpointUrl = "amqp://guest:guest@localhost:5672/";
+            IMessageTypeResolver resolver = new MessageBindingResolver(typeof(Foo).Assembly);
+
+            var channel = Channel.New(_ =>
+            {
+                _.Endpoint(new Uri(endpointUrl, UriKind.Absolute));
+                _.ResolveMessageTypeBy(resolver);
+                _.SetPrefetchSize(10);
+                _.SetPrefetchCount(20);
+            });
+
             var exchange = channel.DeclareDirectExchange("source_exchange");
             var queue = channel.DeclareQueue("my_test_queue");
             channel.DeclareExchangeBinding(exchange, queue, "routing_key");

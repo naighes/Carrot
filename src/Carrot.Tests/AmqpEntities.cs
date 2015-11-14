@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Carrot.Configuration;
 using Moq;
 using RabbitMQ.Client;
 using Xunit;
@@ -12,7 +13,7 @@ namespace Carrot.Tests
 
         public AmqpEntities()
         {
-            _channel = new Channel(null, null, null, null, null, 0, 0);
+            _channel = new Channel(new ChannelConfiguration());
         }
 
         [Fact]

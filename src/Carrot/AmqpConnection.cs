@@ -1,13 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Carrot.Configuration;
 using Carrot.Messages;
-using Carrot.Serialization;
 using RabbitMQ.Client;
 
 namespace Carrot
 {
+    using Carrot.Configuration;
+
     public interface IAmqpConnection : IDisposable
     {
         Task<IPublishResult> PublishAsync<TMessage>(OutboundMessage<TMessage> message,
@@ -21,26 +21,20 @@ namespace Carrot
         private readonly IConnection _connection;
         private readonly IEnumerable<ConsumerBase> _consumers;
         private readonly IModel _outboundModel;
-        private readonly ISerializerFactory _serializerFactory;
-        private readonly INewId _newId;
         private readonly IDateTimeProvider _dateTimeProvider;
-        private readonly IMessageTypeResolver _resolver;
+        private readonly ChannelConfiguration _configuration;
 
         internal AmqpConnection(IConnection connection,
                                 IEnumerable<ConsumerBase> consumers,
                                 IModel outboundModel,
-                                ISerializerFactory serializerFactory,
-                                INewId newId,
                                 IDateTimeProvider dateTimeProvider,
-                                IMessageTypeResolver resolver)
+                                ChannelConfiguration configuration)
         {
             _connection = connection;
             _consumers = consumers;
             _outboundModel = outboundModel;
-            _serializerFactory = serializerFactory;
-            _newId = newId;
             _dateTimeProvider = dateTimeProvider;
-            _resolver = resolver;
+            _configuration = configuration;
         }
 
         public Task<IPublishResult> PublishAsync<TMessage>(OutboundMessage<TMessage> message,
@@ -48,11 +42,7 @@ namespace Carrot
                                                            String routingKey = "",
                                                            TaskFactory taskFactory = null) where TMessage : class
         {
-            var envelope = new OutboundMessageEnvelope<TMessage>(message,
-                                                                 _serializerFactory,
-                                                                 _dateTimeProvider,
-                                                                 _newId,
-                                                                 _resolver);
+            var envelope = new OutboundMessageEnvelope<TMessage>(message, _dateTimeProvider, _configuration);
             return envelope.PublishAsync(_outboundModel, exchange, routingKey, taskFactory);
         }
 

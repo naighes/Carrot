@@ -3,36 +3,30 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
 using System.Threading.Tasks;
-using Carrot.Configuration;
 using Carrot.Extensions;
-using Carrot.Serialization;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Framing;
 
 namespace Carrot.Messages
 {
+    using Carrot.Configuration;
+
     internal class OutboundMessageEnvelope<TMessage> where TMessage : class
     {
         private const String DefaultContentEncoding = "UTF-8";
         private const String DefaultContentType = "application/json";
 
         private readonly OutboundMessage<TMessage> _message;
-        private readonly ISerializerFactory _serializerFactory;
         private readonly IDateTimeProvider _dateTimeProvider;
-        private readonly INewId _newId;
-        private readonly IMessageTypeResolver _resolver;
+        private readonly ChannelConfiguration _configuration;
 
         internal OutboundMessageEnvelope(OutboundMessage<TMessage> message,
-                                         ISerializerFactory serializerFactory,
                                          IDateTimeProvider dateTimeProvider,
-                                         INewId newId,
-                                         IMessageTypeResolver resolver)
+                                         ChannelConfiguration configuration)
         {
             _message = message;
-            _serializerFactory = serializerFactory;
             _dateTimeProvider = dateTimeProvider;
-            _newId = newId;
-            _resolver = resolver;
+            _configuration = configuration;
         }
 
         internal Task<IPublishResult> PublishAsync(IModel model,
@@ -44,7 +38,7 @@ namespace Carrot.Messages
             HydrateProperties(properties);
 
             var encoding = Encoding.GetEncoding(properties.ContentEncoding);
-            var serializer = _serializerFactory.Create(properties.ContentType);
+            var serializer = _configuration.SerializationConfiguration.Create(properties.ContentType);
             var factory = taskFactory ?? Task.Factory;
 
             return factory.StartNew(_ =>
@@ -62,9 +56,9 @@ namespace Carrot.Messages
         {
             _message.HydrateProperties(properties);
 
-            properties.MessageId = _newId.Next();
+            properties.MessageId = _configuration.IdGenerator.Next();
             properties.Timestamp = new AmqpTimestamp(_dateTimeProvider.UtcNow().ToUnixTimestamp());
-            var binding = _resolver.Resolve<TMessage>();
+            var binding = _configuration.MessageTypeResolver.Resolve<TMessage>();
             properties.Type = binding.RawName;
 
             if (properties.ContentEncoding == null)

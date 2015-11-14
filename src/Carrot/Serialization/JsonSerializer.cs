@@ -6,11 +6,11 @@ namespace Carrot.Serialization
 {
     public class JsonSerializer : ISerializer
     {
-        private readonly JsonSerializerSettings _settings;
+        private readonly JsonSerializerSettings _settings = new JsonSerializerSettings();
 
-        public JsonSerializer(JsonSerializerSettings settings = null)
+        public JsonSerializerSettings Settings
         {
-            _settings = settings ?? new JsonSerializerSettings();
+            get { return _settings; }
         }
 
         public Object Deserialize(Byte[] body, Type type, Encoding encoding = null)

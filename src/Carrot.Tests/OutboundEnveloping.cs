@@ -17,22 +17,29 @@ namespace Carrot.Tests
         {
             var content = new Foo();
             var message = new OutboundMessage<Foo>(content);
-            var serializerFactory = new Mock<ISerializerFactory>();
+            var dateTimeProvider = new Mock<IDateTimeProvider>();
+
             var serializer = new Mock<ISerializer>();
             serializer.Setup(_ => _.Serialize(content)).Returns("{}");
-            serializerFactory.Setup(_ => _.Create("application/json")).Returns(serializer.Object);
-            var dateTimeProvider = new Mock<IDateTimeProvider>();
-            var newId = new Mock<INewId>();
+
             const String messageId = "one-id";
+            var newId = new Mock<INewId>();
             newId.Setup(_ => _.Next()).Returns(messageId);
-            var model = new Mock<IModel>();
+
             var resolver = new Mock<IMessageTypeResolver>();
             resolver.Setup(_ => _.Resolve<Foo>()).Returns(new MessageBinding("urn:message:fake", typeof(Foo)));
-            var wrapper = new OutboundMessageEnvelope<Foo>(message,
-                                                           serializerFactory.Object,
-                                                           dateTimeProvider.Object,
-                                                           newId.Object,
-                                                           resolver.Object);
+
+            var model = new Mock<IModel>();
+
+            var configuration = new ChannelConfiguration();
+            configuration.GeneratesMessageIdBy(newId.Object);
+            configuration.ResolveMessageTypeBy(resolver.Object);
+            configuration.ConfigureSerialization(_ =>
+                                                 {
+                                                     _.Map(__ => __.MediaType == "application/json", serializer.Object);
+                                                 });
+
+            var wrapper = new OutboundMessageEnvelope<Foo>(message, dateTimeProvider.Object, configuration);
             var result = Assert.IsType<SuccessfulPublishing>(wrapper.PublishAsync(model.Object,
                                                                                   new Exchange("target_exchange", "direct")).Result);
             Assert.Equal(messageId, result.MessageId);
@@ -44,26 +51,32 @@ namespace Carrot.Tests
             const String exchange = "target_exchange";
             var content = new Foo();
             var message = new OutboundMessage<Foo>(content);
-            var serializerFactory = new Mock<ISerializerFactory>();
+            var dateTimeProvider = new Mock<IDateTimeProvider>();
+
             var serializer = new Mock<ISerializer>();
             serializer.Setup(_ => _.Serialize(content)).Returns("{}");
-            serializerFactory.Setup(_ => _.Create("application/json")).Returns(serializer.Object);
-            var dateTimeProvider = new Mock<IDateTimeProvider>();
-            var newId = new Mock<INewId>();
+
+            var resolver = new Mock<IMessageTypeResolver>();
+            resolver.Setup(_ => _.Resolve<Foo>()).Returns(new MessageBinding("urn:message:fake", typeof(Foo)));
+
             var model = new Mock<IModel>();
+
             var exception = new Exception();
             model.Setup(_ => _.BasicPublish(exchange,
                                             String.Empty,
                                             It.IsAny<IBasicProperties>(),
                                             It.IsAny<Byte[]>()))
                  .Throws(exception);
-            var resolver = new Mock<IMessageTypeResolver>();
-            resolver.Setup(_ => _.Resolve<Foo>()).Returns(new MessageBinding("urn:message:fake", typeof(Foo)));
-            var wrapper = new OutboundMessageEnvelope<Foo>(message,
-                                                           serializerFactory.Object,
-                                                           dateTimeProvider.Object,
-                                                           newId.Object,
-                                                           resolver.Object);
+
+            var configuration = new ChannelConfiguration();
+            configuration.GeneratesMessageIdBy(new Mock<INewId>().Object);
+            configuration.ResolveMessageTypeBy(resolver.Object);
+            configuration.ConfigureSerialization(_ =>
+            {
+                _.Map(__ => __.MediaType == "application/json", serializer.Object);
+            });
+
+            var wrapper = new OutboundMessageEnvelope<Foo>(message, dateTimeProvider.Object, configuration);
             var result = Assert.IsType<FailurePublishing>(wrapper.PublishAsync(model.Object,
                                                                                new Exchange(exchange, "direct")).Result);
             Assert.Equal(result.Exception, exception);
@@ -75,17 +88,23 @@ namespace Carrot.Tests
             const String messageId = "one-id";
             var timestamp = new DateTimeOffset(2015, 1, 2, 3, 4, 5, TimeSpan.Zero);
             var properties = new BasicProperties();
-            var newId = new Mock<INewId>();
-            newId.Setup(_ => _.Next()).Returns(messageId);
+
             var dateTimeProvider = new Mock<IDateTimeProvider>();
             dateTimeProvider.Setup(_ => _.UtcNow()).Returns(timestamp);
+
+            var newId = new Mock<INewId>();
+            newId.Setup(_ => _.Next()).Returns(messageId);
+
             var resolver = new Mock<IMessageTypeResolver>();
             resolver.Setup(_ => _.Resolve<Foo>()).Returns(new MessageBinding("urn:message:fake", typeof(Foo)));
+
+            var configuration = new ChannelConfiguration();
+            configuration.GeneratesMessageIdBy(newId.Object);
+            configuration.ResolveMessageTypeBy(resolver.Object);
+
             var envelope = new OutboundMessageEnvelopeWrapper<Foo>(new OutboundMessage<Foo>(new Foo()),
-                                                                   new Mock<ISerializerFactory>().Object,
                                                                    dateTimeProvider.Object,
-                                                                   newId.Object,
-                                                                   resolver.Object);
+                                                                   configuration);
             envelope.CallHydrateProperties(properties);
             Assert.Equal(messageId, properties.MessageId);
             Assert.Equal(timestamp.ToUnixTimestamp(), properties.Timestamp.UnixTime);
@@ -173,21 +192,21 @@ namespace Carrot.Tests
             var resolver = new Mock<IMessageTypeResolver>();
             resolver.Setup(_ => _.Resolve<TMessage>())
                     .Returns(new MessageBinding("urn:message:fake", typeof(TMessage), expiresAfter));
+            var configuration = new ChannelConfiguration();
+            configuration.ResolveMessageTypeBy(resolver.Object);
+            configuration.GeneratesMessageIdBy(new Mock<INewId>().Object);
+
             return new OutboundMessageEnvelopeWrapper<TMessage>(message,
-                                                                new Mock<ISerializerFactory>().Object,
                                                                 new Mock<IDateTimeProvider>().Object,
-                                                                new Mock<INewId>().Object,
-                                                                resolver.Object);
+                                                                configuration);
         }
 
         internal class OutboundMessageEnvelopeWrapper<TMessage> : OutboundMessageEnvelope<TMessage> where TMessage : class
         {
             internal OutboundMessageEnvelopeWrapper(OutboundMessage<TMessage> message,
-                                                    ISerializerFactory serializerFactory,
                                                     IDateTimeProvider dateTimeProvider,
-                                                    INewId newId,
-                                                    IMessageTypeResolver resolver)
-                : base(message, serializerFactory, dateTimeProvider, newId, resolver)
+                                                    ChannelConfiguration configuration)
+                : base(message, dateTimeProvider, configuration)
             {
             }
 

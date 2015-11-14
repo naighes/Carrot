@@ -23,15 +23,33 @@ namespace Carrot.Serialization
 
         public class MediaTypeHeader : IEquatable<MediaTypeHeader>
         {
-            internal readonly MediaType Type;
-            internal readonly Single Quality;
+            public readonly MediaType MediaType;
+            public readonly Single Quality;
 
             private const Single DefaultQuality = 1.0f;
 
             internal MediaTypeHeader(MediaType type, Single quality)
             {
-                Type = type;
+                MediaType = type;
                 Quality = quality;
+            }
+
+            public static MediaTypeHeader Parse(String source)
+            {
+                var type = default(MediaType);
+                var quality = DefaultQuality;
+
+                foreach (var s in source.Split(new[] { ';' },
+                                               StringSplitOptions.RemoveEmptyEntries)
+                                        .Select(_ => _.Trim()))
+                    if (s.StartsWith("q", StringComparison.Ordinal))
+                        quality = Single.Parse(s.Substring(s.IndexOf('=') + 1)
+                                                .TrimStart(),
+                                               CultureInfo.InvariantCulture);
+                    else if (s.IndexOf('=') == -1)
+                        type = MediaType.Parse(s);
+
+                return new MediaTypeHeader(type, quality);
             }
 
             public static Boolean operator ==(MediaTypeHeader left, MediaTypeHeader right)
@@ -52,7 +70,7 @@ namespace Carrot.Serialization
                 if (ReferenceEquals(this, other))
                     return true;
 
-                return Type.Equals(other.Type);
+                return MediaType.Equals(other.MediaType);
             }
 
             public override Boolean Equals(Object obj)
@@ -69,30 +87,12 @@ namespace Carrot.Serialization
 
             public override Int32 GetHashCode()
             {
-                return Type.GetHashCode();
+                return MediaType.GetHashCode();
             }
 
             public override String ToString()
             {
-                return String.Format("{0};q={1}", Type, Quality.ToString(CultureInfo.InvariantCulture));
-            }
-
-            public static MediaTypeHeader Parse(String source)
-            {
-                var type = default(MediaType);
-                var quality = DefaultQuality;
-
-                foreach (var s in source.Split(new[] { ';' },
-                                               StringSplitOptions.RemoveEmptyEntries)
-                                        .Select(_ => _.Trim()))
-                    if (s.StartsWith("q", StringComparison.Ordinal))
-                        quality = Single.Parse(s.Substring(s.IndexOf('=') + 1)
-                                                .TrimStart(),
-                                               CultureInfo.InvariantCulture);
-                    else if (s.IndexOf('=') == -1) 
-                        type = MediaType.Parse(s);
-
-                return new MediaTypeHeader(type, quality);
+                return String.Format("{0};q={1}", MediaType, Quality.ToString(CultureInfo.InvariantCulture));
             }
 
             internal class MediaTypeHeaderQualityComparer : IComparer<MediaTypeHeader>
@@ -243,6 +243,11 @@ namespace Carrot.Serialization
             public static Boolean operator !=(MediaType left, MediaType right)
             {
                 return !Equals(left, right);
+            }
+
+            public static implicit operator MediaType(String value)
+            {
+                return Parse(value);
             }
 
             public Boolean Equals(MediaType other)

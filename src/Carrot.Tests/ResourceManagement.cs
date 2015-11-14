@@ -22,12 +22,10 @@ namespace Carrot.Tests
             var outboundModel = new Mock<IModel>();
             var connection = new Mock<IConnection>();
             var amqpConnection = new AmqpConnection(connection.Object,
-                                                new List<ConsumerBase> { consumer1, consumer2 },
-                                                outboundModel.Object,
-                                                null,
-                                                null,
-                                                null,
-                                                null);
+                                                    new List<ConsumerBase> { consumer1, consumer2 },
+                                                    outboundModel.Object,
+                                                    null,
+                                                    null);
             amqpConnection.Dispose();
 
             connection.Verify(_ => _.Dispose(), Times.Once);

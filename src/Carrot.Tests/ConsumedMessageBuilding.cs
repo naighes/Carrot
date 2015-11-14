@@ -16,10 +16,10 @@ namespace Carrot.Tests
         public void CannotResolve()
         {
             const String type = "fake-type";
-            var serializerFactory = new Mock<ISerializerFactory>();
+            var serializationConfiguration = new SerializationConfiguration();
             var resolver = new Mock<IMessageTypeResolver>();
             resolver.Setup(_ => _.Resolve(type)).Returns(EmptyMessageBinding.Instance);
-            var builder = new ConsumedMessageBuilder(serializerFactory.Object, resolver.Object);
+            var builder = new ConsumedMessageBuilder(serializationConfiguration, resolver.Object);
             var message = builder.Build(new BasicDeliverEventArgs
                                             {
                                                 BasicProperties = new BasicProperties { Type = type }
@@ -31,10 +31,9 @@ namespace Carrot.Tests
         public void MissingContentType()
         {
             const String contentType = "application/null";
-            var serializerFactory = new Mock<ISerializerFactory>();
-            serializerFactory.Setup(_ => _.Create(contentType)).Returns(NullSerializer.Instance);
+            var serializationConfiguration = new SerializationConfigurationWrapper(NullSerializer.Instance);
             var resolver = new Mock<IMessageTypeResolver>();
-            var builder = new ConsumedMessageBuilder(serializerFactory.Object, resolver.Object);
+            var builder = new ConsumedMessageBuilder(serializationConfiguration, resolver.Object);
             var message = builder.Build(new BasicDeliverEventArgs
                                             {
                                                 BasicProperties = new BasicProperties { ContentType = contentType }
@@ -49,14 +48,13 @@ namespace Carrot.Tests
             const String contentType = "application/null";
             var runtimeType = typeof(Foo);
             var body = new Byte[] { };
-            var serializerFactory = new Mock<ISerializerFactory>();
             var serializer = new Mock<ISerializer>();
             serializer.Setup(_ => _.Deserialize(body, runtimeType, new UTF8Encoding(true)))
                       .Throws(new Exception("boom"));
-            serializerFactory.Setup(_ => _.Create(contentType)).Returns(serializer.Object);
+            var serializationConfiguration = new SerializationConfigurationWrapper(serializer.Object);
             var resolver = new Mock<IMessageTypeResolver>();
             resolver.Setup(_ => _.Resolve(type)).Returns(new MessageBinding(type, runtimeType));
-            var builder = new ConsumedMessageBuilder(serializerFactory.Object, resolver.Object);
+            var builder = new ConsumedMessageBuilder(serializationConfiguration, resolver.Object);
             var message = builder.Build(new BasicDeliverEventArgs
                                             {
                                                 Body = body,
@@ -67,6 +65,21 @@ namespace Carrot.Tests
                                                                       }
                                             });
             Assert.IsType<CorruptedMessage>(message);
+        }
+
+        internal class SerializationConfigurationWrapper : SerializationConfiguration
+        {
+            private readonly ISerializer _serializer;
+
+            public SerializationConfigurationWrapper(ISerializer serializer)
+            {
+                _serializer = serializer;
+            }
+
+            internal override ISerializer Create(String contentType)
+            {
+                return _serializer;
+            }
         }
     }
 }

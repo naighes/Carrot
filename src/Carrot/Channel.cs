@@ -3,56 +3,29 @@ using System.Collections.Generic;
 using System.Linq;
 using Carrot.Configuration;
 using Carrot.Messages;
-using Carrot.Serialization;
 using RabbitMQ.Client;
 
 namespace Carrot
 {
     public class Channel : IChannel
     {
-        private readonly String _endpointUrl;
-        private readonly IDateTimeProvider _dateTimeProvider;
-        private readonly INewId _newId;
-        private readonly ISerializerFactory _serializerFactory;
-        private readonly IMessageTypeResolver _resolver;
-        private readonly UInt32 _prefetchSize;
-        private readonly UInt16 _prefetchCount;
+        private readonly ChannelConfiguration _configuration;
 
         private readonly ISet<Queue> _queues = new HashSet<Queue>();
         private readonly ISet<Exchange> _exchanges = new HashSet<Exchange>();
         private readonly ISet<ExchangeBinding> _bindings = new HashSet<ExchangeBinding>();
         private readonly ISet<Func<IConsumedMessageBuilder, ConsumingPromise>> _promises = new HashSet<Func<IConsumedMessageBuilder, ConsumingPromise>>();
 
-        protected internal Channel(String endpointUrl,
-                                   IDateTimeProvider dateTimeProvider,
-                                   INewId newId,
-                                   ISerializerFactory serializerFactory,
-                                   IMessageTypeResolver resolver,
-                                   UInt32 prefetchSize,
-                                   UInt16 prefetchCount)
+        protected internal Channel(ChannelConfiguration configuration)
         {
-            _endpointUrl = endpointUrl;
-            _dateTimeProvider = dateTimeProvider;
-            _newId = newId;
-            _serializerFactory = serializerFactory;
-            _resolver = resolver;
-            _prefetchSize = prefetchSize;
-            _prefetchCount = prefetchCount;
+            _configuration = configuration;
         }
 
-        public static Channel New(String endpointUrl,
-                                  IMessageTypeResolver resolver,
-                                  IContentNegotiator negotiator = null,
-                                  UInt32 prefetchSize = 0,
-                                  UInt16 prefetchCount = 0)
+        public static IChannel New(Action<ChannelConfiguration> configure)
         {
-            return new Channel(endpointUrl,
-                               new DateTimeProvider(),
-                               new NewGuid(),
-                               new SerializerFactory(negotiator),
-                               resolver,
-                               prefetchSize,
-                               prefetchCount);
+            var configuration = new ChannelConfiguration();
+            configure(configuration);
+            return new Channel(configuration);
         }
 
         public Queue DeclareQueue(String name)
@@ -134,15 +107,14 @@ namespace Carrot
             foreach (var binding in _bindings)
                 binding.Declare(outboundModel);
 
-            var builder = new ConsumedMessageBuilder(_serializerFactory, _resolver);
+            var builder = new ConsumedMessageBuilder(_configuration.SerializationConfiguration,
+                                                     _configuration.MessageTypeResolver);
 
             return new AmqpConnection(connection,
                                       _promises.Select(_ => BuildConsumer(connection, _, builder)).ToList(),
                                       outboundModel,
-                                      _serializerFactory,
-                                      _newId,
-                                      _dateTimeProvider,
-                                      _resolver);
+                                      new DateTimeProvider(),
+                                      _configuration);
         }
 
         public void SubscribeByAtMostOnce(Queue queue, Action<ConsumingConfiguration> configure)
@@ -163,7 +135,7 @@ namespace Carrot
         {
             return new ConnectionFactory
                        {
-                           Uri = _endpointUrl,
+                           Uri = _configuration.EndpointUri.ToString(),
                            AutomaticRecoveryEnabled = true,
                            TopologyRecoveryEnabled = true
                        }.CreateConnection();
@@ -189,7 +161,9 @@ namespace Carrot
                                            Func<IConsumedMessageBuilder, ConsumingPromise> promise,
                                            IConsumedMessageBuilder builder)
         {
-            return promise(builder).Declare(CreateInboundModel(connection, _prefetchSize, _prefetchCount));
+            return promise(builder).Declare(CreateInboundModel(connection,
+                                                               _configuration.PrefetchSize,
+                                                               _configuration.PrefetchCount));
         }
 
         private void Subscribe(Action<ConsumingConfiguration> configure,
