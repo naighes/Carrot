@@ -3,14 +3,13 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
 using System.Threading.Tasks;
+using Carrot.Configuration;
 using Carrot.Extensions;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Framing;
 
 namespace Carrot.Messages
 {
-    using Carrot.Configuration;
-
     internal class OutboundMessageEnvelope<TMessage> where TMessage : class
     {
         private const String DefaultContentEncoding = "UTF-8";

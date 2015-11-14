@@ -1,13 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Carrot.Configuration;
 using Carrot.Messages;
 using RabbitMQ.Client;
 
 namespace Carrot
 {
-    using Carrot.Configuration;
-
     public interface IAmqpConnection : IDisposable
     {
         Task<IPublishResult> PublishAsync<TMessage>(OutboundMessage<TMessage> message,
