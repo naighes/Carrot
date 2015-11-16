@@ -35,13 +35,16 @@ Define your message consumer:
 
 Create an instance of `Channel` providing the RabbitMQ host as input.
 
-	var channel = Channel.New("amqp://guest:guest@localhost:5672/",
-                              new MessageBindingResolver(typeof(Foo).Assembly));
+    var channel = Channel.New(_ =>
+    {
+        _.Endpoint(new Uri("amqp://guest:guest@localhost:5672/", UriKind.Absolute));
+        _.ResolveMessageTypeBy(new MessageBindingResolver(typeof(Foo).Assembly));
+    });
 
 Declare your AMQP entities as the following:
 
     var exchange = channel.DeclareDirectExchange("source_exchange");
-	var queue = channel.DeclareQueue("my_test_queue");
+    var queue = channel.DeclareQueue("my_test_queue");
 
 Bind entities, subscribe your queue and call `IChannel.Connect`:
 
