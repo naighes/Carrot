@@ -54,5 +54,19 @@ namespace Carrot.Tests
             Assert.Equal("urn:message:buzz", binding.RawName);
             Assert.Equal(TimeSpan.FromSeconds(19), binding.ExpiresAfter);
         }
+
+        [Fact]
+        public void Default()
+        {
+            const String typeName = "Carrot.Tests.Foo";
+            var resolver = new DefaultMessageTypeResolver();
+            var binding = resolver.Resolve(typeName);
+            Assert.Equal(typeName, binding.RawName);
+            Assert.Equal(typeof(Foo), binding.RuntimeType);
+
+            var binding2 = resolver.Resolve<Foo>();
+            Assert.Equal(typeName, binding2.RawName);
+            Assert.Equal(typeof(Foo), binding2.RuntimeType);
+        }
     }
 }

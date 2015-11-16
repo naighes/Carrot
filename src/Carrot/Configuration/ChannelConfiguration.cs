@@ -6,6 +6,8 @@ namespace Carrot.Configuration
     {
         private readonly SerializationConfiguration _serializationConfiguration;
 
+        private IMessageTypeResolver _messageTypeResolver = new DefaultMessageTypeResolver();
+
         internal ChannelConfiguration()
         {
             IdGenerator = new NewGuid();
@@ -14,7 +16,11 @@ namespace Carrot.Configuration
 
         internal Uri EndpointUri { get; private set; }
 
-        internal IMessageTypeResolver MessageTypeResolver { get; private set; }
+        internal IMessageTypeResolver MessageTypeResolver
+        {
+            get { return _messageTypeResolver; }
+            private set { _messageTypeResolver = value; }
+        }
 
         internal UInt32 PrefetchSize { get; private set; }
 
