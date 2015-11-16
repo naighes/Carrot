@@ -44,6 +44,8 @@ namespace Carrot.Messages
                                     {
                                         model.BasicPublish(exchange.Name,
                                                            routingKey,
+                                                           false,
+                                                           false,
                                                            (IBasicProperties)_,
                                                            encoding.GetBytes(serializer.Serialize(_message.Content)));
                                     },

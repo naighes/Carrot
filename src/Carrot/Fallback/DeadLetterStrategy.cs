@@ -27,7 +27,7 @@ namespace Carrot.Fallback
 
         public void Apply(IModel model, ConsumedMessageBase message)
         {
-            message.ForwardTo(model, _exchange);
+            message.PersistentForwardTo(model, _exchange, String.Empty, true, false);
         }
     }
 }

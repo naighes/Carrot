@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Carrot.Configuration;
 using Carrot.Messages;
 using RabbitMQ.Client;
+using RabbitMQ.Client.Events;
 
 namespace Carrot
 {
@@ -34,6 +35,10 @@ namespace Carrot
             _outboundModel = outboundModel;
             _dateTimeProvider = dateTimeProvider;
             _configuration = configuration;
+
+            _outboundModel.BasicAcks += OnOutboundModelBasicAcks;
+            _outboundModel.BasicNacks += OnOutboundModelBasicNacks;
+            _outboundModel.BasicReturn += OnOutboundModelBasicReturn;
         }
 
         public Task<IPublishResult> PublishAsync<TMessage>(OutboundMessage<TMessage> message,
@@ -53,11 +58,31 @@ namespace Carrot
             if (_outboundModel != null)
             {
                 _outboundModel.WaitForConfirms(TimeSpan.FromSeconds(30d));
+
+                _outboundModel.BasicAcks -= OnOutboundModelBasicAcks;
+                _outboundModel.BasicNacks -= OnOutboundModelBasicNacks;
+                _outboundModel.BasicReturn -= OnOutboundModelBasicReturn;
+
                 _outboundModel.Dispose();
             }
 
             if (_connection != null)
                 _connection.Dispose();
+        }
+
+        private static void OnOutboundModelBasicReturn(Object sender, BasicReturnEventArgs args)
+        {
+            Console.WriteLine("OnOutboundModelBasicReturn - [ReplyText: '{0}']", args.ReplyText);
+        }
+
+        private static void OnOutboundModelBasicNacks(Object sender, BasicNackEventArgs args)
+        {
+            Console.WriteLine("OnOutboundModelBasicNacks - [DeliveryTag:'{0}']", args.DeliveryTag);
+        }
+
+        private static void OnOutboundModelBasicAcks(Object sender, BasicAckEventArgs args)
+        {
+            Console.WriteLine("OnOutboundModelBasicAcks - [DeliveryTag:'{0}']", args.DeliveryTag);
         }
     }
 }

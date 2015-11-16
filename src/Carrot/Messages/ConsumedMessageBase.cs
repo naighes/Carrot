@@ -44,12 +44,37 @@ namespace Carrot.Messages
             model.BasicNack(Args.DeliveryTag, false, true);
         }
 
-        internal void ForwardTo(IModel model, Exchange exchange)
+        internal void PersistentForwardTo(IModel model,
+                                          Exchange exchange,
+                                          String routingKey = "",
+                                          Boolean mandatory = false,
+                                          Boolean immediate = false)
+        {
+            InternalForwardTo(model, exchange, routingKey, mandatory, immediate, true);
+        }
+
+        internal void ForwardTo(IModel model,
+                                Exchange exchange,
+                                String routingKey = "",
+                                Boolean mandatory = false,
+                                Boolean immediate = false)
+        {
+            InternalForwardTo(model, exchange, routingKey, mandatory, immediate, false);
+        }
+
+        internal void InternalForwardTo(IModel model,
+                                        Exchange exchange,
+                                        String routingKey = "",
+                                        Boolean mandatory = false,
+                                        Boolean immediate = false,
+                                        Boolean persistent = false)
         {
             var properties = Args.BasicProperties.Copy();
-            properties.Persistent = true;
+            properties.Persistent = persistent;
             model.BasicPublish(exchange.Name,
-                               String.Empty,
+                               routingKey,
+                               mandatory,
+                               immediate,
                                properties,
                                Args.Body);
         }
