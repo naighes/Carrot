@@ -51,7 +51,10 @@ namespace Carrot
                 consumer.Dispose();
 
             if (_outboundModel != null)
+            {
+                _outboundModel.WaitForConfirms(TimeSpan.FromSeconds(30d));
                 _outboundModel.Dispose();
+            }
 
             if (_connection != null)
                 _connection.Dispose();
