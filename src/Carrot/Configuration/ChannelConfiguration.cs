@@ -46,7 +46,7 @@ namespace Carrot.Configuration
             if (resolver == null)
                 throw new ArgumentNullException("resolver");
 
-            MessageTypeResolver = resolver; // TODO: we should define a very basic resolving strategy, with a strong convention.
+            MessageTypeResolver = resolver;
         }
 
         public void SetPrefetchSize(UInt32 value)
