@@ -20,5 +20,10 @@ namespace Carrot.NLog
         {
             _logger.Info(message);
         }
+
+        public void Error(String message, Exception exception)
+        {
+            _logger.Error(exception, message);
+        }
     }
 }

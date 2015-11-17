@@ -73,6 +73,7 @@
     <Compile Include="Extensions\BasicPropertiesExtensions.cs" />
     <Compile Include="Extensions\ConsumerExtensions.cs" />
     <Compile Include="Extensions\DateTimeOffsetExtensions.cs" />
+    <Compile Include="Extensions\EnumerableExtensions.cs" />
     <Compile Include="Fallback\DeadLetterStrategy.cs" />
     <Compile Include="Fallback\IFallbackStrategy.cs" />
     <Compile Include="Fallback\NoFallbackStrategy.cs" />

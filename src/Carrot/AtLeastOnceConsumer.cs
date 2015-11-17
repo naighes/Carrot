@@ -21,6 +21,21 @@ namespace Carrot
             _log = log;
         }
 
+        protected internal override Task<AggregateConsumingResult> ConsumeAsync(BasicDeliverEventArgs args)
+        {
+            return base.ConsumeAsync(args)
+                       .ContinueWith(_ =>
+                       {
+                           var result = _.Result;
+
+                           if (result is ConsumingFailureBase)
+                               ((ConsumingFailureBase)result).WithErrors(__ => _log.Error("consuming error",
+                                                                                          __.GetBaseException()));
+
+                           return result;
+                       });
+        }
+
         protected override void OnModelBasicAcks(Object sender, BasicAckEventArgs args)
         {
             base.OnModelBasicAcks(sender, args);

@@ -12,5 +12,12 @@ namespace Carrot.Logging
 
             Debug.WriteLine(message);
         }
+
+        public void Error(String message, Exception exception)
+        {
+            Debug.WriteLine("{0}:{1}",
+                            message ?? "an error has occurred",
+                            exception == null ? "[unknow]" : exception.Message);
+        }
     }
 }

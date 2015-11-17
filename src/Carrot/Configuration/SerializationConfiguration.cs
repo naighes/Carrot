@@ -9,7 +9,7 @@ namespace Carrot.Configuration
         private readonly IContentNegotiator _negotiator = new ContentNegotiator();
 
         private readonly IDictionary<Predicate<ContentNegotiator.MediaTypeHeader>, ISerializer> _serializers =
-            new Dictionary<Predicate<ContentNegotiator.MediaTypeHeader>, ISerializer>()
+            new Dictionary<Predicate<ContentNegotiator.MediaTypeHeader>, ISerializer>
                 {
                     { _ => _.MediaType == "application/json", new JsonSerializer() }
                 };

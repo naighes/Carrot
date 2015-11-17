@@ -1,4 +1,6 @@
 using System;
+using System.Linq;
+using Carrot.Extensions;
 using Carrot.Fallback;
 using RabbitMQ.Client;
 
@@ -84,6 +86,16 @@ namespace Carrot.Messages
         {
             _fallbackStrategy.Apply(model, Message);
             return base.Reply(model);
+        }
+
+        internal void WithErrors(Action<Exception> action)
+        {
+            if (action == null)
+                throw new ArgumentNullException("action");
+
+            Exceptions.NotNull()
+                      .ToList()
+                      .ForEach(action);
         }
     }
 

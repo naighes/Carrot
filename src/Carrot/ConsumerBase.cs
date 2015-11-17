@@ -69,7 +69,7 @@ namespace Carrot
             Model.Dispose();
         }
 
-        protected internal Task<AggregateConsumingResult> ConsumeAsync(BasicDeliverEventArgs args)
+        protected internal virtual Task<AggregateConsumingResult> ConsumeAsync(BasicDeliverEventArgs args)
         {
             return _builder.Build(args).ConsumeAsync(_configuration);
         }

@@ -19,5 +19,10 @@ namespace Carrot.log4net
         {
             _log.Info(message);
         }
+
+        public void Error(String message, Exception exception)
+        {
+            _log.Error(message, exception);
+        }
     }
 }
