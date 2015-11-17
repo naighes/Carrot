@@ -1,24 +1,33 @@
 using System;
 using System.Linq;
+using System.Reflection;
 
 namespace Carrot.Configuration
 {
     public class DefaultMessageTypeResolver : IMessageTypeResolver
     {
+        private readonly Assembly[] _assemblies;
+
+        public DefaultMessageTypeResolver()
+            : this(AppDomain.CurrentDomain.GetAssemblies())
+        {
+        }
+
+        public DefaultMessageTypeResolver(Assembly[] assemblies)
+        {
+            _assemblies = assemblies;
+        }
+
         public MessageBinding Resolve(String source)
         {
             if (source == null)
                 throw new ArgumentNullException("source");
 
            var type = Type.GetType(source) ??
-           AppDomain.CurrentDomain.GetAssemblies()
-                    .Select(a => a.GetType(source))
-                    .FirstOrDefault(t => t != null);
+           _assemblies.Select(_ => _.GetType(source))
+                      .FirstOrDefault(_ => _ != null);
 
-            if (type == null)
-                return EmptyMessageBinding.Instance;
-
-            return new MessageBinding(source, type);
+            return type == null ? EmptyMessageBinding.Instance : new MessageBinding(source, type);
         }
 
         public MessageBinding Resolve<TMessage>() where TMessage : class

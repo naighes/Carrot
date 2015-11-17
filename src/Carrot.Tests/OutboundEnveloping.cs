@@ -64,6 +64,8 @@ namespace Carrot.Tests
             var exception = new Exception();
             model.Setup(_ => _.BasicPublish(exchange,
                                             String.Empty,
+                                            false,
+                                            false,
                                             It.IsAny<IBasicProperties>(),
                                             It.IsAny<Byte[]>()))
                  .Throws(exception);

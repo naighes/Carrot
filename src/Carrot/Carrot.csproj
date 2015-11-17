@@ -76,10 +76,14 @@
     <Compile Include="Fallback\DeadLetterStrategy.cs" />
     <Compile Include="Fallback\IFallbackStrategy.cs" />
     <Compile Include="Fallback\NoFallbackStrategy.cs" />
+    <Compile Include="IAmqpConnection.cs" />
     <Compile Include="IChannel.cs" />
     <Compile Include="IConsumer.cs" />
     <Compile Include="IDateTimeProvider.cs" />
     <Compile Include="INewId.cs" />
+    <Compile Include="LoggedAmqpConnection.cs" />
+    <Compile Include="Logging\DefaultLog.cs" />
+    <Compile Include="Logging\ILog.cs" />
     <Compile Include="Messages\ConsumedMessage.cs" />
     <Compile Include="Messages\ConsumedMessageBase.cs" />
     <Compile Include="Messages\ConsumedMessageBuilder.cs" />

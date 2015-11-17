@@ -110,24 +110,24 @@ namespace Carrot
             var builder = new ConsumedMessageBuilder(_configuration.SerializationConfiguration,
                                                      _configuration.MessageTypeResolver);
 
-            return new AmqpConnection(connection,
-                                      _promises.Select(_ => BuildConsumer(connection, _, builder)).ToList(),
-                                      outboundModel,
-                                      new DateTimeProvider(),
-                                      _configuration);
+            return new LoggedAmqpConnection(connection,
+                                            _promises.Select(_ => BuildConsumer(connection, _, builder)).ToList(),
+                                            outboundModel,
+                                            new DateTimeProvider(),
+                                            _configuration);
         }
 
         public void SubscribeByAtMostOnce(Queue queue, Action<ConsumingConfiguration> configure)
         {
             Subscribe(configure,
-                      (b, c) => new AtMostOnceConsumingPromise(queue, b, c),
+                      (b, c) => new AtMostOnceConsumingPromise(queue, b, c, () => _configuration.Log),
                       queue);
         }
 
         public void SubscribeByAtLeastOnce(Queue queue, Action<ConsumingConfiguration> configure)
         {
             Subscribe(configure,
-                      (b, c) => new AtLeastOnceConsumingPromise(queue, b, c),
+                      (b, c) => new AtLeastOnceConsumingPromise(queue, b, c, () => _configuration.Log),
                       queue);
         }
 

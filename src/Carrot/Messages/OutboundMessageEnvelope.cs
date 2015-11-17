@@ -10,7 +10,8 @@ using RabbitMQ.Client.Framing;
 
 namespace Carrot.Messages
 {
-    internal class OutboundMessageEnvelope<TMessage> where TMessage : class
+    internal class OutboundMessageEnvelope<TMessage>
+        where TMessage : class
     {
         private const String DefaultContentEncoding = "UTF-8";
         private const String DefaultContentType = "application/json";

@@ -1,4 +1,5 @@
 using System;
+using Carrot.Logging;
 
 namespace Carrot.Configuration
 {
@@ -6,6 +7,7 @@ namespace Carrot.Configuration
     {
         private readonly SerializationConfiguration _serializationConfiguration;
 
+        private ILog _log = new DefaultLog();
         private IMessageTypeResolver _messageTypeResolver = new DefaultMessageTypeResolver();
 
         internal ChannelConfiguration()
@@ -27,6 +29,11 @@ namespace Carrot.Configuration
         internal UInt16 PrefetchCount { get; private set; }
 
         internal INewId IdGenerator { get; private set; }
+
+        internal ILog Log
+        {
+            get { return _log; }
+        }
 
         internal SerializationConfiguration SerializationConfiguration
         {
@@ -71,6 +78,14 @@ namespace Carrot.Configuration
                 throw new ArgumentNullException("instance");
 
             IdGenerator = instance;
+        }
+
+        public void LogBy(ILog log)
+        {
+            if (log == null)
+                throw new ArgumentNullException("log");
+
+            _log = log;
         }
 
         public void ConfigureSerialization(Action<SerializationConfiguration> configure)

@@ -19,6 +19,11 @@ namespace Carrot
         {
             _builder = builder;
             _configuration = configuration;
+
+            Model.BasicAcks += OnModelBasicAcks;
+            Model.BasicNacks += OnModelBasicNacks;
+            Model.BasicReturn += OnModelBasicReturn;
+            ConsumerCancelled += OnConsumerCancelled;
         }
 
         public override void HandleBasicDeliver(String consumerTag,
@@ -53,8 +58,15 @@ namespace Carrot
 
         public void Dispose()
         {
-            if (Model != null)
-                Model.Dispose();
+            if (Model == null)
+                return;
+
+            Model.BasicAcks -= OnModelBasicAcks;
+            Model.BasicNacks -= OnModelBasicNacks;
+            Model.BasicReturn -= OnModelBasicReturn;
+            ConsumerCancelled -= OnConsumerCancelled;
+
+            Model.Dispose();
         }
 
         protected internal Task<AggregateConsumingResult> ConsumeAsync(BasicDeliverEventArgs args)
@@ -63,5 +75,13 @@ namespace Carrot
         }
 
         protected abstract Task<AggregateConsumingResult> ConsumeInternalAsync(BasicDeliverEventArgs args);
+
+        protected virtual void OnModelBasicReturn(Object sender, BasicReturnEventArgs args) { }
+
+        protected virtual void OnModelBasicNacks(Object sender, BasicNackEventArgs args) { }
+
+        protected virtual void OnModelBasicAcks(Object sender, BasicAckEventArgs args) { }
+
+        protected virtual void OnConsumerCancelled(Object sender, ConsumerEventArgs args) { }
     }
 }

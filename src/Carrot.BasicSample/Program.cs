@@ -21,8 +21,8 @@ namespace Carrot.BasicSample
             var exchange = channel.DeclareDirectExchange("source_exchange");
             var queue = channel.DeclareQueue("my_test_queue");
             channel.DeclareExchangeBinding(exchange, queue, routingKey);
-            //channel.SubscribeByAtLeastOnce(queue, _ => _.Consumes(new FooConsumer1()));
-            //channel.SubscribeByAtLeastOnce(queue, _ => _.Consumes(new FooConsumer2()));
+            channel.SubscribeByAtLeastOnce(queue, _ => _.Consumes(new FooConsumer1()));
+            channel.SubscribeByAtLeastOnce(queue, _ => _.Consumes(new FooConsumer2()));
             var connection = channel.Connect();
 
             for (var i = 0; i < 5; i++)

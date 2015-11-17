@@ -8,21 +8,14 @@ using RabbitMQ.Client.Events;
 
 namespace Carrot
 {
-    public interface IAmqpConnection : IDisposable
-    {
-        Task<IPublishResult> PublishAsync<TMessage>(OutboundMessage<TMessage> message,
-                                                    Exchange exchange,
-                                                    String routingKey = "",
-                                                    TaskFactory taskFactory = null) where TMessage : class;
-    }
-
     public class AmqpConnection : IAmqpConnection
     {
+        protected readonly ChannelConfiguration Configuration;
+
         private readonly IConnection _connection;
         private readonly IEnumerable<ConsumerBase> _consumers;
         private readonly IModel _outboundModel;
         private readonly IDateTimeProvider _dateTimeProvider;
-        private readonly ChannelConfiguration _configuration;
 
         internal AmqpConnection(IConnection connection,
                                 IEnumerable<ConsumerBase> consumers,
@@ -34,7 +27,7 @@ namespace Carrot
             _consumers = consumers;
             _outboundModel = outboundModel;
             _dateTimeProvider = dateTimeProvider;
-            _configuration = configuration;
+            Configuration = configuration;
 
             _outboundModel.BasicAcks += OnOutboundModelBasicAcks;
             _outboundModel.BasicNacks += OnOutboundModelBasicNacks;
@@ -46,7 +39,7 @@ namespace Carrot
                                                            String routingKey = "",
                                                            TaskFactory taskFactory = null) where TMessage : class
         {
-            var envelope = new OutboundMessageEnvelope<TMessage>(message, _dateTimeProvider, _configuration);
+            var envelope = new OutboundMessageEnvelope<TMessage>(message, _dateTimeProvider, Configuration);
             return envelope.PublishAsync(_outboundModel, exchange, routingKey, taskFactory);
         }
 
@@ -57,7 +50,7 @@ namespace Carrot
 
             if (_outboundModel != null)
             {
-                _outboundModel.WaitForConfirms(TimeSpan.FromSeconds(30d));
+                _outboundModel.WaitForConfirms(TimeSpan.FromSeconds(30d)); // TODO: timeout should not be hardcodeds
 
                 _outboundModel.BasicAcks -= OnOutboundModelBasicAcks;
                 _outboundModel.BasicNacks -= OnOutboundModelBasicNacks;
@@ -70,19 +63,10 @@ namespace Carrot
                 _connection.Dispose();
         }
 
-        private static void OnOutboundModelBasicReturn(Object sender, BasicReturnEventArgs args)
-        {
-            Console.WriteLine("OnOutboundModelBasicReturn - [ReplyText: '{0}']", args.ReplyText);
-        }
+        protected virtual void OnOutboundModelBasicReturn(Object sender, BasicReturnEventArgs args) { }
 
-        private static void OnOutboundModelBasicNacks(Object sender, BasicNackEventArgs args)
-        {
-            Console.WriteLine("OnOutboundModelBasicNacks - [DeliveryTag:'{0}']", args.DeliveryTag);
-        }
+        protected virtual void OnOutboundModelBasicNacks(Object sender, BasicNackEventArgs args) { }
 
-        private static void OnOutboundModelBasicAcks(Object sender, BasicAckEventArgs args)
-        {
-            Console.WriteLine("OnOutboundModelBasicAcks - [DeliveryTag:'{0}']", args.DeliveryTag);
-        }
+        protected virtual void OnOutboundModelBasicAcks(Object sender, BasicAckEventArgs args) { }
     }
 }

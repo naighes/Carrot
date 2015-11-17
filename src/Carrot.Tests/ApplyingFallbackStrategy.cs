@@ -82,6 +82,8 @@ namespace Carrot.Tests
             strategy.Apply(model.Object, message);
             model.Verify(_ => _.BasicPublish(dleName,
                                              String.Empty,
+                                             true,
+                                             false,
                                              It.Is<IBasicProperties>(properties => properties.Persistent == true),
                                              args.Body),
                          Times.Once);
