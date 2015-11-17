@@ -35,8 +35,8 @@ namespace Carrot
             if (ReferenceEquals(this, other))
                 return true;
 
-            return _exchange.Equals(other._exchange) &&
-                   _queue.Equals(other._queue) &&
+            return _exchange == other._exchange &&
+                   _queue == other._queue &&
                    String.Equals(_routingKey, other._routingKey);
         }
 

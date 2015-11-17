@@ -56,6 +56,10 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Carrot.log4net\Carrot.log4net.csproj">
+      <Project>{1a83cab0-abc7-44ce-8f08-da7bf9418af7}</Project>
+      <Name>Carrot.log4net</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Carrot\Carrot.csproj">
       <Project>{0C4F49E6-F192-4846-A489-9AA73D57B13D}</Project>
       <Name>Carrot</Name>
