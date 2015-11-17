@@ -10,12 +10,19 @@ namespace Carrot.Logging
             if (message == null)
                 return;
 
-            Debug.WriteLine(message);
+            Debug.WriteLine("[INFO] {0}", new Object[] { message });
+        }
+
+        public void Warn(String message, Exception exception = null)
+        {
+            Debug.WriteLine("[WARN] {0}:{1}",
+                            message ?? "an error has occurred",
+                            exception == null ? "[unknow]" : exception.Message);
         }
 
         public void Error(String message, Exception exception)
         {
-            Debug.WriteLine("{0}:{1}",
+            Debug.WriteLine("[ERROR] {0}:{1}",
                             message ?? "an error has occurred",
                             exception == null ? "[unknow]" : exception.Message);
         }

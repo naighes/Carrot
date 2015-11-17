@@ -18,12 +18,25 @@ namespace Carrot.NLog
 
         public void Info(String message)
         {
-            _logger.Info(message);
+            if (_logger.IsInfoEnabled)
+                _logger.Info(message);
+        }
+
+        public void Warn(String message, Exception exception = null)
+        {
+            if (!_logger.IsWarnEnabled)
+                return;
+
+            if (exception == null)
+                _logger.Warn(message);
+            else
+                _logger.Warn(exception, message);
         }
 
         public void Error(String message, Exception exception)
         {
-            _logger.Error(exception, message);
+            if (_logger.IsErrorEnabled)
+                _logger.Error(exception, message);
         }
     }
 }

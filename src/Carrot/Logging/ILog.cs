@@ -6,6 +6,8 @@ namespace Carrot.Logging
     {
         void Info(String message);
 
+        void Warn(String message, Exception exception = null);
+
         void Error(String message, Exception exception);
     }
 }

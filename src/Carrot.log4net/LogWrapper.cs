@@ -17,12 +17,25 @@ namespace Carrot.log4net
 
         public void Info(String message)
         {
-            _log.Info(message);
+            if (_log.IsInfoEnabled)
+                _log.Info(message);
+        }
+
+        public void Warn(String message, Exception exception = null)
+        {
+            if (!_log.IsWarnEnabled)
+                return;
+
+            if (exception == null)
+                _log.Warn(message);
+            else
+                _log.Warn(message, exception);
         }
 
         public void Error(String message, Exception exception)
         {
-            _log.Error(message, exception);
+            if (_log.IsErrorEnabled)
+                _log.Error(message, exception);
         }
     }
 }
