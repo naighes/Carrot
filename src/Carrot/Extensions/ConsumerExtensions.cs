@@ -13,8 +13,17 @@ namespace Carrot.Extensions
             var result = task.Result;
 
             if (result is ConsumingFailureBase)
+            {
+                if (result is CorruptedMessageConsumingFailure)
+                    log.Error("message content corruption detected");
+                else if (result is UnresolvedMessageConsumingFailure)
+                    log.Error("runtime type cannot be resolved");
+                else if (result is UnsupportedMessageConsumingFailure)
+                    log.Error("message type cannot be resolved");
+
                 ((ConsumingFailureBase)result).WithErrors(_ => log.Error("consuming error",
                                                                          _.GetBaseException()));
+            }
 
             return result;
         }
