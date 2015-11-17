@@ -83,6 +83,8 @@
     <Compile Include="IDateTimeProvider.cs" />
     <Compile Include="INewId.cs" />
     <Compile Include="LoggedAmqpConnection.cs" />
+    <Compile Include="LoggedAtLeastOnceConsumer.cs" />
+    <Compile Include="LoggedAtMostOnceConsumer.cs" />
     <Compile Include="Logging\DefaultLog.cs" />
     <Compile Include="Logging\ILog.cs" />
     <Compile Include="Messages\ConsumedMessage.cs" />

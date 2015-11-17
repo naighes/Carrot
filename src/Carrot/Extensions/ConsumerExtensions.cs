@@ -1,11 +1,24 @@
 using System;
 using System.Threading.Tasks;
+using Carrot.Logging;
 using Carrot.Messages;
 
 namespace Carrot.Extensions
 {
     internal static class ConsumerExtensions
     {
+        internal static AggregateConsumingResult HandleErrorResult(this Task<AggregateConsumingResult> task,
+                                                                   ILog log)
+        {
+            var result = task.Result;
+
+            if (result is ConsumingFailureBase)
+                ((ConsumingFailureBase)result).WithErrors(_ => log.Error("consuming error",
+                                                                         _.GetBaseException()));
+
+            return result;
+        }
+
         internal static Task<ConsumedMessage.ConsumingResult> SafeConsumeAsync(this IConsumer consumer,
                                                                                ConsumedMessage message)
         {

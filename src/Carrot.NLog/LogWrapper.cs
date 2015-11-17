@@ -33,10 +33,32 @@ namespace Carrot.NLog
                 _logger.Warn(exception, message);
         }
 
-        public void Error(String message, Exception exception)
+        public void Error(String message, Exception exception = null)
         {
-            if (_logger.IsErrorEnabled)
+            if (!_logger.IsErrorEnabled)
+                return;
+
+            if (exception == null)
+                _logger.Error(message);
+            else
                 _logger.Error(exception, message);
+        }
+
+        public void Fatal(String message, Exception exception = null)
+        {
+            if (!_logger.IsFatalEnabled)
+                return;
+
+            if (exception == null)
+                _logger.Fatal(message);
+            else
+                _logger.Fatal(exception, message);
+        }
+
+        public void Debug(String message)
+        {
+            if (_logger.IsDebugEnabled)
+                _logger.Debug(message);
         }
     }
 }

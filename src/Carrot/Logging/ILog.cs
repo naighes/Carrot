@@ -8,6 +8,10 @@ namespace Carrot.Logging
 
         void Warn(String message, Exception exception = null);
 
-        void Error(String message, Exception exception);
+        void Error(String message, Exception exception = null);
+
+        void Fatal(String message, Exception exception = null);
+
+        void Debug(String message);
     }
 }

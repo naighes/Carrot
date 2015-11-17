@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 
 namespace Carrot.Logging
 {
@@ -10,21 +9,36 @@ namespace Carrot.Logging
             if (message == null)
                 return;
 
-            Debug.WriteLine("[INFO] {0}", new Object[] { message });
+            System.Diagnostics.Debug.WriteLine("[INFO] {0}", new Object[] { message });
         }
 
         public void Warn(String message, Exception exception = null)
         {
-            Debug.WriteLine("[WARN] {0}:{1}",
-                            message ?? "an error has occurred",
-                            exception == null ? "[unknow]" : exception.Message);
+            System.Diagnostics.Debug.WriteLine("[WARN] {0}:{1}",
+                                               message ?? "an error has occurred",
+                                               exception == null ? "[unknow]" : exception.Message);
         }
 
-        public void Error(String message, Exception exception)
+        public void Error(String message, Exception exception = null)
         {
-            Debug.WriteLine("[ERROR] {0}:{1}",
-                            message ?? "an error has occurred",
-                            exception == null ? "[unknow]" : exception.Message);
+            System.Diagnostics.Debug.WriteLine("[ERROR] {0}:{1}",
+                                               message ?? "an error has occurred",
+                                               exception == null ? "[unknow]" : exception.Message);
+        }
+
+        public void Fatal(String message, Exception exception = null)
+        {
+            System.Diagnostics.Debug.WriteLine("[FATAL] {0}:{1}",
+                                               message ?? "an error has occurred",
+                                               exception == null ? "[unknow]" : exception.Message);
+        }
+
+        public void Debug(String message)
+        {
+            if (message == null)
+                return;
+
+            System.Diagnostics.Debug.WriteLine("[DEBUG] {0}", new Object[] { message });
         }
     }
 }

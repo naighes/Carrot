@@ -34,8 +34,30 @@ namespace Carrot.log4net
 
         public void Error(String message, Exception exception)
         {
-            if (_log.IsErrorEnabled)
+            if (!_log.IsErrorEnabled)
+                return;
+
+            if (exception == null)
+                _log.Error(message);
+            else
                 _log.Error(message, exception);
+        }
+
+        public void Fatal(String message, Exception exception = null)
+        {
+            if (!_log.IsFatalEnabled)
+                return;
+
+            if (exception == null)
+                _log.Fatal(message);
+            else
+                _log.Fatal(message, exception);
+        }
+
+        public void Debug(String message)
+        {
+            if (_log.IsDebugEnabled)
+                _log.Debug(message);
         }
     }
 }
