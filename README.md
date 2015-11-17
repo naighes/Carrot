@@ -76,7 +76,7 @@ If you need durable messaging, make use of `DurableOutboundMessage<T>`:
 
 Clone the source down to your machine.
 
-    git clone https://github.com/naighes/Carrot.wiki.git
+    git clone https://github.com/naighes/Carrot.git
 
 Run `build.bat`
 
