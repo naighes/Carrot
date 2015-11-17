@@ -108,6 +108,7 @@
     <Compile Include="Serialization\NullSerializer.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Carrot.nuspec" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup />
