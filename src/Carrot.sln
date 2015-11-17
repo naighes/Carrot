@@ -26,6 +26,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ps", "ps", "{5245149C-E13A-
 		..\build.ps1 = ..\build.ps1
 		..\default.ps1 = ..\default.ps1
 		..\extras.psm1 = ..\extras.psm1
+		..\nuget_package.bat = ..\nuget_package.bat
 		..\nuget_push.bat = ..\nuget_push.bat
 	EndProjectSection
 EndProject

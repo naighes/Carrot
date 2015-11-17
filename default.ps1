@@ -29,6 +29,8 @@ Task CreateRelease -Depends AssemblyInfo-Generate, PrepareBinaries
 
 Task NuGet-Push -Depends CreateRelease, NuGet-CreatePackages, NuGet-Publish
 
+Task NuGet-Package -Depends CreateRelease, NuGet-CreatePackages
+
 Task Clean {
     Write-Host $bn
 	
