@@ -39,7 +39,8 @@ namespace Carrot
                                                            String routingKey = "",
                                                            TaskFactory taskFactory = null) where TMessage : class
         {
-            var envelope = new OutboundMessageEnvelope<TMessage>(message, _dateTimeProvider, Configuration);
+            var tag = _outboundModel.NextPublishSeqNo;
+            var envelope = new OutboundMessageEnvelope<TMessage>(message, _dateTimeProvider, tag, Configuration);
             return envelope.PublishAsync(_outboundModel, exchange, routingKey, taskFactory);
         }
 
@@ -59,8 +60,7 @@ namespace Carrot
                 _outboundModel.Dispose();
             }
 
-            if (_connection != null)
-                _connection.Dispose();
+            _connection?.Dispose();
         }
 
         protected virtual void OnOutboundModelBasicReturn(Object sender, BasicReturnEventArgs args) { }

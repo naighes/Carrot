@@ -39,7 +39,7 @@ namespace Carrot.Tests
                                                      _.Map(__ => __.MediaType == "application/json", serializer.Object);
                                                  });
 
-            var wrapper = new OutboundMessageEnvelope<Foo>(message, dateTimeProvider.Object, configuration);
+            var wrapper = new OutboundMessageEnvelope<Foo>(message, dateTimeProvider.Object, 0uL, configuration);
             var result = Assert.IsType<SuccessfulPublishing>(wrapper.PublishAsync(model.Object,
                                                                                   new Exchange("target_exchange", "direct")).Result);
             Assert.Equal(messageId, result.MessageId);
@@ -78,7 +78,7 @@ namespace Carrot.Tests
                 _.Map(__ => __.MediaType == "application/json", serializer.Object);
             });
 
-            var wrapper = new OutboundMessageEnvelope<Foo>(message, dateTimeProvider.Object, configuration);
+            var wrapper = new OutboundMessageEnvelope<Foo>(message, dateTimeProvider.Object, 0uL, configuration);
             var result = Assert.IsType<FailurePublishing>(wrapper.PublishAsync(model.Object,
                                                                                new Exchange(exchange, "direct")).Result);
             Assert.Equal(result.Exception, exception);
@@ -106,6 +106,7 @@ namespace Carrot.Tests
 
             var envelope = new OutboundMessageEnvelopeWrapper<Foo>(new OutboundMessage<Foo>(new Foo()),
                                                                    dateTimeProvider.Object,
+                                                                   0uL,
                                                                    configuration);
             envelope.CallHydrateProperties(properties);
             Assert.Equal(messageId, properties.MessageId);
@@ -200,6 +201,7 @@ namespace Carrot.Tests
 
             return new OutboundMessageEnvelopeWrapper<TMessage>(message,
                                                                 new Mock<IDateTimeProvider>().Object,
+                                                                0uL,
                                                                 configuration);
         }
 
@@ -207,8 +209,9 @@ namespace Carrot.Tests
         {
             internal OutboundMessageEnvelopeWrapper(OutboundMessage<TMessage> message,
                                                     IDateTimeProvider dateTimeProvider,
+                                                    UInt64 tag,
                                                     ChannelConfiguration configuration)
-                : base(message, dateTimeProvider, configuration)
+                : base(message, dateTimeProvider, tag, configuration)
             {
             }
 

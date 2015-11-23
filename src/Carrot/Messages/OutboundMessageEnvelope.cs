@@ -18,14 +18,17 @@ namespace Carrot.Messages
 
         private readonly OutboundMessage<TMessage> _message;
         private readonly IDateTimeProvider _dateTimeProvider;
+        private readonly UInt64 _tag;
         private readonly ChannelConfiguration _configuration;
 
         internal OutboundMessageEnvelope(OutboundMessage<TMessage> message,
                                          IDateTimeProvider dateTimeProvider,
+                                         UInt64 tag,
                                          ChannelConfiguration configuration)
         {
             _message = message;
             _dateTimeProvider = dateTimeProvider;
+            _tag = tag;
             _configuration = configuration;
         }
 
@@ -51,7 +54,7 @@ namespace Carrot.Messages
                                                            encoding.GetBytes(serializer.Serialize(_message.Content)));
                                     },
                                     properties)
-                          .ContinueWith<IPublishResult>(Result);
+                          .ContinueWith(Result);
         }
 
         protected virtual void HydrateProperties(IBasicProperties properties)
