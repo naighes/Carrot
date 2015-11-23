@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Text;
 using System.Threading.Tasks;
 using Carrot.Configuration;
 using Carrot.Extensions;
@@ -40,8 +39,6 @@ namespace Carrot.Messages
             var properties = BuildBasicProperties();
             HydrateProperties(properties);
 
-            var encoding = Encoding.GetEncoding(properties.ContentEncoding);
-            var serializer = _configuration.SerializationConfiguration.Create(properties.ContentType);
             var factory = taskFactory ?? Task.Factory;
 
             return factory.StartNew(_ =>
@@ -51,7 +48,9 @@ namespace Carrot.Messages
                                                                    false,
                                                                    false,
                                                                    (IBasicProperties)_,
-                                                                   encoding.GetBytes(serializer.Serialize(_message.Content)));
+                                                                   properties.CreateEncoding()
+                                                                             .GetBytes(properties.CreateSerializer(_configuration.SerializationConfiguration)
+                                                                                                 .Serialize(_message.Content)));
                                     },
                                     properties)
                           .ContinueWith(Result);

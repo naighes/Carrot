@@ -5,24 +5,15 @@ namespace Carrot.Configuration
 {
     public class ChannelConfiguration
     {
-        private readonly SerializationConfiguration _serializationConfiguration;
-
-        private ILog _log = new DefaultLog();
-        private IMessageTypeResolver _messageTypeResolver = new DefaultMessageTypeResolver();
-
         internal ChannelConfiguration()
         {
             IdGenerator = new NewGuid();
-            _serializationConfiguration = new SerializationConfiguration();
+            SerializationConfiguration = new SerializationConfiguration();
         }
 
         internal Uri EndpointUri { get; private set; }
 
-        internal IMessageTypeResolver MessageTypeResolver
-        {
-            get { return _messageTypeResolver; }
-            private set { _messageTypeResolver = value; }
-        }
+        internal IMessageTypeResolver MessageTypeResolver { get; private set; } = new DefaultMessageTypeResolver();
 
         internal UInt32 PrefetchSize { get; private set; }
 
@@ -30,20 +21,14 @@ namespace Carrot.Configuration
 
         internal INewId IdGenerator { get; private set; }
 
-        internal ILog Log
-        {
-            get { return _log; }
-        }
+        internal ILog Log { get; private set; } = new DefaultLog();
 
-        internal SerializationConfiguration SerializationConfiguration
-        {
-            get { return _serializationConfiguration; }
-        }
+        internal SerializationConfiguration SerializationConfiguration { get; }
 
         public void Endpoint(Uri uri)
         {
             if (uri == null)
-                throw new ArgumentNullException("uri");
+                throw new ArgumentNullException(nameof(uri));
 
             EndpointUri = uri;
         }
@@ -51,7 +36,7 @@ namespace Carrot.Configuration
         public void ResolveMessageTypeBy(IMessageTypeResolver resolver)
         {
             if (resolver == null)
-                throw new ArgumentNullException("resolver");
+                throw new ArgumentNullException(nameof(resolver));
 
             MessageTypeResolver = resolver;
         }
@@ -59,7 +44,7 @@ namespace Carrot.Configuration
         public void SetPrefetchSize(UInt32 value)
         {
             if (value <= 0)
-                throw new ArgumentOutOfRangeException("value");
+                throw new ArgumentOutOfRangeException(nameof(value));
 
             PrefetchSize = value;
         }
@@ -67,7 +52,7 @@ namespace Carrot.Configuration
         public void SetPrefetchCount(UInt16 value)
         {
             if (value <= 0)
-                throw new ArgumentOutOfRangeException("value");
+                throw new ArgumentOutOfRangeException(nameof(value));
 
             PrefetchCount = value;
         }
@@ -75,7 +60,7 @@ namespace Carrot.Configuration
         public void GeneratesMessageIdBy(INewId instance)
         {
             if (instance == null)
-                throw new ArgumentNullException("instance");
+                throw new ArgumentNullException(nameof(instance));
 
             IdGenerator = instance;
         }
@@ -83,17 +68,17 @@ namespace Carrot.Configuration
         public void LogBy(ILog log)
         {
             if (log == null)
-                throw new ArgumentNullException("log");
+                throw new ArgumentNullException(nameof(log));
 
-            _log = log;
+            Log = log;
         }
 
         public void ConfigureSerialization(Action<SerializationConfiguration> configure)
         {
             if (configure == null)
-                throw new ArgumentNullException("configure");
+                throw new ArgumentNullException(nameof(configure));
 
-            configure(_serializationConfiguration);
+            configure(SerializationConfiguration);
         }
     }
 }

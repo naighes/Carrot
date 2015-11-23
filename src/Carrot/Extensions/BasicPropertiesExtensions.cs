@@ -1,5 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Text;
+using Carrot.Configuration;
+using Carrot.Serialization;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Framing;
 
@@ -36,6 +39,20 @@ namespace Carrot.Extensions
                     result.Headers.Add(header.Key, header.Value);
 
             return result;
+        }
+
+        public static ISerializer CreateSerializer(this IBasicProperties source,
+                                                   SerializationConfiguration configuration)
+        {
+            if (configuration == null)
+                throw new ArgumentNullException(nameof(configuration));
+
+            return configuration.Create(source.ContentType);
+        }
+
+        public static Encoding CreateEncoding(this IBasicProperties source)
+        {
+            return Encoding.GetEncoding(source.ContentEncoding);
         }
     }
 }
