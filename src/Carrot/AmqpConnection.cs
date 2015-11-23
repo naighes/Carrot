@@ -28,7 +28,7 @@ namespace Carrot
             _dateTimeProvider = dateTimeProvider;
             Configuration = configuration;
         }
-
+        
         public Task<IPublishResult> PublishAsync<TMessage>(OutboundMessage<TMessage> message,
                                                            Exchange exchange,
                                                            String routingKey = "",

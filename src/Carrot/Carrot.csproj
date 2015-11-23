@@ -71,6 +71,7 @@
     <Compile Include="ConsumingPromise.cs" />
     <Compile Include="Exchange.cs" />
     <Compile Include="Extensions\BasicPropertiesExtensions.cs" />
+    <Compile Include="Extensions\OutboundMessageExtensions.cs" />
     <Compile Include="Extensions\ConsumerExtensions.cs" />
     <Compile Include="Extensions\DateTimeOffsetExtensions.cs" />
     <Compile Include="Extensions\EnumerableExtensions.cs" />
