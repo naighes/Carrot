@@ -40,7 +40,7 @@ namespace Carrot.Tests
                                                  });
 
             var wrapper = new OutboundMessageEnvelope<Foo>(message, dateTimeProvider.Object, 0uL, configuration);
-            var result = Assert.IsType<SuccessfulPublishing>(wrapper.PublishAsync(model.Object,
+            var result = Assert.IsType<SuccessfulPublishing>(wrapper.PublishAsync(new OutboundChannel(model.Object),
                                                                                   new Exchange("target_exchange", "direct")).Result);
             Assert.Equal(messageId, result.MessageId);
         }
@@ -79,7 +79,7 @@ namespace Carrot.Tests
             });
 
             var wrapper = new OutboundMessageEnvelope<Foo>(message, dateTimeProvider.Object, 0uL, configuration);
-            var result = Assert.IsType<FailurePublishing>(wrapper.PublishAsync(model.Object,
+            var result = Assert.IsType<FailurePublishing>(wrapper.PublishAsync(new OutboundChannel(model.Object),
                                                                                new Exchange(exchange, "direct")).Result);
             Assert.Equal(result.Exception, exception);
         }

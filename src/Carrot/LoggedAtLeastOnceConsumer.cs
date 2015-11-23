@@ -24,7 +24,7 @@ namespace Carrot
 
         protected internal override Task<AggregateConsumingResult> ConsumeAsync(BasicDeliverEventArgs args)
         {
-            return base.ConsumeAsync(args).ContinueWith(_ => _.HandleErrorResult(this._log));
+            return base.ConsumeAsync(args).ContinueWith(_ => _.HandleErrorResult(_log));
         }
 
         protected override void OnModelBasicAcks(Object sender, BasicAckEventArgs args)

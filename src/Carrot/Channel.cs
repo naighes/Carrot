@@ -110,11 +110,11 @@ namespace Carrot
             var builder = new ConsumedMessageBuilder(_configuration.SerializationConfiguration,
                                                      _configuration.MessageTypeResolver);
 
-            return new LoggedAmqpConnection(connection,
-                                            _promises.Select(_ => BuildConsumer(connection, _, builder)).ToList(),
-                                            outboundModel,
-                                            new DateTimeProvider(),
-                                            _configuration);
+            return new AmqpConnection(connection,
+                                      _promises.Select(_ => BuildConsumer(connection, _, builder)).ToList(),
+                                      new LoggedOutboundChannel(outboundModel, _configuration),
+                                      new DateTimeProvider(),
+                                      _configuration);
         }
 
         public void SubscribeByAtMostOnce(Queue queue, Action<ConsumingConfiguration> configure)

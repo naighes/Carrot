@@ -32,7 +32,7 @@ namespace Carrot.Messages
             _configuration = configuration;
         }
 
-        internal Task<IPublishResult> PublishAsync(IModel model,
+        internal Task<IPublishResult> PublishAsync(OutboundChannel channel,
                                                    Exchange exchange,
                                                    String routingKey = "",
                                                    TaskFactory taskFactory = null)
@@ -46,12 +46,12 @@ namespace Carrot.Messages
 
             return factory.StartNew(_ =>
                                     {
-                                        model.BasicPublish(exchange.Name,
-                                                           routingKey,
-                                                           false,
-                                                           false,
-                                                           (IBasicProperties)_,
-                                                           encoding.GetBytes(serializer.Serialize(_message.Content)));
+                                        channel.Model.BasicPublish(exchange.Name,
+                                                                   routingKey,
+                                                                   false,
+                                                                   false,
+                                                                   (IBasicProperties)_,
+                                                                   encoding.GetBytes(serializer.Serialize(_message.Content)));
                                     },
                                     properties)
                           .ContinueWith(Result);
