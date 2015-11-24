@@ -3,9 +3,9 @@ using System.Linq;
 
 namespace Carrot.Extensions
 {
-    public static class EnumerableExtensions
+    internal static class EnumerableExtensions
     {
-        public static IEnumerable<T> NotNull<T>(this IEnumerable<T> source) where T : class
+        internal static IEnumerable<T> NotNull<T>(this IEnumerable<T> source) where T : class
         {
             return source.Where(_ => _ != null);
         }

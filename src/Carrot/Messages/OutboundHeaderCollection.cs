@@ -21,8 +21,8 @@ namespace Carrot.Messages
         }
 
         internal virtual IBasicProperties BuildBasicProperties<TMessage>(INewId idGenerator,
-                                                                      IDateTimeProvider dateTimeProvider,
-                                                                      IMessageTypeResolver resolver)
+                                                                         IDateTimeProvider dateTimeProvider,
+                                                                         IMessageTypeResolver resolver)
             where TMessage : class
         {
             var properties = new BasicProperties

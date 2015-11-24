@@ -8,7 +8,7 @@ namespace Carrot.Messages
 {
     public abstract class NonConsumableMessage : ConsumedMessageBase
     {
-        protected NonConsumableMessage(BasicDeliverEventArgs args)
+        protected internal NonConsumableMessage(BasicDeliverEventArgs args)
             : base(args)
         {
         }

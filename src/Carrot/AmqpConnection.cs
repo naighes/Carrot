@@ -36,8 +36,8 @@ namespace Carrot
         {
             var tag = _outboundChannel.Model.NextPublishSeqNo;
             var properties = message.BuildBasicProperties(Configuration.MessageTypeResolver,
-                                                       _dateTimeProvider,
-                                                       Configuration.IdGenerator);
+                                                          _dateTimeProvider,
+                                                          Configuration.IdGenerator);
             var envelope = new OutboundMessageEnvelope<TMessage>(properties,
                                                                  message.Content,
                                                                  tag,

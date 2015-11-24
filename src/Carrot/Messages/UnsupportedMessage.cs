@@ -3,7 +3,7 @@ using RabbitMQ.Client.Events;
 
 namespace Carrot.Messages
 {
-    public class UnsupportedMessage : NonConsumableMessage
+    public sealed class UnsupportedMessage : NonConsumableMessage
     {
         internal UnsupportedMessage(BasicDeliverEventArgs args)
             : base(args)

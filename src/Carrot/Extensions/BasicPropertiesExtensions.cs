@@ -8,9 +8,9 @@ using RabbitMQ.Client.Framing;
 
 namespace Carrot.Extensions
 {
-    public static class BasicPropertiesExtensions
+    internal static class BasicPropertiesExtensions
     {
-        public static IBasicProperties Copy(this IBasicProperties source)
+        internal static IBasicProperties Copy(this IBasicProperties source)
         {
             var result = new BasicProperties
                              {
@@ -41,8 +41,8 @@ namespace Carrot.Extensions
             return result;
         }
 
-        public static ISerializer CreateSerializer(this IBasicProperties source,
-                                                   SerializationConfiguration configuration)
+        internal static ISerializer CreateSerializer(this IBasicProperties source,
+                                                     SerializationConfiguration configuration)
         {
             if (configuration == null)
                 throw new ArgumentNullException(nameof(configuration));
@@ -50,7 +50,7 @@ namespace Carrot.Extensions
             return configuration.Create(source.ContentType);
         }
 
-        public static Encoding CreateEncoding(this IBasicProperties source)
+        internal static Encoding CreateEncoding(this IBasicProperties source)
         {
             return Encoding.GetEncoding(source.ContentEncoding);
         }

@@ -76,9 +76,10 @@ namespace Carrot.Tests
             configuration.GeneratesMessageIdBy(new Mock<INewId>().Object);
             configuration.ResolveMessageTypeBy(resolver.Object);
             configuration.ConfigureSerialization(_ =>
-            {
-                _.Map(__ => __.MediaType == "application/json", serializer.Object);
-            });
+                                                 {
+                                                     _.Map(__ => __.MediaType == "application/json",
+                                                           serializer.Object);
+                                                 });
 
             var properties = message.BuildBasicProperties(resolver.Object,
                                                           dateTimeProvider.Object,

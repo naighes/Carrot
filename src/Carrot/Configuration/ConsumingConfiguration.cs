@@ -12,22 +12,20 @@ namespace Carrot.Configuration
         private readonly Queue _queue;
         private readonly IDictionary<Type, ISet<IConsumer>> _subscriptions = new Dictionary<Type, ISet<IConsumer>>();
 
-        private IFallbackStrategy _fallbackStrategy = NoFallbackStrategy.Instance;
-
         internal ConsumingConfiguration(IChannel channel, Queue queue)
         {
             _channel = channel;
             _queue = queue;
         }
 
-        internal IFallbackStrategy FallbackStrategy => _fallbackStrategy;
+        internal IFallbackStrategy FallbackStrategy { get; private set; } = NoFallbackStrategy.Instance;
 
         public void FallbackBy(Func<IChannel, Queue, IFallbackStrategy> strategy)
         {
             if (strategy == null)
                 throw new ArgumentNullException(nameof(strategy));
 
-            _fallbackStrategy = strategy(_channel, _queue);
+            FallbackStrategy = strategy(_channel, _queue);
         }
 
         public void Consumes<TMessage>(Consumer<TMessage> consumer) where TMessage : class

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Carrot.Configuration;
+using Carrot.Extensions;
 using Carrot.Messages;
 using Moq;
 using RabbitMQ.Client;
@@ -23,8 +24,8 @@ namespace Carrot.Tests
         [Fact]
         public void BuildBasicProperties()
         {
-            const String contentType = "application/json";
-            const String contentEncoding = "UTF-8";
+            const String contentType = "application/xml";
+            const String contentEncoding = "UTF-16";
             const String messageId = "one-id";
             const Int64 timestamp = 123456789L;
             var collection = new OutboundHeaderCollection(new Dictionary<String, Object>(StringComparer.OrdinalIgnoreCase)
@@ -46,6 +47,35 @@ namespace Carrot.Tests
             Assert.Equal(contentType, properties.ContentType);
             Assert.Equal(contentEncoding, properties.ContentEncoding);
             Assert.Equal(value, collection[key]);
+        }
+
+        [Fact]
+        public void BuildBasicPropertiesByConfiguration()
+        {
+            const String contentType = "application/json";
+            const String contentEncoding = "UTF-8";
+            const String messageId = "one-id";
+            const Int64 timestamp = 123456789L;
+            var collection = new OutboundHeaderCollection(new Dictionary<String, Object>(StringComparer.OrdinalIgnoreCase)
+                                                              {
+                                                                  { "content_type", contentType },
+                                                                  { "content_encoding", contentEncoding }
+                                                              });
+            const String key = "foo";
+            const String value = "bar";
+            collection.AddHeader(key, value);
+            var resolver = new Mock<IMessageTypeResolver>();
+            resolver.Setup(_ => _.Resolve<Foo>()).Returns(EmptyMessageBinding.Instance);
+            var newId = new Mock<INewId>();
+            newId.Setup(_ => _.Next()).Returns(messageId);
+            var dateTimeProvider = new Mock<IDateTimeProvider>();
+            dateTimeProvider.Setup(_ => _.UtcNow()).Returns(timestamp.ToDateTimeOffset());
+            var properties = collection.BuildBasicProperties<Foo>(newId.Object, dateTimeProvider.Object, resolver.Object);
+
+            Assert.Equal(messageId, properties.MessageId);
+            Assert.Equal(new AmqpTimestamp(timestamp), properties.Timestamp);
+            Assert.Equal(contentType, properties.ContentType);
+            Assert.Equal(contentEncoding, properties.ContentEncoding);
         }
 
         [Fact]

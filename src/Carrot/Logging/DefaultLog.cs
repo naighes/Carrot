@@ -4,6 +4,8 @@ namespace Carrot.Logging
 {
     public class DefaultLog : ILog
     {
+        internal DefaultLog() { }
+
         public void Info(String message)
         {
             if (message == null)

@@ -11,7 +11,7 @@ namespace Carrot.Messages
     {
         protected readonly BasicDeliverEventArgs Args;
 
-        protected ConsumedMessageBase(BasicDeliverEventArgs args)
+        protected internal ConsumedMessageBase(BasicDeliverEventArgs args)
         {
             Args = args;
         }

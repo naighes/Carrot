@@ -9,6 +9,7 @@ using RabbitMQ.Client.Events;
 
 namespace Carrot.Messages
 {
+    // TODO: should be made sealed.
     public class ConsumedMessage : ConsumedMessageBase
     {
         internal ConsumedMessage(Object content, BasicDeliverEventArgs args)

@@ -13,7 +13,7 @@ namespace Carrot.Configuration
         {
         }
 
-        internal MessageBinding(String rawName, Type runtimeType, TimeSpan? expiresAfter)
+        public MessageBinding(String rawName, Type runtimeType, TimeSpan? expiresAfter)
         {
             RawName = rawName;
             RuntimeType = runtimeType;

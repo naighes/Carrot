@@ -12,8 +12,13 @@ namespace Carrot.Serialization
 
     public class ContentNegotiator : IContentNegotiator
     {
+        internal ContentNegotiator() { }
+
         public SortedSet<MediaTypeHeader> Negotiate(String contentType)
         {
+            if (contentType == null)
+                throw new ArgumentNullException(nameof(contentType));
+
             return new SortedSet<MediaTypeHeader>(contentType.Split(new[] { ',' },
                                                                     StringSplitOptions.RemoveEmptyEntries)
                                                              .Select(_ => MediaTypeHeader.Parse(_.Trim()))

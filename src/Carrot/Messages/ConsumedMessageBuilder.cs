@@ -5,7 +5,7 @@ using RabbitMQ.Client.Events;
 
 namespace Carrot.Messages
 {
-    public class ConsumedMessageBuilder : IConsumedMessageBuilder
+    internal class ConsumedMessageBuilder : IConsumedMessageBuilder
     {
         private readonly SerializationConfiguration _serializarionconfiguration;
         private readonly IMessageTypeResolver _resolver;

@@ -3,7 +3,7 @@ using RabbitMQ.Client.Events;
 
 namespace Carrot.Messages
 {
-    public class CorruptedMessage : NonConsumableMessage
+    public sealed class CorruptedMessage : NonConsumableMessage
     {
         internal CorruptedMessage(BasicDeliverEventArgs args)
             : base(args) 
