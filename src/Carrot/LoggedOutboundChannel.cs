@@ -30,11 +30,11 @@ namespace Carrot
             Log().Info($"outbound-model basic.nack received (delivery-tag: {args.DeliveryTag}, multiple: {args.Multiple})");
         }
 
-        protected override void OnModelBasicReturn(Object sender, BasicReturnEventArgs args)
+        protected override void OnModelShutdown(Object sender, ShutdownEventArgs args)
         {
-            base.OnModelBasicReturn(sender, args);
+            base.OnModelShutdown(sender, args);
 
-            Log().Info($"outbound-model basic.return received (reply-text: '{args.ReplyText}', reply-code: {args.ReplyCode})");
+            Log().Fatal($"outbound-model basic.nack received (reply-text: {args.ReplyText}, reply-code: {args.ReplyCode})");
         }
 
         private ILog Log()

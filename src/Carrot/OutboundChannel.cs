@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Concurrent;
+using System.Linq;
 using System.Threading.Tasks;
 using Carrot.Messages;
 using RabbitMQ.Client;
@@ -10,13 +12,16 @@ namespace Carrot
     {
         private readonly IModel _model;
 
+        private readonly ConcurrentDictionary<UInt64, Tuple<TaskCompletionSource<Boolean>, OutboundMessageEnvelope>> _confirms =
+            new ConcurrentDictionary<UInt64, Tuple<TaskCompletionSource<Boolean>, OutboundMessageEnvelope>>();
+
         public OutboundChannel(IModel model)
         {
             _model = model;
 
             _model.BasicAcks += OnModelBasicAcks;
             _model.BasicNacks += OnModelBasicNacks;
-            _model.BasicReturn += OnModelBasicReturn;
+            _model.ModelShutdown += OnModelShutdown;
         }
 
         public void Dispose()
@@ -28,7 +33,7 @@ namespace Carrot
 
             _model.BasicAcks -= OnModelBasicAcks;
             _model.BasicNacks -= OnModelBasicNacks;
-            _model.BasicReturn -= OnModelBasicReturn;
+            _model.ModelShutdown -= OnModelShutdown;
 
             _model.Dispose();
         }
@@ -41,29 +46,54 @@ namespace Carrot
 
         internal Task<IPublishResult> PublishAsync(OutboundMessageEnvelope message,
                                                    Exchange exchange,
-                                                   String routingKey = "",
-                                                   TaskFactory taskFactory = null)
+                                                   String routingKey = "")
         {
-            var factory = taskFactory ?? Task.Factory;
+            var tcs = new TaskCompletionSource<Boolean>(message.Properties);
+            _confirms.TryAdd(message.Tag,
+                             new Tuple<TaskCompletionSource<Boolean>, OutboundMessageEnvelope>(tcs, message));
 
-            return factory.StartNew(_ =>
-                                    {
-                                        _model.BasicPublish(exchange.Name,
-                                                            routingKey,
-                                                            false,
-                                                            false,
-                                                            (IBasicProperties)_,
-                                                            message.Body);
-                                    },
-                                    message.Properties)
-                          .ContinueWith(Result);
+            try
+            {
+                _model.BasicPublish(exchange.Name,
+                                    routingKey,
+                                    false,
+                                    false,
+                                    message.Properties,
+                                    message.Body);
+            }
+            catch (Exception exception)
+            {
+                Tuple<TaskCompletionSource<Boolean>, OutboundMessageEnvelope> tuple;
+                _confirms.TryRemove(message.Tag, out tuple);
+                tcs.TrySetException(exception);
+            }
+
+            return tcs.Task.ContinueWith(Result);
         }
 
-        protected virtual void OnModelBasicReturn(Object sender, BasicReturnEventArgs args) { }
+        protected virtual void OnModelBasicNacks(Object sender, BasicNackEventArgs args)
+        {
+            HandleServerResponse(args.DeliveryTag,
+                                 args.Multiple,
+                                 _ => _.TrySetException(new InvalidOperationException("publish was NACK-ed")));
+        }
 
-        protected virtual void OnModelBasicNacks(Object sender, BasicNackEventArgs args) { }
+        protected virtual void OnModelBasicAcks(Object sender, BasicAckEventArgs args)
+        {
+            HandleServerResponse(args.DeliveryTag,
+                                 args.Multiple,
+                                 _ => _.TrySetResult(true));
+        }
 
-        protected virtual void OnModelBasicAcks(Object sender, BasicAckEventArgs args) { }
+        protected virtual void OnModelShutdown(Object sender, ShutdownEventArgs args)
+        {
+            foreach (var confirm in _confirms)
+            {
+                var exception = new MessageNotConfirmedException(confirm.Value.Item2,
+                                                                 "publish not confirmed before channel closed");
+                confirm.Value.Item1.TrySetException(exception);
+            }
+        }
 
         private static IPublishResult Result(Task task)
         {
@@ -72,5 +102,32 @@ namespace Carrot
 
             return SuccessfulPublishing.FromBasicProperties(task.AsyncState as IBasicProperties);
         }
+
+        private void HandleServerResponse(UInt64 deliveryTag,
+                                          Boolean multiple,
+                                          Action<TaskCompletionSource<Boolean>> action)
+        {
+            var tags = multiple
+                ? _confirms.Keys.Where(_ => _ <= deliveryTag)
+                : Enumerable.Repeat(deliveryTag, 1);
+
+            foreach (var tag in tags)
+            {
+                action(_confirms[tag].Item1);
+                Tuple<TaskCompletionSource<Boolean>, OutboundMessageEnvelope> tuple;
+                _confirms.TryRemove(tag, out tuple);
+            }
+        }
+    }
+
+    public class MessageNotConfirmedException : Exception
+    {
+        internal MessageNotConfirmedException(OutboundMessageEnvelope envelope, String message)
+            : base(message)
+        {
+            Envelope = envelope;
+        }
+
+        public OutboundMessageEnvelope Envelope { get; }
     }
 }

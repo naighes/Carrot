@@ -5,6 +5,7 @@ using Carrot.Messages;
 using Carrot.Serialization;
 using Moq;
 using RabbitMQ.Client;
+using RabbitMQ.Client.Events;
 using Xunit;
 
 namespace Carrot.Tests
@@ -38,12 +39,14 @@ namespace Carrot.Tests
                                                      _.Map(__ => __.MediaType == "application/json", serializer.Object);
                                                  });
             var properties = message.BuildBasicProperties(resolver.Object, dateTimeProvider.Object, newId.Object);
+            const UInt64 deliveryTag = 0uL;
             var envelope = new OutboundMessageEnvelope(properties,
-                                                       0uL,
+                                                       deliveryTag,
                                                        new Byte[] { });
-            var channel = new OutboundChannel(model.Object);
-            var result = Assert.IsType<SuccessfulPublishing>(channel.PublishAsync(envelope,
-                                                                                  new Exchange("target_exchange", "direct")).Result);
+            var channel = new OutboundChannelWrapper(model.Object);
+            var task = channel.PublishAsync(envelope, new Exchange("target_exchange", "direct"));
+            channel.CallOnModelBasicAcks(new BasicAckEventArgs { DeliveryTag = deliveryTag });
+            var result = Assert.IsType<SuccessfulPublishing>(task.Result);
             Assert.Equal(messageId, result.MessageId);
         }
 
@@ -212,6 +215,19 @@ namespace Carrot.Tests
             resolver.Setup(_ => _.Resolve<TMessage>())
                     .Returns(new MessageBinding("urn:message:fake", typeof(TMessage), expiresAfter));
             return resolver;
+        }
+
+        internal class OutboundChannelWrapper : OutboundChannel
+        {
+            public OutboundChannelWrapper(IModel model)
+                : base(model)
+            {
+            }
+
+            internal void CallOnModelBasicAcks(BasicAckEventArgs args)
+            {
+                OnModelBasicAcks(null, args);
+            }
         }
     }
 }

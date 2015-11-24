@@ -3,7 +3,7 @@ using RabbitMQ.Client;
 
 namespace Carrot.Messages
 {
-    internal class OutboundMessageEnvelope
+    public class OutboundMessageEnvelope
     {
         internal OutboundMessageEnvelope(IBasicProperties properties,
                                          UInt64 tag,
@@ -14,10 +14,10 @@ namespace Carrot.Messages
             Body = body;
         }
 
-        internal IBasicProperties Properties { get; }
+        public IBasicProperties Properties { get; }
 
-        internal UInt64 Tag { get; }
+        public UInt64 Tag { get; }
 
-        internal Byte[] Body { get; }
+        public Byte[] Body { get; }
     }
 }
