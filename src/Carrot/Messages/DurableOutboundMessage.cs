@@ -1,3 +1,4 @@
+using Carrot.Configuration;
 using RabbitMQ.Client;
 
 namespace Carrot.Messages
@@ -10,10 +11,13 @@ namespace Carrot.Messages
         {
         }
 
-        internal override void HydrateProperties(IBasicProperties properties)
+        internal override IBasicProperties BuildBasicProperties(IMessageTypeResolver resolver,
+                                                                IDateTimeProvider dateTimeProvider,
+                                                                INewId idGenerator)
         {
-            base.HydrateProperties(properties);
+            var properties = base.BuildBasicProperties(resolver, dateTimeProvider, idGenerator);
             properties.Persistent = true;
+            return properties;
         }
     }
 }

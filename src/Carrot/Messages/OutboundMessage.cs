@@ -1,3 +1,4 @@
+using Carrot.Configuration;
 using RabbitMQ.Client;
 
 namespace Carrot.Messages
@@ -5,27 +6,22 @@ namespace Carrot.Messages
     public class OutboundMessage<TMessage> : Message<TMessage>
         where TMessage : class
     {
-        private readonly TMessage _content;
-        private readonly HeaderCollection _headers = new HeaderCollection();
-
         public OutboundMessage(TMessage content)
         {
-            _content = content;
+            Content = content;
         }
 
-        public override HeaderCollection Headers
-        {
-            get { return _headers; }
-        }
+        public override HeaderCollection Headers { get; } = new OutboundHeaderCollection();
 
-        public override TMessage Content
-        {
-            get { return _content; }
-        }
+        public override TMessage Content { get; }
 
-        internal virtual void HydrateProperties(IBasicProperties properties)
+        internal virtual IBasicProperties BuildBasicProperties(IMessageTypeResolver resolver,
+                                                               IDateTimeProvider dateTimeProvider,
+                                                               INewId idGenerator)
         {
-            Headers.HydrateProperties(properties);
+            return ((OutboundHeaderCollection)Headers).BuildBasicProperties<TMessage>(idGenerator,
+                                                                                      dateTimeProvider,
+                                                                                      resolver);
         }
     }
 }

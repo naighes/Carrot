@@ -11,18 +11,13 @@ namespace Carrot.Messages
 {
     public class ConsumedMessage : ConsumedMessageBase
     {
-        private readonly Object _content;
-
         internal ConsumedMessage(Object content, BasicDeliverEventArgs args)
             : base(args)
         {
-            _content = content;
+            Content = content;
         }
 
-        internal override Object Content
-        {
-            get { return _content; }
-        }
+        internal override Object Content { get; }
 
         internal override Boolean Match(Type type)
         {

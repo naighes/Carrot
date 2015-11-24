@@ -9,9 +9,6 @@ namespace Carrot.Messages
 
         public abstract HeaderCollection Headers { get; }
 
-        Object IMessage.Content
-        {
-            get { return Content; }
-        }
+        Object IMessage.Content => Content;
     }
 }

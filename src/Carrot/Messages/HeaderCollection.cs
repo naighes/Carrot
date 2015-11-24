@@ -1,19 +1,20 @@
 using System;
 using System.Collections.Generic;
 using RabbitMQ.Client;
-using RabbitMQ.Client.Events;
 
 namespace Carrot.Messages
 {
     public class HeaderCollection
     {
-        private readonly ISet<String> _reserverKeys = new HashSet<String>
-                                                          {
-                                                              "message_id",
-                                                              "timestamp"
-                                                          };
+        protected internal readonly ISet<String> ReservedKeys = new HashSet<String>
+                                                                    {
+                                                                        "message_id",
+                                                                        "timestamp",
+                                                                        "content_type",
+                                                                        "content_encoding"
+                                                                    };
 
-        private readonly IDictionary<String, Object> _dictionary;
+        protected internal readonly IDictionary<String, Object> InternalDictionary;
 
         internal HeaderCollection()
             : this(new Dictionary<String, Object>(StringComparer.OrdinalIgnoreCase))
@@ -22,65 +23,73 @@ namespace Carrot.Messages
 
         internal HeaderCollection(IDictionary<String, Object> dictionary)
         {
-            _dictionary = dictionary;
+            InternalDictionary = dictionary;
         }
 
-        public String MessageId
-        {
-            get { return _dictionary["message_id"] as String; }
-        }
+        public String MessageId => ValueOrDefault<String>("message_id");
 
-        public Int64 Timestamp
-        {
-            get { return (Int64)_dictionary["timestamp"]; }
-        }
+        public Int64 Timestamp => ValueOrDefault<Int64>("timestamp");
+
+        public String ContentType => ValueOrDefault<String>("content_type");
+
+        public String ContentEncoding => ValueOrDefault<String>("content_encoding");
 
         public Object this[String key]
         {
             get
             {
                 if (key == null)
-                    throw new ArgumentNullException("key");
+                    throw new ArgumentNullException(nameof(key));
 
-                if (_reserverKeys.Contains(key))
-                    throw new InvalidOperationException(String.Format("key '{0}' is reserved", key));
+                if (ReservedKeys.Contains(key))
+                    throw new InvalidOperationException($"key '{key}' is reserved");
 
-                return _dictionary[key];
+                return InternalDictionary[key];
             }
         }
 
-        public void AddHeader(String key, Object value)
+        internal static HeaderCollection Parse(IBasicProperties properties)
         {
-            if (_reserverKeys.Contains(key))
-                throw new InvalidOperationException(String.Format("key '{0}' is reserved", key));
+            var headers = new Dictionary<String, Object>(StringComparer.OrdinalIgnoreCase)
+                              {
+                                  { "message_id", properties.MessageId },
+                                  { "timestamp", properties.Timestamp.UnixTime },
+                                  { "content_type", properties.ContentType },
+                                  { "content_encoding", properties.ContentEncoding }
+                              };
 
-            _dictionary.Add(key, value);
+            if (properties.Headers != null)
+                foreach (var header in properties.Headers)
+                    if (!headers.ContainsKey(header.Key))
+                        headers.Add(header.Key, header.Value);
+
+            return new HeaderCollection(headers);
         }
 
-        public void RemoveHeader(String key)
+        private T ValueOrDefault<T>(String key)
         {
-            if (_reserverKeys.Contains(key))
-                throw new InvalidOperationException(String.Format("key '{0}' is reserved", key));
-
-            _dictionary.Remove(key);
+            return InternalDictionary.ContainsKey(key) ? (T)InternalDictionary[key] : default(T);
         }
 
-        internal static HeaderCollection Parse(BasicDeliverEventArgs args)
+        public void SetContentEncoding(String value)
         {
-            return new HeaderCollection(new Dictionary<String, Object>(StringComparer.OrdinalIgnoreCase)
-                                            {
-                                                { "message_id", args.BasicProperties.MessageId },
-                                                { "timestamp", args.BasicProperties.Timestamp.UnixTime }
-                                            });
+            Set("content_encoding", value);
         }
 
-        internal void HydrateProperties(IBasicProperties properties)
+        public void SetContentType(String value)
         {
-            properties.Persistent = false;
+            Set("content_type", value);
+        }
 
-            foreach (var pair in _dictionary)
-                if (!_reserverKeys.Contains(pair.Key))
-                    properties.Headers.Add(pair.Key, pair.Value);
+        private void Set<T>(String key, T value)
+        {
+            if (value == null)
+                throw new ArgumentNullException(nameof(value));
+
+            if (!InternalDictionary.ContainsKey(key))
+                InternalDictionary.Add(key, value);
+            else
+                InternalDictionary[key] = value;
         }
     }
 }

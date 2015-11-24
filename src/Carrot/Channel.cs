@@ -81,13 +81,13 @@ namespace Carrot
         public void DeclareExchangeBinding(Exchange exchange, Queue queue, String routingKey = "")
         {
             if (exchange == null)
-                throw new ArgumentNullException("exchange");
+                throw new ArgumentNullException(nameof(exchange));
 
             if (queue == null)
-                throw new ArgumentNullException("queue");
+                throw new ArgumentNullException(nameof(queue));
 
             if (routingKey == null)
-                throw new ArgumentNullException("routingKey");
+                throw new ArgumentNullException(nameof(routingKey));
 
             if (!_bindings.Add(new ExchangeBinding(exchange, queue, routingKey)))
                 throw new ArgumentException("dupicate binding detected");

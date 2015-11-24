@@ -6,6 +6,8 @@ using Xunit;
 
 namespace Carrot.Tests
 {
+    using System.Collections.Generic;
+
     public class MessageBuilding
     {
         [Fact]
@@ -58,6 +60,25 @@ namespace Carrot.Tests
             var message = new FakeConsumedMessage(content, args);
             var actual = message.As<Foo>();
             Assert.Equal(consumerTag, actual.ConsumerTag);
+        }
+
+        [Fact]
+        public void CustomHeader()
+        {
+            var content = new Foo();
+            var args = new BasicDeliverEventArgs
+                           {
+                               BasicProperties = new BasicProperties
+                                                     {
+                                                         Headers = new Dictionary<String, Object>
+                                                                       {
+                                                                           { "a", "b" }
+                                                                       }
+                                                     }
+                           };
+            var message = new FakeConsumedMessage(content, args);
+            var actual = message.As<Foo>();
+            Assert.Equal("b", actual.Headers["a"]);
         }
 
         private static BasicDeliverEventArgs FakeBasicDeliverEventArgs()

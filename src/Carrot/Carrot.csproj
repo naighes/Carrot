@@ -71,7 +71,6 @@
     <Compile Include="ConsumingPromise.cs" />
     <Compile Include="Exchange.cs" />
     <Compile Include="Extensions\BasicPropertiesExtensions.cs" />
-    <Compile Include="Extensions\OutboundMessageExtensions.cs" />
     <Compile Include="Extensions\ConsumerExtensions.cs" />
     <Compile Include="Extensions\DateTimeOffsetExtensions.cs" />
     <Compile Include="Extensions\EnumerableExtensions.cs" />
@@ -98,6 +97,7 @@
     <Compile Include="Messages\HeaderCollection.cs" />
     <Compile Include="Messages\IConsumedMessageBuilder.cs" />
     <Compile Include="Messages\IMessage.cs" />
+    <Compile Include="Messages\OutboundHeaderCollection.cs" />
     <Compile Include="Messages\OutboundMessage.cs" />
     <Compile Include="Messages\OutboundMessageEnvelope.cs" />
     <Compile Include="Messages\Results.cs" />

@@ -77,10 +77,7 @@ namespace Carrot.Messages
             _exceptions = exceptions;
         }
 
-        internal Exception[] Exceptions
-        {
-            get { return _exceptions ?? new Exception[] { }; }
-        }
+        internal Exception[] Exceptions => _exceptions ?? new Exception[] { };
 
         internal override AggregateConsumingResult Reply(IModel model)
         {
@@ -91,7 +88,7 @@ namespace Carrot.Messages
         internal void WithErrors(Action<Exception> action)
         {
             if (action == null)
-                throw new ArgumentNullException("action");
+                throw new ArgumentNullException(nameof(action));
 
             Exceptions.NotNull()
                       .ToList()

@@ -92,7 +92,7 @@ namespace Carrot.Serialization
 
             public override String ToString()
             {
-                return String.Format("{0};q={1}", MediaType, Quality.ToString(CultureInfo.InvariantCulture));
+                return $"{MediaType};q={Quality.ToString(CultureInfo.InvariantCulture)}";
             }
 
             internal class MediaTypeHeaderQualityComparer : IComparer<MediaTypeHeader>
@@ -162,17 +162,17 @@ namespace Carrot.Serialization
             {
                 unchecked
                 {
-                    return ((Name != null ? Name.GetHashCode() : 0) * 397) ^ 
-                           ((Prefix != null ? Prefix.GetHashCode() : 0) * 397) ^ 
-                           (Suffix != null ? Suffix.GetHashCode() : 0);
+                    return ((Name?.GetHashCode() ?? 0) * 397) ^ 
+                           ((Prefix?.GetHashCode() ?? 0) * 397) ^ 
+                           (Suffix?.GetHashCode() ?? 0);
                 }
             }
 
             public override String ToString()
             {
                 return Suffix == null
-                    ? String.Format("{0}{1}", Prefix, Name)
-                    : String.Format("{0}{1}+{2}", Prefix, Name, Suffix);
+                    ? $"{Prefix}{Name}"
+                    : $"{Prefix}{Name}+{Suffix}";
             }
 
             internal static RegistrationTree Parse(String source)
@@ -197,7 +197,7 @@ namespace Carrot.Serialization
                 if (index == -1)
                     return null;
 
-                var start = index + (key == null ? 0 : key.Length);
+                var start = index + (key?.Length ?? 0);
                 var end = source.IndexOf("+", StringComparison.Ordinal);
 
                 return end == -1 ? source.Substring(start) : source.Substring(start, end - start);
@@ -285,13 +285,13 @@ namespace Carrot.Serialization
             {
                 return RegistrationTree == null
                     ? Type
-                    : String.Format("{0}/{1}", Type, RegistrationTree);
+                    : $"{Type}/{RegistrationTree}";
             }
 
             internal static MediaType Parse(String source)
             {
                 if (source == null)
-                    throw new ArgumentNullException("source");
+                    throw new ArgumentNullException(nameof(source));
 
                 var strings = source.Split(new[] { '/' },
                                            StringSplitOptions.RemoveEmptyEntries)

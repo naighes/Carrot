@@ -37,10 +37,13 @@ namespace Carrot.Tests
                                                  {
                                                      _.Map(__ => __.MediaType == "application/json", serializer.Object);
                                                  });
-
-            var wrapper = new OutboundMessageEnvelope<Foo>(message, dateTimeProvider.Object, 0uL, configuration);
-            var result = Assert.IsType<SuccessfulPublishing>(wrapper.PublishAsync(new OutboundChannel(model.Object),
-                                                                                  new Exchange("target_exchange", "direct")).Result);
+            var properties = message.BuildBasicProperties(resolver.Object, dateTimeProvider.Object, newId.Object);
+            var envelope = new OutboundMessageEnvelope<Foo>(properties,
+                                                            message.Content,
+                                                            0uL,
+                                                            configuration.SerializationConfiguration);
+            var result = Assert.IsType<SuccessfulPublishing>(envelope.PublishAsync(new OutboundChannel(model.Object),
+                                                                                   new Exchange("target_exchange", "direct")).Result);
             Assert.Equal(messageId, result.MessageId);
         }
 
@@ -77,9 +80,15 @@ namespace Carrot.Tests
                 _.Map(__ => __.MediaType == "application/json", serializer.Object);
             });
 
-            var wrapper = new OutboundMessageEnvelope<Foo>(message, dateTimeProvider.Object, 0uL, configuration);
-            var result = Assert.IsType<FailurePublishing>(wrapper.PublishAsync(new OutboundChannel(model.Object),
-                                                                               new Exchange(exchange, "direct")).Result);
+            var properties = message.BuildBasicProperties(resolver.Object,
+                                                          dateTimeProvider.Object,
+                                                          new Mock<INewId>().Object);
+            var envelope = new OutboundMessageEnvelope<Foo>(properties,
+                                                            message.Content,
+                                                            0uL,
+                                                            configuration.SerializationConfiguration);
+            var result = Assert.IsType<FailurePublishing>(envelope.PublishAsync(new OutboundChannel(model.Object),
+                                                                                new Exchange(exchange, "direct")).Result);
             Assert.Equal(result.Exception, exception);
         }
 
@@ -103,7 +112,9 @@ namespace Carrot.Tests
             configuration.ResolveMessageTypeBy(resolver.Object);
 
             var message = new OutboundMessage<Foo>(new Foo());
-            var properties = message.BuildBasicProperties(configuration, dateTimeProvider.Object);
+            var properties = message.BuildBasicProperties(resolver.Object,
+                                                          dateTimeProvider.Object,
+                                                          newId.Object);
             Assert.Equal(messageId, properties.MessageId);
             Assert.Equal(timestamp.ToUnixTimestamp(), properties.Timestamp.UnixTime);
         }
@@ -112,57 +123,53 @@ namespace Carrot.Tests
         public void MessageType()
         {
             var message = new OutboundMessage<Bar>(new Bar());
-            var configuration = StubChannelConfiguration(StubResolver<Bar>(null));
-            var properties = message.BuildBasicProperties(configuration, new Mock<IDateTimeProvider>().Object);
+            var properties = message.BuildBasicProperties(StubResolver<Bar>(null).Object,
+                                                          new Mock<IDateTimeProvider>().Object,
+                                                          new Mock<INewId>().Object);
             Assert.Equal("urn:message:fake", properties.Type);
         }
 
-        // TODO: overriding content encoding
-        //[Fact]
-        //public void ContentEncoding()
-        //{
-        //    const String contentEncoding = "UTF-16";
-        //    var message = new OutboundMessage<Bar>(new Bar());
-        //    var envelope = BuildDefaultEnvelope(message);
-        //    var properties = new BasicProperties { ContentEncoding = contentEncoding };
-
-        //    envelope.CallHydrateProperties(properties,
-        //                                   message,
-        //                                   new ChannelConfiguration(),
-        //                                   new Mock<IDateTimeProvider>().Object);
-        //    Assert.Equal(contentEncoding, properties.ContentEncoding);
-        //}
+        [Fact]
+        public void ContentEncoding()
+        {
+            const String contentEncoding = "UTF-16";
+            var message = new OutboundMessage<Bar>(new Bar());
+            message.Headers.SetContentEncoding(contentEncoding);
+            var properties = message.BuildBasicProperties(StubResolver<Bar>(null).Object,
+                                                          new Mock<IDateTimeProvider>().Object,
+                                                          new Mock<INewId>().Object);
+            Assert.Equal(contentEncoding, properties.ContentEncoding);
+        }
 
         [Fact]
         public void DefaultContentEncoding()
         {
             var message = new OutboundMessage<Bar>(new Bar());
-            var configuration = new ChannelConfiguration();
-            var properties = message.BuildBasicProperties(configuration, new Mock<IDateTimeProvider>().Object);
+            var properties = message.BuildBasicProperties(StubResolver<Bar>(null).Object,
+                                                          new Mock<IDateTimeProvider>().Object,
+                                                          new Mock<INewId>().Object);
             Assert.Equal("UTF-8", properties.ContentEncoding);
         }
 
-        // TODO: overriding content type
-        //[Fact]
-        //public void ContentType()
-        //{
-        //    const String contentType = "application/xml";
-        //    var message = new OutboundMessage<Bar>(new Bar());
-        //    var envelope = BuildDefaultEnvelope(message);
-        //    var properties = new BasicProperties { ContentType = contentType };
-        //    envelope.CallHydrateProperties(properties,
-        //                                   message,
-        //                                   new ChannelConfiguration(),
-        //                                   new Mock<IDateTimeProvider>().Object);
-        //    Assert.Equal(contentType, properties.ContentType);
-        //}
+        [Fact]
+        public void ContentType()
+        {
+            const String contentType = "application/xml";
+            var message = new OutboundMessage<Bar>(new Bar());
+            message.Headers.SetContentType(contentType);
+            var properties = message.BuildBasicProperties(StubResolver<Bar>(null).Object,
+                                                          new Mock<IDateTimeProvider>().Object,
+                                                          new Mock<INewId>().Object);
+            Assert.Equal(contentType, properties.ContentType);
+        }
 
         [Fact]
         public void DefaultContentType()
         {
             var message = new OutboundMessage<Bar>(new Bar());
-            var configuration = new ChannelConfiguration();
-            var properties = message.BuildBasicProperties(configuration, new Mock<IDateTimeProvider>().Object);
+            var properties = message.BuildBasicProperties(StubResolver<Bar>(null).Object,
+                                                          new Mock<IDateTimeProvider>().Object,
+                                                          new Mock<INewId>().Object);
             Assert.Equal("application/json", properties.ContentType);
         }
 
@@ -170,8 +177,9 @@ namespace Carrot.Tests
         public void NonDurableMessage()
         {
             var message = new OutboundMessage<Bar>(new Bar());
-            var configuration = new ChannelConfiguration();
-            var properties = message.BuildBasicProperties(configuration, new Mock<IDateTimeProvider>().Object);
+            var properties = message.BuildBasicProperties(StubResolver<Bar>(null).Object,
+                                                          new Mock<IDateTimeProvider>().Object,
+                                                          new Mock<INewId>().Object);
             Assert.False(properties.Persistent);
         }
 
@@ -179,8 +187,9 @@ namespace Carrot.Tests
         public void DurableMessage()
         {
             var message = new DurableOutboundMessage<Bar>(new Bar());
-            var configuration = new ChannelConfiguration();
-            var properties = message.BuildBasicProperties(configuration, new Mock<IDateTimeProvider>().Object);
+            var properties = message.BuildBasicProperties(StubResolver<Bar>(null).Object,
+                                                          new Mock<IDateTimeProvider>().Object,
+                                                          new Mock<INewId>().Object);
             Assert.True(properties.Persistent);
         }
 
@@ -189,17 +198,10 @@ namespace Carrot.Tests
         {
             var expiresAfter = new TimeSpan?(TimeSpan.FromSeconds(18));
             var message = new DurableOutboundMessage<Bar>(new Bar());
-            var configuration = StubChannelConfiguration(StubResolver<Bar>(expiresAfter));
-            var properties = message.BuildBasicProperties(configuration, new Mock<IDateTimeProvider>().Object);
+            var properties = message.BuildBasicProperties(StubResolver<Bar>(expiresAfter).Object,
+                                                          new Mock<IDateTimeProvider>().Object,
+                                                          new Mock<INewId>().Object);
             Assert.Equal("18000", properties.Expiration);
-        }
-
-        private static ChannelConfiguration StubChannelConfiguration(IMock<IMessageTypeResolver> resolver)
-        {
-            var configuration = new ChannelConfiguration();
-            configuration.ResolveMessageTypeBy(resolver.Object);
-            configuration.GeneratesMessageIdBy(new Mock<INewId>().Object);
-            return configuration;
         }
 
         private static Mock<IMessageTypeResolver> StubResolver<TMessage>(TimeSpan? expiresAfter)

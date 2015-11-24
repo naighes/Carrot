@@ -25,11 +25,11 @@ namespace Carrot.Messages
             var content = Content as TMessage;
 
             if (content == null)
-                throw new InvalidCastException(String.Format("cannot cast '{0}' to '{1}'",
-                                                             Content.GetType(),
-                                                             typeof(TMessage)));
+                throw new InvalidCastException($"cannot cast '{Content.GetType()}' to '{typeof(TMessage)}'");
 
-            return new ConsumedMessage<TMessage>(content, HeaderCollection.Parse(Args), Args.ConsumerTag);
+            return new ConsumedMessage<TMessage>(content,
+                                                 HeaderCollection.Parse(Args.BasicProperties),
+                                                 Args.ConsumerTag);
         }
 
         internal abstract Boolean Match(Type type);

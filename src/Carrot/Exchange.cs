@@ -13,10 +13,10 @@ namespace Carrot
         internal Exchange(String name, String type, Boolean isDurable = false)
         {
             if (name == null)
-                throw new ArgumentNullException("name");
+                throw new ArgumentNullException(nameof(name));
 
             if (type == null)
-                throw new ArgumentNullException("type");
+                throw new ArgumentNullException(nameof(type));
 
             Type = type;
             IsDurable = isDurable;

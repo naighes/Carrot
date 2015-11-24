@@ -6,31 +6,29 @@ namespace Carrot
 {
     public class OutboundChannel : IDisposable
     {
-        private readonly IModel _model;
-
         public OutboundChannel(IModel model)
         {
-            _model = model;
+            Model = model;
 
-            _model.BasicAcks += OnModelBasicAcks;
-            _model.BasicNacks += OnModelBasicNacks;
-            _model.BasicReturn += OnModelBasicReturn;
+            Model.BasicAcks += OnModelBasicAcks;
+            Model.BasicNacks += OnModelBasicNacks;
+            Model.BasicReturn += OnModelBasicReturn;
         }
 
-        internal IModel Model => _model;
+        internal IModel Model { get; }
 
         public void Dispose()
         {
-            if (_model == null)
+            if (Model == null)
                 return;
 
-            _model.WaitForConfirms(TimeSpan.FromSeconds(30d)); // TODO: timeout should not be hardcodeds
+            Model.WaitForConfirms(TimeSpan.FromSeconds(30d)); // TODO: timeout should not be hardcodeds
 
-            _model.BasicAcks -= OnModelBasicAcks;
-            _model.BasicNacks -= OnModelBasicNacks;
-            _model.BasicReturn -= OnModelBasicReturn;
+            Model.BasicAcks -= OnModelBasicAcks;
+            Model.BasicNacks -= OnModelBasicNacks;
+            Model.BasicReturn -= OnModelBasicReturn;
 
-            _model.Dispose();
+            Model.Dispose();
         }
 
         protected virtual void OnModelBasicReturn(Object sender, BasicReturnEventArgs args) { }

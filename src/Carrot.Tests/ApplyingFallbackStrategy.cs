@@ -72,12 +72,12 @@ namespace Carrot.Tests
             var message = new FakeConsumedMessage(null, args);
             var channel = new Mock<IChannel>();
             var queue = new Queue("queue_name");
-            Func<String, String> f = _ => String.Format("{0}-DeadLetter", _);
+            Func<String, String> f = _ => $"{_}-DeadLetter";
             var dleName = f(queue.Name);
             channel.Setup(_ => _.DeclareDurableDirectExchange(dleName)).Returns(new Exchange(dleName, "direct"));
             var strategy = DeadLetterStrategy.New(channel.Object,
                                                   queue,
-                                                  _ => String.Format("{0}-DeadLetter", _));
+                                                  _ => $"{_}-DeadLetter");
             var model = new Mock<IModel>();
             strategy.Apply(model.Object, message);
             model.Verify(_ => _.BasicPublish(dleName,

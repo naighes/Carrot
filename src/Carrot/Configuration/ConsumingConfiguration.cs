@@ -20,15 +20,12 @@ namespace Carrot.Configuration
             _queue = queue;
         }
 
-        internal IFallbackStrategy FallbackStrategy
-        {
-            get { return _fallbackStrategy; }
-        }
+        internal IFallbackStrategy FallbackStrategy => _fallbackStrategy;
 
         public void FallbackBy(Func<IChannel, Queue, IFallbackStrategy> strategy)
         {
             if (strategy == null)
-                throw new ArgumentNullException("strategy");
+                throw new ArgumentNullException(nameof(strategy));
 
             _fallbackStrategy = strategy(_channel, _queue);
         }

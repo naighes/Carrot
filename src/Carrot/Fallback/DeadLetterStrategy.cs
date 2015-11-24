@@ -15,7 +15,7 @@ namespace Carrot.Fallback
 
         public static IFallbackStrategy New(IChannel channel, Queue queue)
         {
-            return New(channel, queue, _ => String.Format("{0}::dle", _));
+            return New(channel, queue, _ => $"{_}::dle");
         }
 
         public static IFallbackStrategy New(IChannel channel,

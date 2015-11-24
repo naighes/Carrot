@@ -16,21 +16,21 @@ namespace Carrot.Logging
         {
             System.Diagnostics.Debug.WriteLine("[WARN] {0}:{1}",
                                                message ?? "an error has occurred",
-                                               exception == null ? "[unknow]" : exception.Message);
+                                               exception?.Message ?? "[unknow]");
         }
 
         public void Error(String message, Exception exception = null)
         {
             System.Diagnostics.Debug.WriteLine("[ERROR] {0}:{1}",
                                                message ?? "an error has occurred",
-                                               exception == null ? "[unknow]" : exception.Message);
+                                               exception?.Message ?? "[unknow]");
         }
 
         public void Fatal(String message, Exception exception = null)
         {
             System.Diagnostics.Debug.WriteLine("[FATAL] {0}:{1}",
                                                message ?? "an error has occurred",
-                                               exception == null ? "[unknow]" : exception.Message);
+                                               exception?.Message ?? "[unknow]");
         }
 
         public void Debug(String message)

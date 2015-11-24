@@ -19,10 +19,10 @@ namespace Carrot.Configuration
         public void Map(Predicate<ContentNegotiator.MediaTypeHeader> predicate, ISerializer serializer)
         {
             if (predicate == null)
-                throw new ArgumentNullException("predicate");
+                throw new ArgumentNullException(nameof(predicate));
 
             if (serializer == null)
-                throw new ArgumentNullException("serializer");
+                throw new ArgumentNullException(nameof(serializer));
 
             _serializers.Add(predicate, serializer);
         }

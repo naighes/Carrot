@@ -35,7 +35,13 @@ namespace Carrot
                                                            TaskFactory taskFactory = null) where TMessage : class
         {
             var tag = _outboundChannel.Model.NextPublishSeqNo;
-            var envelope = new OutboundMessageEnvelope<TMessage>(message, _dateTimeProvider, tag, Configuration);
+            var properties = message.BuildBasicProperties(Configuration.MessageTypeResolver,
+                                                       _dateTimeProvider,
+                                                       Configuration.IdGenerator);
+            var envelope = new OutboundMessageEnvelope<TMessage>(properties,
+                                                                 message.Content,
+                                                                 tag,
+                                                                 Configuration.SerializationConfiguration);
             return envelope.PublishAsync(_outboundChannel, exchange, routingKey, taskFactory);
         }
 

@@ -22,7 +22,7 @@ namespace Carrot.Configuration
         public MessageBinding Resolve(String source)
         {
             if (source == null)
-                throw new ArgumentNullException("source");
+                throw new ArgumentNullException(nameof(source));
 
             return _internalMap.ContainsKey(source)
                        ? BuildMessageBinding(source, _internalMap[source].Item1, _internalMap[source].Item2)
@@ -34,9 +34,9 @@ namespace Carrot.Configuration
             var type = typeof(TMessage);
             var attribute = type.GetCustomAttribute<MessageBindingAttribute>();
 
-            return BuildMessageBinding(attribute != null ? attribute.MessageType : String.Format("urn:message:{0}", type.FullName),
+            return BuildMessageBinding(attribute != null ? attribute.MessageType : $"urn:message:{type.FullName}",
                                        type,
-                                       attribute != null ? attribute.ExpiresAfter : -1);
+                                       attribute?.ExpiresAfter ?? -1);
         }
 
         private static MessageBinding BuildMessageBinding(String source, Type type, Int32 expiresAfter)

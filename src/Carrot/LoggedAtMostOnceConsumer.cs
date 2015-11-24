@@ -31,35 +31,28 @@ namespace Carrot
         {
             base.OnModelBasicAcks(sender, args);
 
-            _log.Info(String.Format("consumer-model basic.ack received (delivery-tag: {0}, multiple: {1})",
-                                    args.DeliveryTag,
-                                    args.Multiple));
+            _log.Info($"consumer-model basic.ack received (delivery-tag: {args.DeliveryTag}, multiple: {args.Multiple})");
         }
 
         protected override void OnModelBasicNacks(Object sender, BasicNackEventArgs args)
         {
             base.OnModelBasicNacks(sender, args);
 
-            _log.Info(String.Format("consumer-model basic.nack received (delivery-tag: {0}, multiple: {1})",
-                                    args.DeliveryTag,
-                                    args.Multiple));
+            _log.Info($"consumer-model basic.nack received (delivery-tag: {args.DeliveryTag}, multiple: {args.Multiple})");
         }
 
         protected override void OnModelBasicReturn(Object sender, BasicReturnEventArgs args)
         {
             base.OnModelBasicReturn(sender, args);
 
-            _log.Info(String.Format("consumer-model basic.return received (reply-text: '{0}', reply-code: {1})",
-                                    args.ReplyText,
-                                    args.ReplyCode));
+            _log.Info($"consumer-model basic.return received (reply-text: '{args.ReplyText}', reply-code: {args.ReplyCode})");
         }
 
         protected override void OnConsumerCancelled(Object sender, ConsumerEventArgs args)
         {
             base.OnConsumerCancelled(sender, args);
 
-            _log.Info(String.Format("consumer-model basic.cancel received (consumer-tag: '{0}')",
-                                    args.ConsumerTag));
+            _log.Info($"consumer-model basic.cancel received (consumer-tag: '{args.ConsumerTag}')");
         }
     }
 }

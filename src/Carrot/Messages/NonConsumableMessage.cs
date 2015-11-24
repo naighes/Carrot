@@ -13,10 +13,7 @@ namespace Carrot.Messages
         {
         }
 
-        internal override Object Content
-        {
-            get { return null; }
-        }
+        internal override Object Content => null;
 
         internal override Task<AggregateConsumingResult> ConsumeAsync(ConsumingConfiguration configuration)
         {

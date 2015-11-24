@@ -55,7 +55,7 @@ namespace Carrot.Configuration
 
         public override Int32 GetHashCode()
         {
-            return RawName != null ? RawName.GetHashCode() : 0;
+            return RawName?.GetHashCode() ?? 0;
         }
     }
 }

@@ -21,7 +21,7 @@ namespace Carrot.Configuration
         public MessageBinding Resolve(String source)
         {
             if (source == null)
-                throw new ArgumentNullException("source");
+                throw new ArgumentNullException(nameof(source));
 
            var type = Type.GetType(source) ??
            _assemblies.Select(_ => _.GetType(source))

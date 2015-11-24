@@ -9,20 +9,20 @@ namespace Carrot.Messages
     internal class OutboundMessageEnvelope<TMessage>
         where TMessage : class
     {
-        private readonly OutboundMessage<TMessage> _message;
-        private readonly IDateTimeProvider _dateTimeProvider;
+        private readonly IBasicProperties _properties;
+        private readonly TMessage _content;
         private readonly UInt64 _tag;
-        private readonly ChannelConfiguration _configuration;
+        private readonly SerializationConfiguration _serializationConfiguration;
 
-        internal OutboundMessageEnvelope(OutboundMessage<TMessage> message,
-                                         IDateTimeProvider dateTimeProvider,
+        internal OutboundMessageEnvelope(IBasicProperties properties,
+                                         TMessage content,
                                          UInt64 tag,
-                                         ChannelConfiguration configuration)
+                                         SerializationConfiguration serializationConfiguration)
         {
-            _message = message;
-            _dateTimeProvider = dateTimeProvider;
+            _properties = properties;
+            _content = content;
             _tag = tag;
-            _configuration = configuration;
+            _serializationConfiguration = serializationConfiguration;
         }
 
         internal Task<IPublishResult> PublishAsync(OutboundChannel channel,
@@ -30,8 +30,10 @@ namespace Carrot.Messages
                                                    String routingKey = "",
                                                    TaskFactory taskFactory = null)
         {
-            var properties = _message.BuildBasicProperties(_configuration, _dateTimeProvider);
             var factory = taskFactory ?? Task.Factory;
+            var body = _properties.CreateEncoding()
+                                  .GetBytes(_properties.CreateSerializer(_serializationConfiguration)
+                                  .Serialize(_content));
 
             return factory.StartNew(_ =>
                                     {
@@ -40,11 +42,9 @@ namespace Carrot.Messages
                                                                    false,
                                                                    false,
                                                                    (IBasicProperties)_,
-                                                                   properties.CreateEncoding()
-                                                                             .GetBytes(properties.CreateSerializer(_configuration.SerializationConfiguration)
-                                                                                                 .Serialize(_message.Content)));
+                                                                   body);
                                     },
-                                    properties)
+                                    _properties)
                           .ContinueWith(Result);
         }
 
