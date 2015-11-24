@@ -38,12 +38,12 @@ namespace Carrot.Tests
                                                      _.Map(__ => __.MediaType == "application/json", serializer.Object);
                                                  });
             var properties = message.BuildBasicProperties(resolver.Object, dateTimeProvider.Object, newId.Object);
-            var envelope = new OutboundMessageEnvelope<Foo>(properties,
-                                                            message.Content,
-                                                            0uL,
-                                                            configuration.SerializationConfiguration);
-            var result = Assert.IsType<SuccessfulPublishing>(envelope.PublishAsync(new OutboundChannel(model.Object),
-                                                                                   new Exchange("target_exchange", "direct")).Result);
+            var envelope = new OutboundMessageEnvelope(properties,
+                                                       0uL,
+                                                       new Byte[] { });
+            var channel = new OutboundChannel(model.Object);
+            var result = Assert.IsType<SuccessfulPublishing>(channel.PublishAsync(envelope,
+                                                                                  new Exchange("target_exchange", "direct")).Result);
             Assert.Equal(messageId, result.MessageId);
         }
 
@@ -84,12 +84,12 @@ namespace Carrot.Tests
             var properties = message.BuildBasicProperties(resolver.Object,
                                                           dateTimeProvider.Object,
                                                           new Mock<INewId>().Object);
-            var envelope = new OutboundMessageEnvelope<Foo>(properties,
-                                                            message.Content,
-                                                            0uL,
-                                                            configuration.SerializationConfiguration);
-            var result = Assert.IsType<FailurePublishing>(envelope.PublishAsync(new OutboundChannel(model.Object),
-                                                                                new Exchange(exchange, "direct")).Result);
+            var envelope = new OutboundMessageEnvelope(properties,
+                                                       0uL,
+                                                       new Byte[] { });
+            var channel = new OutboundChannel(model.Object);
+            var result = Assert.IsType<FailurePublishing>(channel.PublishAsync(envelope,
+                                                                               new Exchange(exchange, "direct")).Result);
             Assert.Equal(result.Exception, exception);
         }
 

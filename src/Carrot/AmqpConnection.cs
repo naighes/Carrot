@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Carrot.Configuration;
+using Carrot.Extensions;
 using Carrot.Messages;
 using RabbitMQ.Client;
 
@@ -34,15 +35,14 @@ namespace Carrot
                                                            String routingKey = "",
                                                            TaskFactory taskFactory = null) where TMessage : class
         {
-            var tag = _outboundChannel.Model.NextPublishSeqNo;
             var properties = message.BuildBasicProperties(Configuration.MessageTypeResolver,
                                                           _dateTimeProvider,
                                                           Configuration.IdGenerator);
-            var envelope = new OutboundMessageEnvelope<TMessage>(properties,
-                                                                 message.Content,
-                                                                 tag,
-                                                                 Configuration.SerializationConfiguration);
-            return envelope.PublishAsync(_outboundChannel, exchange, routingKey, taskFactory);
+            var body = properties.CreateEncoding()
+                                 .GetBytes(properties.CreateSerializer(Configuration.SerializationConfiguration)
+                                 .Serialize(message.Content));
+            var envelope = _outboundChannel.BuildEnvelope(properties, body);
+            return _outboundChannel.PublishAsync(envelope, exchange, routingKey, taskFactory);
         }
 
         public void Dispose()

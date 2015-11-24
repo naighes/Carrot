@@ -1,4 +1,6 @@
 using System;
+using System.Threading.Tasks;
+using Carrot.Messages;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 
@@ -6,29 +8,55 @@ namespace Carrot
 {
     public class OutboundChannel : IDisposable
     {
+        private readonly IModel _model;
+
         public OutboundChannel(IModel model)
         {
-            Model = model;
+            _model = model;
 
-            Model.BasicAcks += OnModelBasicAcks;
-            Model.BasicNacks += OnModelBasicNacks;
-            Model.BasicReturn += OnModelBasicReturn;
+            _model.BasicAcks += OnModelBasicAcks;
+            _model.BasicNacks += OnModelBasicNacks;
+            _model.BasicReturn += OnModelBasicReturn;
         }
-
-        internal IModel Model { get; }
 
         public void Dispose()
         {
-            if (Model == null)
+            if (_model == null)
                 return;
 
-            Model.WaitForConfirms(TimeSpan.FromSeconds(30d)); // TODO: timeout should not be hardcodeds
+            _model.WaitForConfirms(TimeSpan.FromSeconds(30d)); // TODO: timeout should not be hardcodeds
 
-            Model.BasicAcks -= OnModelBasicAcks;
-            Model.BasicNacks -= OnModelBasicNacks;
-            Model.BasicReturn -= OnModelBasicReturn;
+            _model.BasicAcks -= OnModelBasicAcks;
+            _model.BasicNacks -= OnModelBasicNacks;
+            _model.BasicReturn -= OnModelBasicReturn;
 
-            Model.Dispose();
+            _model.Dispose();
+        }
+
+        internal OutboundMessageEnvelope BuildEnvelope(IBasicProperties properties, Byte[] body)
+        {
+            var tag = _model.NextPublishSeqNo;
+            return new OutboundMessageEnvelope(properties, tag, body);
+        }
+
+        internal Task<IPublishResult> PublishAsync(OutboundMessageEnvelope message,
+                                                   Exchange exchange,
+                                                   String routingKey = "",
+                                                   TaskFactory taskFactory = null)
+        {
+            var factory = taskFactory ?? Task.Factory;
+
+            return factory.StartNew(_ =>
+                                    {
+                                        _model.BasicPublish(exchange.Name,
+                                                            routingKey,
+                                                            false,
+                                                            false,
+                                                            (IBasicProperties)_,
+                                                            message.Body);
+                                    },
+                                    message.Properties)
+                          .ContinueWith(Result);
         }
 
         protected virtual void OnModelBasicReturn(Object sender, BasicReturnEventArgs args) { }
@@ -36,5 +64,13 @@ namespace Carrot
         protected virtual void OnModelBasicNacks(Object sender, BasicNackEventArgs args) { }
 
         protected virtual void OnModelBasicAcks(Object sender, BasicAckEventArgs args) { }
+
+        private static IPublishResult Result(Task task)
+        {
+            if (task.Exception != null)
+                return new FailurePublishing(task.Exception.GetBaseException());
+
+            return SuccessfulPublishing.FromBasicProperties(task.AsyncState as IBasicProperties);
+        }
     }
 }
