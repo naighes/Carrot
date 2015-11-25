@@ -12,8 +12,8 @@ namespace Carrot
     {
         private readonly IModel _model;
 
-        private readonly ConcurrentDictionary<UInt64, Tuple<TaskCompletionSource<Boolean>, OutboundMessageEnvelope>> _confirms =
-            new ConcurrentDictionary<UInt64, Tuple<TaskCompletionSource<Boolean>, OutboundMessageEnvelope>>();
+        private readonly ConcurrentDictionary<UInt64, Tuple<TaskCompletionSource<Boolean>, IMessage>> _confirms =
+            new ConcurrentDictionary<UInt64, Tuple<TaskCompletionSource<Boolean>, IMessage>>();
 
         public OutboundChannel(IModel model)
         {
@@ -38,20 +38,23 @@ namespace Carrot
             _model.Dispose();
         }
 
-        internal OutboundMessageEnvelope BuildEnvelope(IBasicProperties properties,
-                                                       Byte[] body,
-                                                       Exchange exchange,
-                                                       String routingKey)
+        internal OutboundMessageEnvelope<TMessage> BuildEnvelope<TMessage>(IBasicProperties properties,
+                                                                           Byte[] body,
+                                                                           Exchange exchange,
+                                                                           String routingKey,
+                                                                           OutboundMessage<TMessage> source)
+            where TMessage : class
         {
             var tag = _model.NextPublishSeqNo;
-            return new OutboundMessageEnvelope(properties, body, exchange, routingKey, tag);
+            return new OutboundMessageEnvelope<TMessage>(properties, body, exchange, routingKey, tag, source);
         }
 
-        internal Task<IPublishResult> PublishAsync(OutboundMessageEnvelope message)
+        internal Task<IPublishResult> PublishAsync<TMessage>(OutboundMessageEnvelope<TMessage> message)
+            where TMessage : class
         {
             var tcs = new TaskCompletionSource<Boolean>(message.Properties);
             _confirms.TryAdd(message.Tag,
-                             new Tuple<TaskCompletionSource<Boolean>, OutboundMessageEnvelope>(tcs, message));
+                             new Tuple<TaskCompletionSource<Boolean>, IMessage>(tcs, message.Source));
 
             try
             {
@@ -64,7 +67,7 @@ namespace Carrot
             }
             catch (Exception exception)
             {
-                Tuple<TaskCompletionSource<Boolean>, OutboundMessageEnvelope> tuple;
+                Tuple<TaskCompletionSource<Boolean>, IMessage> tuple;
                 _confirms.TryRemove(message.Tag, out tuple);
                 tcs.TrySetException(exception);
             }
@@ -115,7 +118,7 @@ namespace Carrot
             foreach (var tag in tags)
             {
                 action(_confirms[tag].Item1);
-                Tuple<TaskCompletionSource<Boolean>, OutboundMessageEnvelope> tuple;
+                Tuple<TaskCompletionSource<Boolean>, IMessage> tuple;
                 _confirms.TryRemove(tag, out tuple);
             }
         }
@@ -123,12 +126,12 @@ namespace Carrot
 
     public class MessageNotConfirmedException : Exception
     {
-        internal MessageNotConfirmedException(OutboundMessageEnvelope envelope, String message)
+        internal MessageNotConfirmedException(IMessage source, String message)
             : base(message)
         {
-            Envelope = envelope;
+            SourceMessage = source;
         }
 
-        public OutboundMessageEnvelope Envelope { get; }
+        public IMessage SourceMessage { get; }
     }
 }

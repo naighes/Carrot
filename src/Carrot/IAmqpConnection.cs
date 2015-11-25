@@ -8,7 +8,7 @@ namespace Carrot
     {
         Task<IPublishResult> PublishAsync<TMessage>(OutboundMessage<TMessage> message,
                                                     Exchange exchange,
-                                                    String routingKey = "",
-                                                    TaskFactory taskFactory = null) where TMessage : class;
+                                                    String routingKey = "")
+            where TMessage : class;
     }
 }

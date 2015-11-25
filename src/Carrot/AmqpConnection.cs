@@ -32,8 +32,8 @@ namespace Carrot
         
         public Task<IPublishResult> PublishAsync<TMessage>(OutboundMessage<TMessage> message,
                                                            Exchange exchange,
-                                                           String routingKey = "",
-                                                           TaskFactory taskFactory = null) where TMessage : class
+                                                           String routingKey = "")
+            where TMessage : class
         {
             var properties = message.BuildBasicProperties(Configuration.MessageTypeResolver,
                                                           _dateTimeProvider,
@@ -41,7 +41,7 @@ namespace Carrot
             var body = properties.CreateEncoding()
                                  .GetBytes(properties.CreateSerializer(Configuration.SerializationConfiguration)
                                  .Serialize(message.Content));
-            var envelope = _outboundChannel.BuildEnvelope(properties, body, exchange, routingKey);
+            var envelope = _outboundChannel.BuildEnvelope(properties, body, exchange, routingKey, message);
             return _outboundChannel.PublishAsync(envelope);
         }
 

@@ -40,11 +40,12 @@ namespace Carrot.Tests
                                                  });
             var properties = message.BuildBasicProperties(resolver.Object, dateTimeProvider.Object, newId.Object);
             const UInt64 deliveryTag = 0uL;
-            var envelope = new OutboundMessageEnvelope(properties,
-                                                       new Byte[] { },
-                                                       new Exchange("target_exchange", "direct"),
-                                                       null,
-                                                       deliveryTag);
+            var envelope = new OutboundMessageEnvelope<Foo>(properties,
+                                                            new Byte[] { },
+                                                            new Exchange("target_exchange", "direct"),
+                                                            null,
+                                                            deliveryTag,
+                                                            message);
             var channel = new OutboundChannelWrapper(model.Object);
             var task = channel.PublishAsync(envelope);
             channel.CallOnModelBasicAcks(new BasicAckEventArgs { DeliveryTag = deliveryTag });
@@ -89,11 +90,12 @@ namespace Carrot.Tests
             var properties = message.BuildBasicProperties(resolver.Object,
                                                           dateTimeProvider.Object,
                                                           new Mock<INewId>().Object);
-            var envelope = new OutboundMessageEnvelope(properties,
-                                                       new Byte[] { },
-                                                       new Exchange(exchange, "direct"),
-                                                       String.Empty,
-                                                       0uL);
+            var envelope = new OutboundMessageEnvelope<Foo>(properties,
+                                                            new Byte[] { },
+                                                            new Exchange(exchange, "direct"),
+                                                            String.Empty,
+                                                            0uL,
+                                                            message);
             var channel = new OutboundChannel(model.Object);
             var result = Assert.IsType<FailurePublishing>(channel.PublishAsync(envelope).Result);
             Assert.Equal(result.Exception, exception);
