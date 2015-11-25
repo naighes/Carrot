@@ -74,6 +74,7 @@
     <Compile Include="Extensions\ConsumerExtensions.cs" />
     <Compile Include="Extensions\DateTimeOffsetExtensions.cs" />
     <Compile Include="Extensions\EnumerableExtensions.cs" />
+    <Compile Include="Extensions\OutboundMessageExtensions.cs" />
     <Compile Include="Fallback\DeadLetterStrategy.cs" />
     <Compile Include="Fallback\IFallbackStrategy.cs" />
     <Compile Include="Fallback\NoFallbackStrategy.cs" />
@@ -82,12 +83,14 @@
     <Compile Include="IConsumer.cs" />
     <Compile Include="IDateTimeProvider.cs" />
     <Compile Include="INewId.cs" />
+    <Compile Include="IOutboundChannel.cs" />
     <Compile Include="LoggedAtLeastOnceConsumer.cs" />
     <Compile Include="LoggedAtMostOnceConsumer.cs" />
     <Compile Include="LoggedOutboundChannel.cs" />
     <Compile Include="LoggedReliableOutboundChannel.cs" />
     <Compile Include="Logging\DefaultLog.cs" />
     <Compile Include="Logging\ILog.cs" />
+    <Compile Include="MessageNotConfirmedException.cs" />
     <Compile Include="Messages\ConsumedMessage.cs" />
     <Compile Include="Messages\ConsumedMessageBase.cs" />
     <Compile Include="Messages\ConsumedMessageBuilder.cs" />
@@ -104,6 +107,7 @@
     <Compile Include="Messages\UnresolvedMessage.cs" />
     <Compile Include="Messages\UnsupportedMessage.cs" />
     <Compile Include="Messages\ConsumedMessage.generic.cs" />
+    <Compile Include="NegativeAckReceivedException.cs" />
     <Compile Include="OutboundChannel.cs" />
     <Compile Include="ReliableOutboundChannel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

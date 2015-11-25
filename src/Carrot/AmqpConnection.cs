@@ -14,12 +14,12 @@ namespace Carrot
 
         private readonly IConnection _connection;
         private readonly IEnumerable<ConsumerBase> _consumers;
-        private readonly ReliableOutboundChannel _outboundChannel;
+        private readonly IOutboundChannel _outboundChannel;
         private readonly IDateTimeProvider _dateTimeProvider;
 
         internal AmqpConnection(IConnection connection,
                                 IEnumerable<ConsumerBase> consumers,
-                                ReliableOutboundChannel outboundChannel,
+                                IOutboundChannel outboundChannel,
                                 IDateTimeProvider dateTimeProvider,
                                 ChannelConfiguration configuration)
         {
@@ -41,8 +41,7 @@ namespace Carrot
             var body = properties.CreateEncoding()
                                  .GetBytes(properties.CreateSerializer(Configuration.SerializationConfiguration)
                                  .Serialize(message.Content));
-            var envelope = _outboundChannel.BuildEnvelope(properties, body, exchange, routingKey, message);
-            return _outboundChannel.PublishAsync(envelope);
+            return _outboundChannel.PublishAsync(properties, body, exchange, routingKey, message);
         }
 
         public void Dispose()

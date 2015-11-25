@@ -1,15 +1,16 @@
 using System;
 using System.Threading.Tasks;
+using Carrot.Extensions;
 using Carrot.Messages;
 using RabbitMQ.Client;
 
 namespace Carrot
 {
-    public class OutboundChannel : IDisposable
+    public class OutboundChannel : IOutboundChannel
     {
         protected readonly IModel Model;
 
-        public OutboundChannel(IModel model)
+        internal OutboundChannel(IModel model)
         {
             Model = model;
             Model.ModelShutdown += OnModelShutdown;
@@ -25,25 +26,18 @@ namespace Carrot
             Model.Dispose();
         }
 
-        internal OutboundMessageEnvelope<TMessage> BuildEnvelope<TMessage>(IBasicProperties properties,
-                                                                           Byte[] body,
-                                                                           Exchange exchange,
-                                                                           String routingKey,
-                                                                           OutboundMessage<TMessage> source)
+        public virtual Task<IPublishResult> PublishAsync<TMessage>(IBasicProperties properties,
+                                                                   Byte[] body,
+                                                                   Exchange exchange,
+                                                                   String routingKey,
+                                                                   OutboundMessage<TMessage> source)
             where TMessage : class
         {
-            var tag = Model.NextPublishSeqNo;
-            return new OutboundMessageEnvelope<TMessage>(properties,
-                                                         body,
-                                                         exchange,
-                                                         routingKey,
-                                                         tag,
-                                                         source);
-        }
-
-        internal virtual Task<IPublishResult> PublishAsync<TMessage>(OutboundMessageEnvelope<TMessage> message)
-            where TMessage : class
-        {
+            var message = source.BuildEnvelope(Model,
+                                               properties,
+                                               body,
+                                               exchange,
+                                               routingKey);
             var tcs = BuildTaskCompletionSource(message);
 
             try

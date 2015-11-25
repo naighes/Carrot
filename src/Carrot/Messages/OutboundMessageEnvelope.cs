@@ -10,15 +10,15 @@ namespace Carrot.Messages
                                          Byte[] body,
                                          Exchange exchange,
                                          String routingKey,
-                                         UInt64 tag,
-                                         OutboundMessage<TMessage> source)
+                                         OutboundMessage<TMessage> source,
+                                         UInt64 tag)
         {
             Properties = properties;
             Body = body;
             Exchange = exchange;
             RoutingKey = routingKey;
-            Tag = tag;
             Source = source;
+            Tag = tag;
         }
 
         public IBasicProperties Properties { get; }
@@ -29,8 +29,8 @@ namespace Carrot.Messages
 
         public String RoutingKey { get; }
 
-        public UInt64 Tag { get; }
-
         public OutboundMessage<TMessage> Source { get; set; }
+
+        public UInt64 Tag { get; }
     }
 }

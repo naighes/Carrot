@@ -21,14 +21,14 @@ namespace Carrot.Tests
                                                           StubDateTimeProvider().Object,
                                                           StubNewId(messageId).Object);
             const UInt64 deliveryTag = 0uL;
-            var envelope = new OutboundMessageEnvelope<Foo>(properties,
-                                                            new Byte[] { },
-                                                            new Exchange("target_exchange", "direct"),
-                                                            null,
-                                                            deliveryTag,
-                                                            message);
-            var channel = new OutboundChannelWrapper(new Mock<IModel>().Object);
-            var task = channel.PublishAsync(envelope);
+            var model = new Mock<IModel>();
+            model.Setup(_ => _.NextPublishSeqNo).Returns(deliveryTag);
+            var channel = new OutboundChannelWrapper(model.Object);
+            var task = channel.PublishAsync(properties,
+                                            new Byte[] { },
+                                            new Exchange("target_exchange", "direct"),
+                                            String.Empty,
+                                            message);
             channel.CallOnModelBasicAcks(new BasicAckEventArgs { DeliveryTag = deliveryTag });
             var result = Assert.IsType<SuccessfulPublishing>(task.Result);
             Assert.Equal(messageId, result.MessageId);
@@ -44,14 +44,14 @@ namespace Carrot.Tests
                                                           StubDateTimeProvider().Object,
                                                           StubNewId(messageId).Object);
             const UInt64 deliveryTag = 0uL;
-            var envelope = new OutboundMessageEnvelope<Foo>(properties,
-                                                            new Byte[] { },
-                                                            new Exchange("target_exchange", "direct"),
-                                                            null,
-                                                            deliveryTag,
-                                                            message);
-            var channel = new OutboundChannelWrapper(new Mock<IModel>().Object);
-            var task = channel.PublishAsync(envelope);
+            var model = new Mock<IModel>();
+            model.Setup(_ => _.NextPublishSeqNo).Returns(deliveryTag);
+            var channel = new OutboundChannelWrapper(model.Object);
+            var task = channel.PublishAsync(properties,
+                                            new Byte[] { },
+                                            new Exchange("target_exchange", "direct"),
+                                            String.Empty,
+                                            message);
             channel.CallOnModelBasicNacks(new BasicNackEventArgs { DeliveryTag = deliveryTag });
             var result = Assert.IsType<FailurePublishing>(task.Result);
             Assert.IsType<NegativeAckReceivedException>(result.Exception);
@@ -76,15 +76,13 @@ namespace Carrot.Tests
                                             It.IsAny<IBasicProperties>(),
                                             It.IsAny<Byte[]>()))
                  .Throws(exception);
-
-            var envelope = new OutboundMessageEnvelope<Foo>(properties,
-                                                            new Byte[] { },
-                                                            new Exchange(exchange, "direct"),
-                                                            String.Empty,
-                                                            0uL,
-                                                            message);
+            
             var channel = new ReliableOutboundChannel(model.Object);
-            var result = Assert.IsType<FailurePublishing>(channel.PublishAsync(envelope).Result);
+            var result = Assert.IsType<FailurePublishing>(channel.PublishAsync(properties,
+                                                                               new Byte[] { },
+                                                                               new Exchange(exchange, "direct"),
+                                                                               String.Empty,
+                                                                               message).Result);
             Assert.Equal(result.Exception, exception);
         }
 
@@ -98,14 +96,14 @@ namespace Carrot.Tests
                                                           StubDateTimeProvider().Object,
                                                           StubNewId(messageId).Object);
             const UInt64 deliveryTag = 0uL;
-            var envelope = new OutboundMessageEnvelope<Foo>(properties,
-                                                            new Byte[] { },
-                                                            new Exchange("target_exchange", "direct"),
-                                                            null,
-                                                            deliveryTag,
-                                                            message);
-            var channel = new OutboundChannelWrapper(new Mock<IModel>().Object);
-            var task = channel.PublishAsync(envelope);
+            var model = new Mock<IModel>();
+            model.Setup(_ => _.NextPublishSeqNo).Returns(deliveryTag);
+            var channel = new OutboundChannelWrapper(model.Object);
+            var task = channel.PublishAsync(properties,
+                                            new Byte[] { },
+                                            new Exchange("target_exchange", "direct"),
+                                            String.Empty,
+                                            message);
             channel.CallOnModelShutdown(new ShutdownEventArgs(ShutdownInitiator.Application, 3, "boom"));
             var result = Assert.IsType<FailurePublishing>(task.Result);
             Assert.IsType<MessageNotConfirmedException>(result.Exception);
@@ -254,7 +252,7 @@ namespace Carrot.Tests
 
         internal class OutboundChannelWrapper : ReliableOutboundChannel
         {
-            public OutboundChannelWrapper(IModel model)
+            internal OutboundChannelWrapper(IModel model)
                 : base(model)
             {
             }

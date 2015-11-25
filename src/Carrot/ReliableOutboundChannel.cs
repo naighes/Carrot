@@ -2,6 +2,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Linq;
 using System.Threading.Tasks;
+using Carrot.Extensions;
 using Carrot.Messages;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
@@ -13,7 +14,7 @@ namespace Carrot
         private readonly ConcurrentDictionary<UInt64, Tuple<TaskCompletionSource<Boolean>, IMessage>> _confirms =
             new ConcurrentDictionary<UInt64, Tuple<TaskCompletionSource<Boolean>, IMessage>>();
 
-        public ReliableOutboundChannel(IModel model)
+        internal ReliableOutboundChannel(IModel model)
             : base(model)
         {
             model.ConfirmSelect(); // TODO: not here! it issues a RPC call.
@@ -21,8 +22,17 @@ namespace Carrot
             Model.BasicNacks += OnModelBasicNacks;
         }
 
-        internal override Task<IPublishResult> PublishAsync<TMessage>(OutboundMessageEnvelope<TMessage> message)
+        public override Task<IPublishResult> PublishAsync<TMessage>(IBasicProperties properties,
+                                                                    Byte[] body,
+                                                                    Exchange exchange,
+                                                                    String routingKey,
+                                                                    OutboundMessage<TMessage> source)
         {
+            var message = source.BuildEnvelope(Model,
+                                               properties,
+                                               body,
+                                               exchange,
+                                               routingKey);
             var tcs = BuildTaskCompletionSource(message);
             _confirms.TryAdd(message.Tag,
                              new Tuple<TaskCompletionSource<Boolean>, IMessage>(tcs, message.Source));
@@ -90,27 +100,5 @@ namespace Carrot
                 _confirms.TryRemove(tag, out tuple);
             }
         }
-    }
-
-    public class NegativeAckReceivedException : Exception
-    {
-        internal NegativeAckReceivedException(IMessage source, String message)
-            : base(message)
-        {
-            SourceMessage = source;
-        }
-
-        public IMessage SourceMessage { get; }
-    }
-
-    public class MessageNotConfirmedException : Exception
-    {
-        internal MessageNotConfirmedException(IMessage source, String message)
-            : base(message)
-        {
-            SourceMessage = source;
-        }
-
-        public IMessage SourceMessage { get; }
     }
 }
