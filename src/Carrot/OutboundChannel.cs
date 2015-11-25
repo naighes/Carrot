@@ -79,14 +79,15 @@ namespace Carrot
         {
             HandleServerResponse(args.DeliveryTag,
                                  args.Multiple,
-                                 _ => _.TrySetException(new InvalidOperationException("publish was NACK-ed")));
+                                 (_, source) => _.TrySetException(new NegativeAckReceivedException(source,
+                                                                                                   "publish was NACK-ed")));
         }
 
         protected virtual void OnModelBasicAcks(Object sender, BasicAckEventArgs args)
         {
             HandleServerResponse(args.DeliveryTag,
                                  args.Multiple,
-                                 _ => _.TrySetResult(true));
+                                 (_, source) => _.TrySetResult(true));
         }
 
         protected virtual void OnModelShutdown(Object sender, ShutdownEventArgs args)
@@ -109,7 +110,7 @@ namespace Carrot
 
         private void HandleServerResponse(UInt64 deliveryTag,
                                           Boolean multiple,
-                                          Action<TaskCompletionSource<Boolean>> action)
+                                          Action<TaskCompletionSource<Boolean>, IMessage> action)
         {
             var tags = multiple
                 ? _confirms.Keys.Where(_ => _ <= deliveryTag)
@@ -117,11 +118,23 @@ namespace Carrot
 
             foreach (var tag in tags)
             {
-                action(_confirms[tag].Item1);
+                var confirm = this._confirms[tag];
+                action(confirm.Item1, confirm.Item2);
                 Tuple<TaskCompletionSource<Boolean>, IMessage> tuple;
                 _confirms.TryRemove(tag, out tuple);
             }
         }
+    }
+
+    public class NegativeAckReceivedException : Exception
+    {
+        internal NegativeAckReceivedException(IMessage source, String message)
+            : base(message)
+        {
+            SourceMessage = source;
+        }
+
+        public IMessage SourceMessage { get; }
     }
 
     public class MessageNotConfirmedException : Exception
