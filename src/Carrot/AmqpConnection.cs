@@ -41,8 +41,8 @@ namespace Carrot
             var body = properties.CreateEncoding()
                                  .GetBytes(properties.CreateSerializer(Configuration.SerializationConfiguration)
                                  .Serialize(message.Content));
-            var envelope = _outboundChannel.BuildEnvelope(properties, body);
-            return _outboundChannel.PublishAsync(envelope, exchange, routingKey);
+            var envelope = _outboundChannel.BuildEnvelope(properties, body, exchange, routingKey);
+            return _outboundChannel.PublishAsync(envelope);
         }
 
         public void Dispose()

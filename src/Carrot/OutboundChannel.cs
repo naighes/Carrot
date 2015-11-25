@@ -38,15 +38,16 @@ namespace Carrot
             _model.Dispose();
         }
 
-        internal OutboundMessageEnvelope BuildEnvelope(IBasicProperties properties, Byte[] body)
+        internal OutboundMessageEnvelope BuildEnvelope(IBasicProperties properties,
+                                                       Byte[] body,
+                                                       Exchange exchange,
+                                                       String routingKey)
         {
             var tag = _model.NextPublishSeqNo;
-            return new OutboundMessageEnvelope(properties, tag, body);
+            return new OutboundMessageEnvelope(properties, body, exchange, routingKey, tag);
         }
 
-        internal Task<IPublishResult> PublishAsync(OutboundMessageEnvelope message,
-                                                   Exchange exchange,
-                                                   String routingKey = "")
+        internal Task<IPublishResult> PublishAsync(OutboundMessageEnvelope message)
         {
             var tcs = new TaskCompletionSource<Boolean>(message.Properties);
             _confirms.TryAdd(message.Tag,
@@ -54,8 +55,8 @@ namespace Carrot
 
             try
             {
-                _model.BasicPublish(exchange.Name,
-                                    routingKey,
+                _model.BasicPublish(message.Exchange.Name,
+                                    message.RoutingKey,
                                     false,
                                     false,
                                     message.Properties,

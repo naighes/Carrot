@@ -41,10 +41,12 @@ namespace Carrot.Tests
             var properties = message.BuildBasicProperties(resolver.Object, dateTimeProvider.Object, newId.Object);
             const UInt64 deliveryTag = 0uL;
             var envelope = new OutboundMessageEnvelope(properties,
-                                                       deliveryTag,
-                                                       new Byte[] { });
+                                                       new Byte[] { },
+                                                       new Exchange("target_exchange", "direct"),
+                                                       null,
+                                                       deliveryTag);
             var channel = new OutboundChannelWrapper(model.Object);
-            var task = channel.PublishAsync(envelope, new Exchange("target_exchange", "direct"));
+            var task = channel.PublishAsync(envelope);
             channel.CallOnModelBasicAcks(new BasicAckEventArgs { DeliveryTag = deliveryTag });
             var result = Assert.IsType<SuccessfulPublishing>(task.Result);
             Assert.Equal(messageId, result.MessageId);
@@ -88,11 +90,12 @@ namespace Carrot.Tests
                                                           dateTimeProvider.Object,
                                                           new Mock<INewId>().Object);
             var envelope = new OutboundMessageEnvelope(properties,
-                                                       0uL,
-                                                       new Byte[] { });
+                                                       new Byte[] { },
+                                                       new Exchange(exchange, "direct"),
+                                                       String.Empty,
+                                                       0uL);
             var channel = new OutboundChannel(model.Object);
-            var result = Assert.IsType<FailurePublishing>(channel.PublishAsync(envelope,
-                                                                               new Exchange(exchange, "direct")).Result);
+            var result = Assert.IsType<FailurePublishing>(channel.PublishAsync(envelope).Result);
             Assert.Equal(result.Exception, exception);
         }
 
