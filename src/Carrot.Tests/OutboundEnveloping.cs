@@ -83,7 +83,7 @@ namespace Carrot.Tests
                                                             String.Empty,
                                                             0uL,
                                                             message);
-            var channel = new OutboundChannel(model.Object);
+            var channel = new ReliableOutboundChannel(model.Object);
             var result = Assert.IsType<FailurePublishing>(channel.PublishAsync(envelope).Result);
             Assert.Equal(result.Exception, exception);
         }
@@ -252,7 +252,7 @@ namespace Carrot.Tests
             return new Mock<IDateTimeProvider>();
         }
 
-        internal class OutboundChannelWrapper : OutboundChannel
+        internal class OutboundChannelWrapper : ReliableOutboundChannel
         {
             public OutboundChannelWrapper(IModel model)
                 : base(model)

@@ -14,12 +14,12 @@ namespace Carrot
 
         private readonly IConnection _connection;
         private readonly IEnumerable<ConsumerBase> _consumers;
-        private readonly OutboundChannel _outboundChannel;
+        private readonly ReliableOutboundChannel _outboundChannel;
         private readonly IDateTimeProvider _dateTimeProvider;
 
         internal AmqpConnection(IConnection connection,
                                 IEnumerable<ConsumerBase> consumers,
-                                OutboundChannel outboundChannel,
+                                ReliableOutboundChannel outboundChannel,
                                 IDateTimeProvider dateTimeProvider,
                                 ChannelConfiguration configuration)
         {

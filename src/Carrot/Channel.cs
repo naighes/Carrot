@@ -112,7 +112,7 @@ namespace Carrot
 
             return new AmqpConnection(connection,
                                       _promises.Select(_ => BuildConsumer(connection, _, builder)).ToList(),
-                                      new LoggedOutboundChannel(outboundModel, _configuration),
+                                      new LoggedReliableOutboundChannel(outboundModel, _configuration),
                                       new DateTimeProvider(),
                                       _configuration);
         }

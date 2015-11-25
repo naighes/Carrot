@@ -23,7 +23,7 @@ namespace Carrot.Tests
             var connection = new Mock<IConnection>();
             var amqpConnection = new AmqpConnection(connection.Object,
                                                     new List<ConsumerBase> { consumer1, consumer2 },
-                                                    new OutboundChannel(outboundModel.Object),
+                                                    new ReliableOutboundChannel(outboundModel.Object),
                                                     null,
                                                     null);
             amqpConnection.Dispose();

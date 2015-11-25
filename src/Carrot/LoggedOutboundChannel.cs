@@ -2,7 +2,6 @@ using System;
 using Carrot.Configuration;
 using Carrot.Logging;
 using RabbitMQ.Client;
-using RabbitMQ.Client.Events;
 
 namespace Carrot
 {
@@ -14,20 +13,6 @@ namespace Carrot
             : base(model)
         {
             _configuration = configuration;
-        }
-
-        protected override void OnModelBasicAcks(Object sender, BasicAckEventArgs args)
-        {
-            base.OnModelBasicAcks(sender, args);
-
-            Log().Info($"outbound-model basic.ack received (delivery-tag: {args.DeliveryTag}, multiple: {args.Multiple})");
-        }
-
-        protected override void OnModelBasicNacks(Object sender, BasicNackEventArgs args)
-        {
-            base.OnModelBasicNacks(sender, args);
-
-            Log().Info($"outbound-model basic.nack received (delivery-tag: {args.DeliveryTag}, multiple: {args.Multiple})");
         }
 
         protected override void OnModelShutdown(Object sender, ShutdownEventArgs args)
