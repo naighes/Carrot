@@ -96,7 +96,7 @@ namespace Carrot
         public IAmqpConnection Connect()
         {
             var connection = CreateConnection();
-            var outboundModel = CreateOutboundModel(connection);
+            var outboundModel = connection.CreateModel();
 
             foreach (var exchange in _exchanges)
                 exchange.Declare(outboundModel);
@@ -139,13 +139,6 @@ namespace Carrot
                            AutomaticRecoveryEnabled = true,
                            TopologyRecoveryEnabled = true
                        }.CreateConnection();
-        }
-
-        protected internal virtual IModel CreateOutboundModel(IConnection connection)
-        {
-            var model = connection.CreateModel();
-            model.ConfirmSelect();
-            return model;
         }
 
         protected internal virtual IModel CreateInboundModel(IConnection connection,

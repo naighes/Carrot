@@ -21,7 +21,9 @@ namespace Carrot.Tests
             var configuration = new ChannelConfiguration();
             configuration.GeneratesMessageIdBy(new Mock<INewId>().Object);
             configuration.ResolveMessageTypeBy(new Mock<IMessageTypeResolver>().Object);
-            var channel = new ChannelWrapper(new Mock<IConnection>().Object,
+            var connection = new Mock<IConnection>();
+            connection.Setup(_ => _.CreateModel()).Returns(model.Object);
+            var channel = new ChannelWrapper(connection.Object,
                                              model.Object,
                                              configuration);
             var consumer = new FakeConsumer(_ => Task.Factory.StartNew(() => { }));
@@ -63,11 +65,6 @@ namespace Carrot.Tests
             protected internal override IConnection CreateConnection()
             {
                 return _connection;
-            }
-
-            protected internal override IModel CreateOutboundModel(IConnection connection)
-            {
-                return _model;
             }
 
             protected internal override IModel CreateInboundModel(IConnection connection,

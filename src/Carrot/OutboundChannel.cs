@@ -17,6 +17,7 @@ namespace Carrot
 
         public OutboundChannel(IModel model)
         {
+            model.ConfirmSelect();
             _model = model;
 
             _model.BasicAcks += OnModelBasicAcks;
