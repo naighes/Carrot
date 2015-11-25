@@ -1,10 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using RabbitMQ.Client;
 
 namespace Carrot.Messages
 {
-    // potrei usare un decorator, oppure definire il dizionario come internal.
     public class HeaderCollection
     {
         protected internal readonly ISet<String> ReservedKeys = new HashSet<String>
@@ -15,7 +15,7 @@ namespace Carrot.Messages
                                                                         "content_encoding"
                                                                     };
 
-        protected internal readonly IDictionary<String, Object> InternalDictionary;
+        internal readonly IDictionary<String, Object> InternalDictionary;
 
         internal HeaderCollection()
             : this(new Dictionary<String, Object>(StringComparer.OrdinalIgnoreCase))
@@ -70,6 +70,34 @@ namespace Carrot.Messages
         private T ValueOrDefault<T>(String key)
         {
             return InternalDictionary.ContainsKey(key) ? (T)InternalDictionary[key] : default(T);
+        }
+
+        internal void AddHeader(String key, Object value)
+        {
+            if (key == null)
+                throw new ArgumentNullException(nameof(key));
+
+            if (ReservedKeys.Contains(key))
+                throw new InvalidOperationException($"key '{key}' is reserved");
+
+            InternalDictionary.Add(key, value);
+        }
+
+        internal void RemoveHeader(String key)
+        {
+            if (key == null)
+                throw new ArgumentNullException(nameof(key));
+
+            if (ReservedKeys.Contains(key))
+                throw new InvalidOperationException($"key '{key}' is reserved");
+
+            InternalDictionary.Remove(key);
+        }
+
+        internal IDictionary<String, Object> NonReservedHeaders()
+        {
+            return InternalDictionary.Where(_ => !ReservedKeys.Contains(_.Key))
+                                     .ToDictionary(_ => _.Key, _ => _.Value);
         }
     }
 }

@@ -16,7 +16,7 @@ namespace Carrot.Tests
         {
             const String key = "foo";
             const String value = "some-value";
-            var collection = new OutboundHeaderCollection();
+            var collection = new HeaderCollection();
             collection.AddHeader(key, value);
             Assert.Equal(value, collection[key.ToUpperInvariant()]);
         }
@@ -28,19 +28,20 @@ namespace Carrot.Tests
             const String contentEncoding = "UTF-16";
             const String messageId = "one-id";
             const Int64 timestamp = 123456789L;
-            var collection = new OutboundHeaderCollection(new Dictionary<String, Object>(StringComparer.OrdinalIgnoreCase)
-                                                              {
-                                                                  { "message_id", messageId },
-                                                                  { "timestamp", timestamp },
-                                                                  { "content_type", contentType },
-                                                                  { "content_encoding", contentEncoding }
-                                                              });
+            var collection = new HeaderCollection(new Dictionary<String, Object>(StringComparer.OrdinalIgnoreCase)
+                                                      {
+                                                          { "message_id", messageId },
+                                                          { "timestamp", timestamp },
+                                                          { "content_type", contentType },
+                                                          { "content_encoding", contentEncoding }
+                                                      });
             const String key = "foo";
             const String value = "bar";
             collection.AddHeader(key, value);
             var resolver = new Mock<IMessageTypeResolver>();
             resolver.Setup(_ => _.Resolve<Foo>()).Returns(EmptyMessageBinding.Instance);
-            var properties = collection.BuildBasicProperties<Foo>(null, null, resolver.Object);
+            var message = new OutboundMessage<Foo>(new Foo(), collection);
+            var properties = message.BuildBasicProperties(resolver.Object, null, null);
 
             Assert.Equal(messageId, properties.MessageId);
             Assert.Equal(new AmqpTimestamp(timestamp), properties.Timestamp);
@@ -56,11 +57,11 @@ namespace Carrot.Tests
             const String contentEncoding = "UTF-8";
             const String messageId = "one-id";
             const Int64 timestamp = 123456789L;
-            var collection = new OutboundHeaderCollection(new Dictionary<String, Object>(StringComparer.OrdinalIgnoreCase)
-                                                              {
-                                                                  { "content_type", contentType },
-                                                                  { "content_encoding", contentEncoding }
-                                                              });
+            var collection = new HeaderCollection(new Dictionary<String, Object>(StringComparer.OrdinalIgnoreCase)
+                                                      {
+                                                          { "content_type", contentType },
+                                                          { "content_encoding", contentEncoding }
+                                                      });
             const String key = "foo";
             const String value = "bar";
             collection.AddHeader(key, value);
@@ -70,7 +71,8 @@ namespace Carrot.Tests
             newId.Setup(_ => _.Next()).Returns(messageId);
             var dateTimeProvider = new Mock<IDateTimeProvider>();
             dateTimeProvider.Setup(_ => _.UtcNow()).Returns(timestamp.ToDateTimeOffset());
-            var properties = collection.BuildBasicProperties<Foo>(newId.Object, dateTimeProvider.Object, resolver.Object);
+            var message = new OutboundMessage<Foo>(new Foo(), collection);
+            var properties = message.BuildBasicProperties(resolver.Object, dateTimeProvider.Object, newId.Object);
 
             Assert.Equal(messageId, properties.MessageId);
             Assert.Equal(new AmqpTimestamp(timestamp), properties.Timestamp);
@@ -81,7 +83,7 @@ namespace Carrot.Tests
         [Fact]
         public void AddOrRemoveReservedHeaders()
         {
-            var collection = new OutboundHeaderCollection();
+            var collection = new HeaderCollection();
 
             Assert.Throws<InvalidOperationException>(() => collection.AddHeader("message_id", "one-id"));
             Assert.Throws<InvalidOperationException>(() => collection.AddHeader("timestamp", 12345678L));

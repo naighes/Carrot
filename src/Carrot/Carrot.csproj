@@ -97,7 +97,6 @@
     <Compile Include="Messages\HeaderCollection.cs" />
     <Compile Include="Messages\IConsumedMessageBuilder.cs" />
     <Compile Include="Messages\IMessage.cs" />
-    <Compile Include="Messages\OutboundHeaderCollection.cs" />
     <Compile Include="Messages\OutboundMessage.cs" />
     <Compile Include="Messages\OutboundMessageEnvelope.cs" />
     <Compile Include="Messages\Results.cs" />
