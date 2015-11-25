@@ -4,6 +4,7 @@ using RabbitMQ.Client;
 
 namespace Carrot.Messages
 {
+    // potrei usare un decorator, oppure definire il dizionario come internal.
     public class HeaderCollection
     {
         protected internal readonly ISet<String> ReservedKeys = new HashSet<String>
@@ -69,27 +70,6 @@ namespace Carrot.Messages
         private T ValueOrDefault<T>(String key)
         {
             return InternalDictionary.ContainsKey(key) ? (T)InternalDictionary[key] : default(T);
-        }
-
-        public void SetContentEncoding(String value)
-        {
-            Set("content_encoding", value);
-        }
-
-        public void SetContentType(String value)
-        {
-            Set("content_type", value);
-        }
-
-        private void Set<T>(String key, T value)
-        {
-            if (value == null)
-                throw new ArgumentNullException(nameof(value));
-
-            if (!InternalDictionary.ContainsKey(key))
-                InternalDictionary.Add(key, value);
-            else
-                InternalDictionary[key] = value;
         }
     }
 }

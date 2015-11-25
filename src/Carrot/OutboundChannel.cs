@@ -118,7 +118,7 @@ namespace Carrot
 
             foreach (var tag in tags)
             {
-                var confirm = this._confirms[tag];
+                var confirm = _confirms[tag];
                 action(confirm.Item1, confirm.Item2);
                 Tuple<TaskCompletionSource<Boolean>, IMessage> tuple;
                 _confirms.TryRemove(tag, out tuple);

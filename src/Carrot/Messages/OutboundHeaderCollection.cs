@@ -32,7 +32,7 @@ namespace Carrot.Messages
                                      ContentType = ContentType ?? DefaultContentType,
                                      ContentEncoding = ContentEncoding ?? DefaultContentEncoding,
                                      MessageId = MessageId ?? idGenerator.Next(),
-                                     Timestamp =new AmqpTimestamp(Timestamp <= 0L
+                                     Timestamp = new AmqpTimestamp(Timestamp <= 0L
                                              ? dateTimeProvider.UtcNow().ToUnixTimestamp()
                                              : Timestamp)
                                  };
@@ -73,6 +73,27 @@ namespace Carrot.Messages
                 throw new InvalidOperationException($"key '{key}' is reserved");
 
             InternalDictionary.Remove(key);
+        }
+
+        public void SetContentEncoding(String value)
+        {
+            Set("content_encoding", value);
+        }
+
+        public void SetContentType(String value)
+        {
+            Set("content_type", value);
+        }
+
+        private void Set<T>(String key, T value)
+        {
+            if (value == null)
+                throw new ArgumentNullException(nameof(value));
+
+            if (!InternalDictionary.ContainsKey(key))
+                InternalDictionary.Add(key, value);
+            else
+                InternalDictionary[key] = value;
         }
     }
 }

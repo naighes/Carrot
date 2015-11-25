@@ -143,7 +143,7 @@ namespace Carrot.Tests
         {
             const String contentEncoding = "UTF-16";
             var message = new OutboundMessage<Bar>(new Bar());
-            message.Headers.SetContentEncoding(contentEncoding);
+            ((OutboundHeaderCollection)message.Headers).SetContentEncoding(contentEncoding);
             var properties = message.BuildBasicProperties(StubResolver<Bar>(null).Object,
                                                           new Mock<IDateTimeProvider>().Object,
                                                           new Mock<INewId>().Object);
@@ -165,7 +165,7 @@ namespace Carrot.Tests
         {
             const String contentType = "application/xml";
             var message = new OutboundMessage<Bar>(new Bar());
-            message.Headers.SetContentType(contentType);
+            ((OutboundHeaderCollection)message.Headers).SetContentType(contentType);
             var properties = message.BuildBasicProperties(StubResolver<Bar>(null).Object,
                                                           new Mock<IDateTimeProvider>().Object,
                                                           new Mock<INewId>().Object);
