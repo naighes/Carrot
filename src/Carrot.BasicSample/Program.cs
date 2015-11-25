@@ -26,8 +26,11 @@ namespace Carrot.BasicSample
             var connection = channel.Connect();
 
             for (var i = 0; i < 5; i++)
-                connection.PublishAsync(new OutboundMessage<Foo>(new Foo { Bar = i }), exchange, routingKey);
-            
+            {
+                var message = new OutboundMessage<Foo>(new Foo { Bar = i });
+                connection.PublishAsync(message, exchange, routingKey);
+            }
+
             Console.ReadLine();
             connection.Dispose();
         }

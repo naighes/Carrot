@@ -2,7 +2,6 @@ using System;
 using Carrot.Configuration;
 using Carrot.Extensions;
 using Carrot.Messages;
-using Carrot.Serialization;
 using Moq;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
@@ -15,30 +14,12 @@ namespace Carrot.Tests
         [Fact]
         public void PublishingSuccessfully()
         {
-            var content = new Foo();
-            var message = new OutboundMessage<Foo>(content);
-            var dateTimeProvider = new Mock<IDateTimeProvider>();
-
-            var serializer = new Mock<ISerializer>();
-            serializer.Setup(_ => _.Serialize(content)).Returns("{}");
-
             const String messageId = "one-id";
-            var newId = new Mock<INewId>();
-            newId.Setup(_ => _.Next()).Returns(messageId);
 
-            var resolver = new Mock<IMessageTypeResolver>();
-            resolver.Setup(_ => _.Resolve<Foo>()).Returns(new MessageBinding("urn:message:fake", typeof(Foo)));
-
-            var model = new Mock<IModel>();
-
-            var configuration = new ChannelConfiguration();
-            configuration.GeneratesMessageIdBy(newId.Object);
-            configuration.ResolveMessageTypeBy(resolver.Object);
-            configuration.ConfigureSerialization(_ =>
-                                                 {
-                                                     _.Map(__ => __.MediaType == "application/json", serializer.Object);
-                                                 });
-            var properties = message.BuildBasicProperties(resolver.Object, dateTimeProvider.Object, newId.Object);
+            var message = NewMessage();
+            var properties = message.BuildBasicProperties(StubResolver().Object,
+                                                          StubDateTimeProvider().Object,
+                                                          StubNewId(messageId).Object);
             const UInt64 deliveryTag = 0uL;
             var envelope = new OutboundMessageEnvelope<Foo>(properties,
                                                             new Byte[] { },
@@ -46,7 +27,7 @@ namespace Carrot.Tests
                                                             null,
                                                             deliveryTag,
                                                             message);
-            var channel = new OutboundChannelWrapper(model.Object);
+            var channel = new OutboundChannelWrapper(new Mock<IModel>().Object);
             var task = channel.PublishAsync(envelope);
             channel.CallOnModelBasicAcks(new BasicAckEventArgs { DeliveryTag = deliveryTag });
             var result = Assert.IsType<SuccessfulPublishing>(task.Result);
@@ -54,22 +35,40 @@ namespace Carrot.Tests
         }
 
         [Fact]
+        public void NegativeAck()
+        {
+            const String messageId = "one-id";
+
+            var message = NewMessage();
+            var properties = message.BuildBasicProperties(StubResolver().Object,
+                                                          StubDateTimeProvider().Object,
+                                                          StubNewId(messageId).Object);
+            const UInt64 deliveryTag = 0uL;
+            var envelope = new OutboundMessageEnvelope<Foo>(properties,
+                                                            new Byte[] { },
+                                                            new Exchange("target_exchange", "direct"),
+                                                            null,
+                                                            deliveryTag,
+                                                            message);
+            var channel = new OutboundChannelWrapper(new Mock<IModel>().Object);
+            var task = channel.PublishAsync(envelope);
+            channel.CallOnModelBasicNacks(new BasicNackEventArgs { DeliveryTag = deliveryTag });
+            var result = Assert.IsType<FailurePublishing>(task.Result);
+            Assert.IsType<NegativeAckReceivedException>(result.Exception);
+        }
+
+        [Fact]
         public void PublishingFailed()
         {
             const String exchange = "target_exchange";
-            var content = new Foo();
-            var message = new OutboundMessage<Foo>(content);
-            var dateTimeProvider = new Mock<IDateTimeProvider>();
 
-            var serializer = new Mock<ISerializer>();
-            serializer.Setup(_ => _.Serialize(content)).Returns("{}");
-
-            var resolver = new Mock<IMessageTypeResolver>();
-            resolver.Setup(_ => _.Resolve<Foo>()).Returns(new MessageBinding("urn:message:fake", typeof(Foo)));
-
-            var model = new Mock<IModel>();
+            var message = NewMessage();
+            var properties = message.BuildBasicProperties(StubResolver().Object,
+                                                          StubDateTimeProvider().Object,
+                                                          new Mock<INewId>().Object);
 
             var exception = new Exception();
+            var model = new Mock<IModel>();
             model.Setup(_ => _.BasicPublish(exchange,
                                             String.Empty,
                                             false,
@@ -78,18 +77,6 @@ namespace Carrot.Tests
                                             It.IsAny<Byte[]>()))
                  .Throws(exception);
 
-            var configuration = new ChannelConfiguration();
-            configuration.GeneratesMessageIdBy(new Mock<INewId>().Object);
-            configuration.ResolveMessageTypeBy(resolver.Object);
-            configuration.ConfigureSerialization(_ =>
-                                                 {
-                                                     _.Map(__ => __.MediaType == "application/json",
-                                                           serializer.Object);
-                                                 });
-
-            var properties = message.BuildBasicProperties(resolver.Object,
-                                                          dateTimeProvider.Object,
-                                                          new Mock<INewId>().Object);
             var envelope = new OutboundMessageEnvelope<Foo>(properties,
                                                             new Byte[] { },
                                                             new Exchange(exchange, "direct"),
@@ -102,12 +89,36 @@ namespace Carrot.Tests
         }
 
         [Fact]
+        public void ModelShutdown()
+        {
+            const String messageId = "one-id";
+
+            var message = NewMessage();
+            var properties = message.BuildBasicProperties(StubResolver().Object,
+                                                          StubDateTimeProvider().Object,
+                                                          StubNewId(messageId).Object);
+            const UInt64 deliveryTag = 0uL;
+            var envelope = new OutboundMessageEnvelope<Foo>(properties,
+                                                            new Byte[] { },
+                                                            new Exchange("target_exchange", "direct"),
+                                                            null,
+                                                            deliveryTag,
+                                                            message);
+            var channel = new OutboundChannelWrapper(new Mock<IModel>().Object);
+            var task = channel.PublishAsync(envelope);
+            channel.CallOnModelShutdown(new ShutdownEventArgs(ShutdownInitiator.Application, 3, "boom"));
+            var result = Assert.IsType<FailurePublishing>(task.Result);
+            Assert.IsType<MessageNotConfirmedException>(result.Exception);
+        }
+
+        [Fact]
         public void BasicPropertiesMapping()
         {
+            var message = NewMessage();
             const String messageId = "one-id";
             var timestamp = new DateTimeOffset(2015, 1, 2, 3, 4, 5, TimeSpan.Zero);
             
-            var dateTimeProvider = new Mock<IDateTimeProvider>();
+            var dateTimeProvider = StubDateTimeProvider();
             dateTimeProvider.Setup(_ => _.UtcNow()).Returns(timestamp);
 
             var newId = new Mock<INewId>();
@@ -116,11 +127,6 @@ namespace Carrot.Tests
             var resolver = new Mock<IMessageTypeResolver>();
             resolver.Setup(_ => _.Resolve<Foo>()).Returns(new MessageBinding("urn:message:fake", typeof(Foo)));
 
-            var configuration = new ChannelConfiguration();
-            configuration.GeneratesMessageIdBy(newId.Object);
-            configuration.ResolveMessageTypeBy(resolver.Object);
-
-            var message = new OutboundMessage<Foo>(new Foo());
             var properties = message.BuildBasicProperties(resolver.Object,
                                                           dateTimeProvider.Object,
                                                           newId.Object);
@@ -133,7 +139,7 @@ namespace Carrot.Tests
         {
             var message = new OutboundMessage<Bar>(new Bar());
             var properties = message.BuildBasicProperties(StubResolver<Bar>(null).Object,
-                                                          new Mock<IDateTimeProvider>().Object,
+                                                          StubDateTimeProvider().Object,
                                                           new Mock<INewId>().Object);
             Assert.Equal("urn:message:fake", properties.Type);
         }
@@ -145,7 +151,7 @@ namespace Carrot.Tests
             var message = new OutboundMessage<Bar>(new Bar());
             message.SetContentEncoding(contentEncoding);
             var properties = message.BuildBasicProperties(StubResolver<Bar>(null).Object,
-                                                          new Mock<IDateTimeProvider>().Object,
+                                                          StubDateTimeProvider().Object,
                                                           new Mock<INewId>().Object);
             Assert.Equal(contentEncoding, properties.ContentEncoding);
         }
@@ -155,7 +161,7 @@ namespace Carrot.Tests
         {
             var message = new OutboundMessage<Bar>(new Bar());
             var properties = message.BuildBasicProperties(StubResolver<Bar>(null).Object,
-                                                          new Mock<IDateTimeProvider>().Object,
+                                                          StubDateTimeProvider().Object,
                                                           new Mock<INewId>().Object);
             Assert.Equal("UTF-8", properties.ContentEncoding);
         }
@@ -167,7 +173,7 @@ namespace Carrot.Tests
             var message = new OutboundMessage<Bar>(new Bar());
             message.SetContentType(contentType);
             var properties = message.BuildBasicProperties(StubResolver<Bar>(null).Object,
-                                                          new Mock<IDateTimeProvider>().Object,
+                                                          StubDateTimeProvider().Object,
                                                           new Mock<INewId>().Object);
             Assert.Equal(contentType, properties.ContentType);
         }
@@ -177,7 +183,7 @@ namespace Carrot.Tests
         {
             var message = new OutboundMessage<Bar>(new Bar());
             var properties = message.BuildBasicProperties(StubResolver<Bar>(null).Object,
-                                                          new Mock<IDateTimeProvider>().Object,
+                                                          StubDateTimeProvider().Object,
                                                           new Mock<INewId>().Object);
             Assert.Equal("application/json", properties.ContentType);
         }
@@ -187,7 +193,7 @@ namespace Carrot.Tests
         {
             var message = new OutboundMessage<Bar>(new Bar());
             var properties = message.BuildBasicProperties(StubResolver<Bar>(null).Object,
-                                                          new Mock<IDateTimeProvider>().Object,
+                                                          StubDateTimeProvider().Object,
                                                           new Mock<INewId>().Object);
             Assert.False(properties.Persistent);
         }
@@ -197,7 +203,7 @@ namespace Carrot.Tests
         {
             var message = new DurableOutboundMessage<Bar>(new Bar());
             var properties = message.BuildBasicProperties(StubResolver<Bar>(null).Object,
-                                                          new Mock<IDateTimeProvider>().Object,
+                                                          StubDateTimeProvider().Object,
                                                           new Mock<INewId>().Object);
             Assert.True(properties.Persistent);
         }
@@ -208,7 +214,7 @@ namespace Carrot.Tests
             var expiresAfter = new TimeSpan?(TimeSpan.FromSeconds(18));
             var message = new DurableOutboundMessage<Bar>(new Bar());
             var properties = message.BuildBasicProperties(StubResolver<Bar>(expiresAfter).Object,
-                                                          new Mock<IDateTimeProvider>().Object,
+                                                          StubDateTimeProvider().Object,
                                                           new Mock<INewId>().Object);
             Assert.Equal("18000", properties.Expiration);
         }
@@ -222,6 +228,30 @@ namespace Carrot.Tests
             return resolver;
         }
 
+        private static OutboundMessage<Foo> NewMessage()
+        {
+            return new OutboundMessage<Foo>(new Foo());
+        }
+
+        private static Mock<INewId> StubNewId(String messageId)
+        {
+            var newId = new Mock<INewId>();
+            newId.Setup(_ => _.Next()).Returns(messageId);
+            return newId;
+        }
+
+        private static Mock<IMessageTypeResolver> StubResolver()
+        {
+            var resolver = new Mock<IMessageTypeResolver>();
+            resolver.Setup(_ => _.Resolve<Foo>()).Returns(new MessageBinding("urn:message:fake", typeof(Foo)));
+            return resolver;
+        }
+
+        private static Mock<IDateTimeProvider> StubDateTimeProvider()
+        {
+            return new Mock<IDateTimeProvider>();
+        }
+
         internal class OutboundChannelWrapper : OutboundChannel
         {
             public OutboundChannelWrapper(IModel model)
@@ -232,6 +262,16 @@ namespace Carrot.Tests
             internal void CallOnModelBasicAcks(BasicAckEventArgs args)
             {
                 OnModelBasicAcks(null, args);
+            }
+
+            internal void CallOnModelBasicNacks(BasicNackEventArgs args)
+            {
+                OnModelBasicNacks(null, args);
+            }
+
+            internal void CallOnModelShutdown(ShutdownEventArgs args)
+            {
+                OnModelShutdown(null, args);
             }
         }
     }
