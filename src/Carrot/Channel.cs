@@ -110,7 +110,7 @@ namespace Carrot
             var builder = new ConsumedMessageBuilder(_configuration.SerializationConfiguration,
                                                      _configuration.MessageTypeResolver);
 
-            IOutboundChannel channel = new LoggedReliableOutboundChannel(outboundModel, _configuration);
+            var channel = _configuration.OutboundChannelBuilder(outboundModel, _configuration);
             return new AmqpConnection(connection,
                                       _promises.Select(_ => BuildConsumer(connection, _, builder)).ToList(),
                                       channel,

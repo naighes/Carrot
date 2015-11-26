@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using Carrot.Configuration;
 using Carrot.Extensions;
 using Carrot.Messages;
 using RabbitMQ.Client;
@@ -15,6 +16,10 @@ namespace Carrot
             Model = model;
             Model.ModelShutdown += OnModelShutdown;
         }
+
+        public static Func<IModel, ChannelConfiguration, IOutboundChannel> Default { get; } = (m, c) => new LoggedOutboundChannel(m, c);
+
+        public static Func<IModel, ChannelConfiguration, IOutboundChannel> Reliable { get; } = (m, c) => new LoggedReliableOutboundChannel(m, c);
 
         public void Dispose()
         {

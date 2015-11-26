@@ -1,5 +1,6 @@
 using System;
 using Carrot.Logging;
+using RabbitMQ.Client;
 
 namespace Carrot.Configuration
 {
@@ -24,6 +25,8 @@ namespace Carrot.Configuration
         internal ILog Log { get; private set; } = new DefaultLog();
 
         internal SerializationConfiguration SerializationConfiguration { get; }
+
+        internal Func<IModel, ChannelConfiguration, IOutboundChannel> OutboundChannelBuilder { get; private set; } = OutboundChannel.Default;
 
         public void Endpoint(Uri uri)
         {
@@ -79,6 +82,14 @@ namespace Carrot.Configuration
                 throw new ArgumentNullException(nameof(configure));
 
             configure(SerializationConfiguration);
+        }
+
+        public void PublishBy(Func<IModel, ChannelConfiguration, IOutboundChannel> builder)
+        {
+            if (builder == null)
+                throw new ArgumentNullException(nameof(builder));
+
+            OutboundChannelBuilder = builder;
         }
     }
 }
