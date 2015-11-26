@@ -6,13 +6,13 @@ namespace Carrot.Configuration
 {
     public class SerializationConfiguration
     {
-        private readonly IContentNegotiator _negotiator = new ContentNegotiator();
-
         private readonly IDictionary<Predicate<ContentNegotiator.MediaTypeHeader>, ISerializer> _serializers =
             new Dictionary<Predicate<ContentNegotiator.MediaTypeHeader>, ISerializer>
                 {
                     { _ => _.MediaType == "application/json", new JsonSerializer() }
                 };
+
+        private IContentNegotiator _negotiator = new ContentNegotiator();
 
         internal SerializationConfiguration() { }
 
@@ -25,6 +25,14 @@ namespace Carrot.Configuration
                 throw new ArgumentNullException(nameof(serializer));
 
             _serializers.Add(predicate, serializer);
+        }
+
+        public void NegotiateBy(IContentNegotiator negotiator)
+        {
+            if (negotiator == null)
+                throw new ArgumentNullException(nameof(negotiator));
+
+            _negotiator = negotiator;
         }
 
         internal virtual ISerializer Create(String contentType)

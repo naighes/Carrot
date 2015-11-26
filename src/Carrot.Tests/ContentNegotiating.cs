@@ -1,8 +1,10 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Carrot.Configuration;
 using Carrot.Serialization;
+using Moq;
 using Xunit;
 
 namespace Carrot.Tests
@@ -59,6 +61,22 @@ namespace Carrot.Tests
             var configuration = new SerializationConfiguration();
             var serializer = configuration.Create(contentType);
             Assert.IsType<NullSerializer>(serializer);
+        }
+
+        [Fact]
+        public void CustomNegotiation()
+        {
+            const String contentType = "application/custom";
+            var configuration = new SerializationConfiguration();
+            configuration.Map(_ => _.MediaType == "application/custom", new FakeSerializer());
+            var negotiator = new Mock<IContentNegotiator>();
+            var @set = new SortedSet<ContentNegotiator.MediaTypeHeader>();
+            @set.Add(ContentNegotiator.MediaTypeHeader.Parse(contentType));
+            negotiator.Setup(_ => _.Negotiate(contentType))
+                      .Returns(@set);
+            configuration.NegotiateBy(negotiator.Object);
+            var serializer = configuration.Create(contentType);
+            Assert.IsType<FakeSerializer>(serializer);
         }
 
         internal class FakeSerializer : ISerializer
