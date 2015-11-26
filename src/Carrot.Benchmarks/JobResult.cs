@@ -26,11 +26,11 @@ namespace Carrot.Benchmarks
 
         public void Print(TextWriter writer)
         {
-            Console.WriteLine("[{0}] processed {1} entries in {2} seconds ({3}/s)",
-                              Name,
-                              Count,
-                              Seconds,
-                              (Int32)(Count / Seconds));
+            writer.WriteLine("[{0}] processed {1} entries in {2} seconds ({3}/s)",
+                             Name,
+                             Count,
+                             Seconds,
+                             (Int32)(Count / Seconds));
         }
     }
 }

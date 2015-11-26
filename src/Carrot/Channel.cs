@@ -93,6 +93,17 @@ namespace Carrot
                 throw new ArgumentException("dupicate binding detected");
         }
 
+        public Boolean TryDeclareExchangeBinding(Exchange exchange, Queue queue, String routingKey = "")
+        {
+            if (queue == null)
+                throw new ArgumentNullException(nameof(queue));
+
+            if (routingKey == null)
+                throw new ArgumentNullException(nameof(routingKey));
+
+            return _bindings.Add(new ExchangeBinding(exchange, queue, routingKey));
+        }
+
         public IAmqpConnection Connect()
         {
             var connection = CreateConnection();

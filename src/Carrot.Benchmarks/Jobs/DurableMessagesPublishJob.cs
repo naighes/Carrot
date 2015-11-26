@@ -3,7 +3,7 @@ using Carrot.Messages;
 
 namespace Carrot.Benchmarks.Jobs
 {
-    [JobName("publish-durable-messages-with-confirms")]
+    [JobName("publish-durable-messages")]
     public class DurableMessagesPublishJob : PublishJob
     {
         public DurableMessagesPublishJob(IChannel channel, Exchange exchange, String routingKey)
