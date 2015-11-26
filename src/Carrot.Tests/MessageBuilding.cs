@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using RabbitMQ.Client.Framing;
@@ -6,8 +7,6 @@ using Xunit;
 
 namespace Carrot.Tests
 {
-    using System.Collections.Generic;
-
     public class MessageBuilding
     {
         [Fact]

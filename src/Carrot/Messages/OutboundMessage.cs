@@ -12,9 +12,6 @@ namespace Carrot.Messages
     public class OutboundMessage<TMessage> : Message<TMessage>
         where TMessage : class
     {
-        private const String DefaultContentEncoding = "UTF-8";
-        private const String DefaultContentType = "application/json";
-
         public OutboundMessage(TMessage content)
             : this(content, new HeaderCollection())
         {
@@ -58,8 +55,8 @@ namespace Carrot.Messages
             {
                 Headers = new Dictionary<String, Object>(),
                 Persistent = false,
-                ContentType = Headers.ContentType ?? DefaultContentType,
-                ContentEncoding = Headers.ContentEncoding ?? DefaultContentEncoding,
+                ContentType = Headers.ContentType ?? SerializationConfiguration.DefaultContentType,
+                ContentEncoding = Headers.ContentEncoding ?? SerializationConfiguration.DefaultContentEncoding,
                 MessageId = Headers.MessageId ?? idGenerator.Next(),
                 Timestamp = new AmqpTimestamp(Headers.Timestamp <= 0L
                                              ? dateTimeProvider.UtcNow().ToUnixTimestamp()

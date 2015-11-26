@@ -1,5 +1,5 @@
-using System.Text;
 using Carrot.Configuration;
+using Carrot.Extensions;
 using Carrot.Serialization;
 using RabbitMQ.Client.Events;
 
@@ -24,7 +24,7 @@ namespace Carrot.Messages
             if (binding is EmptyMessageBinding)
                 return new UnresolvedMessage(args);
 
-            var serializer = _serializarionconfiguration.Create(args.BasicProperties.ContentType);
+            var serializer = args.BasicProperties.CreateSerializer(_serializarionconfiguration);
 
             if (serializer is NullSerializer)
                 return new UnsupportedMessage(args);
@@ -39,17 +39,8 @@ namespace Carrot.Messages
         {
             return new ConsumedMessage(serializer.Deserialize(args.Body,
                                                               messageBinding.RuntimeType,
-                                                              Encoding(args)),
+                                                              args.BasicProperties.CreateEncoding()),
                                        args);
-        }
-
-        private static Encoding Encoding(BasicDeliverEventArgs args)
-        {
-            var encoding = args.BasicProperties.ContentEncoding;
-
-            return encoding == null 
-                       ? new UTF8Encoding(true) 
-                       : System.Text.Encoding.GetEncoding(encoding);
         }
     }
 }
