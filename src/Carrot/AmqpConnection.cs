@@ -40,7 +40,7 @@ namespace Carrot
                                                           Configuration.IdGenerator);
             var body = properties.CreateEncoding()
                                  .GetBytes(properties.CreateSerializer(Configuration.SerializationConfiguration)
-                                 .Serialize(message.Content));
+                                                     .Serialize(message.Content));
             return _outboundChannel.PublishAsync(properties, body, exchange, routingKey, message);
         }
 
