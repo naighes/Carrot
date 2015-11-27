@@ -57,7 +57,7 @@
     <Compile Include="Configuration\SerializationConfiguration.cs" />
     <Compile Include="ExchangeBinding.cs" />
     <Compile Include="Channel.cs" />
-    <Compile Include="AmqpConnection.cs" />
+    <Compile Include="Connection.cs" />
     <Compile Include="AtLeastOnceConsumer.cs" />
     <Compile Include="AtMostOnceConsumer.cs" />
     <Compile Include="Configuration\EmptyMessageBinding.cs" />

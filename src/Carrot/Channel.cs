@@ -122,7 +122,7 @@ namespace Carrot
                                                      _configuration.MessageTypeResolver);
 
             var channel = _configuration.OutboundChannelBuilder(outboundModel, _configuration);
-            return new AmqpConnection(connection,
+            return new Connection(connection,
                                       _promises.Select(_ => BuildConsumer(connection, _, builder)).ToList(),
                                       channel,
                                       new DateTimeProvider(),

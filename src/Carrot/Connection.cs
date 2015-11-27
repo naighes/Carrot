@@ -7,7 +7,7 @@ using Carrot.Messages;
 
 namespace Carrot
 {
-    public class AmqpConnection : IConnection
+    public class Connection : IConnection
     {
         protected readonly ChannelConfiguration Configuration;
 
@@ -16,7 +16,7 @@ namespace Carrot
         private readonly IOutboundChannel _outboundChannel;
         private readonly IDateTimeProvider _dateTimeProvider;
 
-        internal AmqpConnection(RabbitMQ.Client.IConnection connection,
+        internal Connection(RabbitMQ.Client.IConnection connection,
                                 IEnumerable<ConsumerBase> consumers,
                                 IOutboundChannel outboundChannel,
                                 IDateTimeProvider dateTimeProvider,

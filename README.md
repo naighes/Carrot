@@ -53,7 +53,7 @@ Bind entities, subscribe your queue and call `IChannel.Connect`:
 	var connection = channel.Connect();
 
 You're up 'n running!
-Do not forget to call `AmqpConnection.Dispose()` when your application exits.
+Do not forget to call `IConnection.Dispose()` when your application exits.
 
 Please note that exchanges, queues and messages are not durable by default.
 You can create durable entities by calling the proper builder methods.
