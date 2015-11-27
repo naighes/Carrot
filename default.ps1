@@ -1,5 +1,5 @@
 import-module ".\extras.psm1"
-$framework = "4.0"
+$framework = "4.6"
 
 properties {
     $baseDir  = resolve-path .
