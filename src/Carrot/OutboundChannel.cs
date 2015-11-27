@@ -17,9 +17,9 @@ namespace Carrot
             Model.ModelShutdown += OnModelShutdown;
         }
 
-        public static Func<IModel, ChannelConfiguration, IOutboundChannel> Default { get; } = (m, c) => new LoggedOutboundChannel(m, c);
+        public static Func<IModel, EnvironmentConfiguration, IOutboundChannel> Default { get; } = (m, c) => new LoggedOutboundChannel(m, c);
 
-        public static Func<IModel, ChannelConfiguration, IOutboundChannel> Reliable { get; } = (m, c) => new LoggedReliableOutboundChannel(m, c);
+        public static Func<IModel, EnvironmentConfiguration, IOutboundChannel> Reliable { get; } = (m, c) => new LoggedReliableOutboundChannel(m, c);
 
         public void Dispose()
         {

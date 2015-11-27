@@ -52,7 +52,7 @@
     <Compile Include="..\CommonAssemblyInfo.cs">
       <Link>Properties\CommonAssemblyInfo.cs</Link>
     </Compile>
-    <Compile Include="Configuration\ChannelConfiguration.cs" />
+    <Compile Include="Configuration\EnvironmentConfiguration.cs" />
     <Compile Include="Configuration\DefaultMessageTypeResolver.cs" />
     <Compile Include="Configuration\SerializationConfiguration.cs" />
     <Compile Include="ExchangeBinding.cs" />

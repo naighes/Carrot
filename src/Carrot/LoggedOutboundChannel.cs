@@ -7,9 +7,9 @@ namespace Carrot
 {
     internal class LoggedOutboundChannel : OutboundChannel
     {
-        private readonly ChannelConfiguration _configuration;
+        private readonly EnvironmentConfiguration _configuration;
 
-        public LoggedOutboundChannel(IModel model, ChannelConfiguration configuration)
+        public LoggedOutboundChannel(IModel model, EnvironmentConfiguration configuration)
             : base(model)
         {
             _configuration = configuration;

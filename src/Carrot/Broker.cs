@@ -9,21 +9,21 @@ namespace Carrot
 {
     public class Broker : IBroker
     {
-        private readonly ChannelConfiguration _configuration;
+        private readonly EnvironmentConfiguration _configuration;
 
         private readonly ISet<Queue> _queues = new HashSet<Queue>();
         private readonly ISet<Exchange> _exchanges = new HashSet<Exchange>();
         private readonly ISet<ExchangeBinding> _bindings = new HashSet<ExchangeBinding>();
         private readonly ISet<Func<IConsumedMessageBuilder, ConsumingPromise>> _promises = new HashSet<Func<IConsumedMessageBuilder, ConsumingPromise>>();
 
-        protected internal Broker(ChannelConfiguration configuration)
+        protected internal Broker(EnvironmentConfiguration configuration)
         {
             _configuration = configuration;
         }
 
-        public static IBroker New(Action<ChannelConfiguration> configure)
+        public static IBroker New(Action<EnvironmentConfiguration> configure)
         {
-            var configuration = new ChannelConfiguration();
+            var configuration = new EnvironmentConfiguration();
             configure(configuration);
             return new Broker(configuration);
         }

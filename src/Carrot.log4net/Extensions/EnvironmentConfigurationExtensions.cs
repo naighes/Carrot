@@ -3,9 +3,9 @@ using global::log4net;
 
 namespace Carrot.log4net.Extensions
 {
-    public static class ChannelConfigurationExtensions
+    public static class EnvironmentConfigurationExtensions
     {
-        public static void UseLog4Net(this ChannelConfiguration configuration, ILog log)
+        public static void UseLog4Net(this EnvironmentConfiguration configuration, ILog log)
         {
             configuration.LogBy(new LogWrapper(log));
         }

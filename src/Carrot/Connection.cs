@@ -9,22 +9,22 @@ namespace Carrot
 {
     public class Connection : IConnection
     {
-        protected readonly ChannelConfiguration Configuration;
+        protected readonly EnvironmentConfiguration Configuration;
 
         private readonly RabbitMQ.Client.IConnection _connection;
         private readonly IEnumerable<ConsumerBase> _consumers;
-        private readonly IOutboundChannel _outboundChannel;
+        private readonly IOutboundChannel _channel;
         private readonly IDateTimeProvider _dateTimeProvider;
 
         internal Connection(RabbitMQ.Client.IConnection connection,
                             IEnumerable<ConsumerBase> consumers,
-                            IOutboundChannel outboundChannel,
+                            IOutboundChannel channel,
                             IDateTimeProvider dateTimeProvider,
-                            ChannelConfiguration configuration)
+                            EnvironmentConfiguration configuration)
         {
             _connection = connection;
             _consumers = consumers;
-            _outboundChannel = outboundChannel;
+            _channel = channel;
             _dateTimeProvider = dateTimeProvider;
             Configuration = configuration;
         }
@@ -40,7 +40,7 @@ namespace Carrot
             var body = properties.CreateEncoding()
                                  .GetBytes(properties.CreateSerializer(Configuration.SerializationConfiguration)
                                                      .Serialize(message.Content));
-            return _outboundChannel.PublishAsync(properties, body, exchange, routingKey, message);
+            return _channel.PublishAsync(properties, body, exchange, routingKey, message);
         }
 
         public void Dispose()
@@ -48,7 +48,7 @@ namespace Carrot
             foreach (var consumer in _consumers)
                 consumer.Dispose();
 
-            _outboundChannel?.Dispose();
+            _channel?.Dispose();
             _connection?.Dispose();
         }
     }

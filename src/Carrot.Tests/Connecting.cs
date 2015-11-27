@@ -18,7 +18,7 @@ namespace Carrot.Tests
             const String routingKey = "routing_key";
 
             var model = new Mock<IModel>();
-            var configuration = new ChannelConfiguration();
+            var configuration = new EnvironmentConfiguration();
             configuration.GeneratesMessageIdBy(new Mock<INewId>().Object);
             configuration.ResolveMessageTypeBy(new Mock<IMessageTypeResolver>().Object);
             var connection = new Mock<RabbitMQ.Client.IConnection>();
@@ -53,7 +53,7 @@ namespace Carrot.Tests
 
             internal BrokerWrapper(RabbitMQ.Client.IConnection connection,
                                    IModel model,
-                                   ChannelConfiguration configuration)
+                                   EnvironmentConfiguration configuration)
                 : base(configuration)
             {
                 _connection = connection;

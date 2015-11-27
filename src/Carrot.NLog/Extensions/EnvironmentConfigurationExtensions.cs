@@ -3,9 +3,9 @@ using global::NLog;
 
 namespace Carrot.NLog.Extensions
 {
-    public static class ChannelConfigurationExtensions
+    public static class EnvironmentConfigurationExtensions
     {
-        public static void UseNLog(this ChannelConfiguration configuration, ILogger logger)
+        public static void UseNLog(this EnvironmentConfiguration configuration, ILogger logger)
         {
             configuration.LogBy(new LogWrapper(logger));
         }

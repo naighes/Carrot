@@ -4,9 +4,9 @@ using RabbitMQ.Client;
 
 namespace Carrot.Configuration
 {
-    public class ChannelConfiguration
+    public class EnvironmentConfiguration
     {
-        internal ChannelConfiguration()
+        internal EnvironmentConfiguration()
         {
             IdGenerator = new NewGuid();
             SerializationConfiguration = new SerializationConfiguration();
@@ -26,7 +26,7 @@ namespace Carrot.Configuration
 
         internal SerializationConfiguration SerializationConfiguration { get; }
 
-        internal Func<IModel, ChannelConfiguration, IOutboundChannel> OutboundChannelBuilder { get; private set; } = OutboundChannel.Default;
+        internal Func<IModel, EnvironmentConfiguration, IOutboundChannel> OutboundChannelBuilder { get; private set; } = OutboundChannel.Default;
 
         public void Endpoint(Uri uri)
         {
@@ -84,7 +84,7 @@ namespace Carrot.Configuration
             configure(SerializationConfiguration);
         }
 
-        public void PublishBy(Func<IModel, ChannelConfiguration, IOutboundChannel> builder)
+        public void PublishBy(Func<IModel, EnvironmentConfiguration, IOutboundChannel> builder)
         {
             if (builder == null)
                 throw new ArgumentNullException(nameof(builder));
