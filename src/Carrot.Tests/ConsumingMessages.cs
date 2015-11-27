@@ -17,7 +17,7 @@ namespace Carrot.Tests
 
         public ConsumingMessages()
         {
-            _configuration = new ConsumingConfiguration(new Mock<IChannel>().Object, default(Queue));
+            _configuration = new ConsumingConfiguration(new Mock<IBroker>().Object, default(Queue));
         }
 
         [Fact]

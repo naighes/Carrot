@@ -12,18 +12,18 @@ namespace Carrot.BasicSample
             const String endpointUrl = "amqp://guest:guest@localhost:5672/";
             IMessageTypeResolver resolver = new MessageBindingResolver(typeof(Foo).Assembly);
 
-            var channel = Channel.New(_ =>
+            var broker = Broker.New(_ =>
             {
                 _.Endpoint(new Uri(endpointUrl, UriKind.Absolute));
                 _.ResolveMessageTypeBy(resolver);
             });
 
-            var exchange = channel.DeclareDirectExchange("source_exchange");
-            var queue = channel.DeclareQueue("my_test_queue");
-            channel.DeclareExchangeBinding(exchange, queue, routingKey);
-            channel.SubscribeByAtLeastOnce(queue, _ => _.Consumes(new FooConsumer1()));
-            channel.SubscribeByAtLeastOnce(queue, _ => _.Consumes(new FooConsumer2()));
-            var connection = channel.Connect();
+            var exchange = broker.DeclareDirectExchange("source_exchange");
+            var queue = broker.DeclareQueue("my_test_queue");
+            broker.DeclareExchangeBinding(exchange, queue, routingKey);
+            broker.SubscribeByAtLeastOnce(queue, _ => _.Consumes(new FooConsumer1()));
+            broker.SubscribeByAtLeastOnce(queue, _ => _.Consumes(new FooConsumer2()));
+            var connection = broker.Connect();
 
             for (var i = 0; i < 5; i++)
             {

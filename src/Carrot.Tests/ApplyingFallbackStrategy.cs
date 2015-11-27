@@ -17,7 +17,7 @@ namespace Carrot.Tests
 
         public ApplyingFallbackStrategy()
         {
-            _configuration = new ConsumingConfiguration(new Mock<IChannel>().Object, default(Queue));
+            _configuration = new ConsumingConfiguration(new Mock<IBroker>().Object, default(Queue));
         }
 
         [Fact]
@@ -70,12 +70,12 @@ namespace Carrot.Tests
         {
             var args = FakeBasicDeliverEventArgs();
             var message = new FakeConsumedMessage(null, args);
-            var channel = new Mock<IChannel>();
+            var broker = new Mock<IBroker>();
             var queue = new Queue("queue_name");
             Func<String, String> f = _ => $"{_}-DeadLetter";
             var dleName = f(queue.Name);
-            channel.Setup(_ => _.DeclareDurableDirectExchange(dleName)).Returns(new Exchange(dleName, "direct"));
-            var strategy = DeadLetterStrategy.New(channel.Object,
+            broker.Setup(_ => _.DeclareDurableDirectExchange(dleName)).Returns(new Exchange(dleName, "direct"));
+            var strategy = DeadLetterStrategy.New(broker.Object,
                                                   queue,
                                                   _ => $"{_}-DeadLetter");
             var model = new Mock<IModel>();

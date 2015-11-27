@@ -9,21 +9,21 @@ namespace Carrot.Tests
 {
     public class AmqpEntities
     {
-        private readonly Channel _channel;
+        private readonly Broker _broker;
 
         public AmqpEntities()
         {
-            _channel = new Channel(new ChannelConfiguration());
+            _broker = new Broker(new ChannelConfiguration());
         }
 
         [Fact]
         public void ExchangeDeclarationWithDefaultDurability()
         {
             var model = new Mock<IModel>();
-            var e1 = _channel.DeclareDirectExchange("e");
-            e1.Declare(model.Object);
-            model.Verify(_ => _.ExchangeDeclare(e1.Name,
-                                                e1.Type,
+            var exchange = _broker.DeclareDirectExchange("e");
+            exchange.Declare(model.Object);
+            model.Verify(_ => _.ExchangeDeclare(exchange.Name,
+                                                exchange.Type,
                                                 false,
                                                 false,
                                                 It.IsAny<IDictionary<String, Object>>()));
@@ -33,10 +33,10 @@ namespace Carrot.Tests
         public void ExchangeDeclarationWithExplicitDurability()
         {
             var model = new Mock<IModel>();
-            var e2 = _channel.DeclareDurableTopicExchange("e");
-            e2.Declare(model.Object);
-            model.Verify(_ => _.ExchangeDeclare(e2.Name,
-                                                e2.Type,
+            var exchange = _broker.DeclareDurableTopicExchange("e");
+            exchange.Declare(model.Object);
+            model.Verify(_ => _.ExchangeDeclare(exchange.Name,
+                                                exchange.Type,
                                                 true,
                                                 false,
                                                 It.IsAny<IDictionary<String, Object>>()));
@@ -46,7 +46,7 @@ namespace Carrot.Tests
         public void BuildingDirectExchange()
         {
             const String name = "one_exchange";
-            var exchange = _channel.DeclareDirectExchange(name);
+            var exchange = _broker.DeclareDirectExchange(name);
             Assert.Equal(name, exchange.Name);
             Assert.Equal("direct", exchange.Type);
             Assert.Equal(false, exchange.IsDurable);
@@ -56,7 +56,7 @@ namespace Carrot.Tests
         public void BuildingFanoutExchange()
         {
             const String name = "one_exchange";
-            var exchange = _channel.DeclareFanoutExchange(name);
+            var exchange = _broker.DeclareFanoutExchange(name);
             Assert.Equal(name, exchange.Name);
             Assert.Equal("fanout", exchange.Type);
             Assert.Equal(false, exchange.IsDurable);
@@ -66,7 +66,7 @@ namespace Carrot.Tests
         public void BuildingTopicExchange()
         {
             const String name = "one_exchange";
-            var exchange = _channel.DeclareTopicExchange(name);
+            var exchange = _broker.DeclareTopicExchange(name);
             Assert.Equal(name, exchange.Name);
             Assert.Equal("topic", exchange.Type);
             Assert.Equal(false, exchange.IsDurable);
@@ -76,7 +76,7 @@ namespace Carrot.Tests
         public void BuildingHeadersExchange()
         {
             const String name = "one_exchange";
-            var exchange = _channel.DeclareHeadersExchange(name);
+            var exchange = _broker.DeclareHeadersExchange(name);
             Assert.Equal(name, exchange.Name);
             Assert.Equal("headers", exchange.Type);
             Assert.Equal(false, exchange.IsDurable);
@@ -96,17 +96,17 @@ namespace Carrot.Tests
         [Fact]
         public void MultipleBinding()
         {
-            var exchange = _channel.DeclareDirectExchange("exchange");
-            var queue = _channel.DeclareQueue("queue");
-            _channel.DeclareExchangeBinding(exchange, queue, "key");
-            Assert.Throws<ArgumentException>(() => _channel.DeclareExchangeBinding(exchange, queue, "key"));
+            var exchange = _broker.DeclareDirectExchange("exchange");
+            var queue = _broker.DeclareQueue("queue");
+            _broker.DeclareExchangeBinding(exchange, queue, "key");
+            Assert.Throws<ArgumentException>(() => _broker.DeclareExchangeBinding(exchange, queue, "key"));
         }
 
         [Fact]
         public void QueueDeclarationWithDefaultDurability()
         {
             var model = new Mock<IModel>();
-            var queue = _channel.DeclareQueue("q");
+            var queue = _broker.DeclareQueue("q");
             queue.Declare(model.Object);
             model.Verify(_ => _.QueueDeclare(queue.Name,
                                              false,

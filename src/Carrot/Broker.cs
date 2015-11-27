@@ -7,7 +7,7 @@ using RabbitMQ.Client;
 
 namespace Carrot
 {
-    public class Channel : IChannel
+    public class Broker : IBroker
     {
         private readonly ChannelConfiguration _configuration;
 
@@ -16,16 +16,16 @@ namespace Carrot
         private readonly ISet<ExchangeBinding> _bindings = new HashSet<ExchangeBinding>();
         private readonly ISet<Func<IConsumedMessageBuilder, ConsumingPromise>> _promises = new HashSet<Func<IConsumedMessageBuilder, ConsumingPromise>>();
 
-        protected internal Channel(ChannelConfiguration configuration)
+        protected internal Broker(ChannelConfiguration configuration)
         {
             _configuration = configuration;
         }
 
-        public static IChannel New(Action<ChannelConfiguration> configure)
+        public static IBroker New(Action<ChannelConfiguration> configure)
         {
             var configuration = new ChannelConfiguration();
             configure(configuration);
-            return new Channel(configuration);
+            return new Broker(configuration);
         }
 
         public Queue DeclareQueue(String name)

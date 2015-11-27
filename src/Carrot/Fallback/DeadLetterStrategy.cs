@@ -13,16 +13,16 @@ namespace Carrot.Fallback
             _exchange = exchange;
         }
 
-        public static IFallbackStrategy New(IChannel channel, Queue queue)
+        public static IFallbackStrategy New(IBroker broker, Queue queue)
         {
-            return New(channel, queue, _ => $"{_}::dle");
+            return New(broker, queue, _ => $"{_}::dle");
         }
 
-        public static IFallbackStrategy New(IChannel channel,
+        public static IFallbackStrategy New(IBroker broker,
                                             Queue queue,
                                             Func<String, String> exchangeNameBuilder)
         {
-            return new DeadLetterStrategy(channel.DeclareDurableDirectExchange(exchangeNameBuilder(queue.Name)));
+            return new DeadLetterStrategy(broker.DeclareDurableDirectExchange(exchangeNameBuilder(queue.Name)));
         }
 
         public void Apply(IModel model, ConsumedMessageBase message)

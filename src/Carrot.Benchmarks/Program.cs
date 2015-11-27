@@ -16,34 +16,34 @@ namespace Carrot.Benchmarks
         private const Int32 Count = 100000;
         private const Int32 Times = 3;
 
-        private static Exchange DeclareExchange(IChannel channel)
+        private static Exchange DeclareExchange(IBroker broker)
         {
-            var exchange = channel.DeclareDirectExchange("test_benchmarks_exchange");
-            var queue = channel.DeclareQueue("test_benchmarks_queue");
-            channel.TryDeclareExchangeBinding(exchange, queue, RoutingKey);
+            var exchange = broker.DeclareDirectExchange("test_benchmarks_exchange");
+            var queue = broker.DeclareQueue("test_benchmarks_queue");
+            broker.TryDeclareExchangeBinding(exchange, queue, RoutingKey);
             return exchange;
         }
 
-        private static Exchange DeclareDurableExchange(IChannel channel)
+        private static Exchange DeclareDurableExchange(IBroker broker)
         {
-            var exchange = channel.DeclareDurableDirectExchange("test_benchmarks_durable_exchange");
-            var queue = channel.DeclareDurableQueue("test_benchmarks_durable_queue");
-            channel.DeclareExchangeBinding(exchange, queue, RoutingKey);
+            var exchange = broker.DeclareDurableDirectExchange("test_benchmarks_durable_exchange");
+            var queue = broker.DeclareDurableQueue("test_benchmarks_durable_queue");
+            broker.DeclareExchangeBinding(exchange, queue, RoutingKey);
             return exchange;
         }
 
         private static void Main()
         {
             var writer = BuildWriter();
-            var channels = new Dictionary<String, IChannel>
-                               {
-                                   { "default", BuildChannel() },
-                                   { "reliable", BuildReliableChannel() }
-                               };
+            var brokers = new Dictionary<String, IBroker>
+                              {
+                                  { "default", BuildBroker() },
+                                  { "reliable", BuildReliableBroker() }
+                              };
 
-            foreach (var pair in channels)
+            foreach (var pair in brokers)
             {
-                writer.WriteLine("using '{0}' channel...", pair.Key);
+                writer.WriteLine("using '{0}' broker...", pair.Key);
                 writer.WriteLine("----------------------------------------------------------");
                 RunOn(pair.Value, Times, Count, writer);
                 writer.WriteLine();
@@ -69,15 +69,15 @@ namespace Carrot.Benchmarks
                                    new StreamWriter(stream, new UTF8Encoding(true), bufferSize, false));
         }
 
-        private static void RunOn(IChannel channel, Int32 times, Int32 count, TextWriter writer)
+        private static void RunOn(IBroker broker, Int32 times, Int32 count, TextWriter writer)
         {
-            var exchange = DeclareExchange(channel);
-            var durableExchange = DeclareDurableExchange(channel);
+            var exchange = DeclareExchange(broker);
+            var durableExchange = DeclareDurableExchange(broker);
 
-            var jobs = Enumerable.Repeat(new DurableMessagesPublishJob(channel, durableExchange, RoutingKey),
+            var jobs = Enumerable.Repeat(new DurableMessagesPublishJob(broker, durableExchange, RoutingKey),
                                          times)
                                  .Cast<IJob>()
-                                 .Concat(Enumerable.Repeat(new NonDurableMessagesPublishJob(channel, exchange, RoutingKey),
+                                 .Concat(Enumerable.Repeat(new NonDurableMessagesPublishJob(broker, exchange, RoutingKey),
                                                            times))
                                  .ToArray();
 
@@ -89,18 +89,18 @@ namespace Carrot.Benchmarks
             }
         }
 
-        private static IChannel BuildChannel()
+        private static IBroker BuildBroker()
         {
-            return Channel.New(_ =>
+            return Broker.New(_ =>
                                {
                                    _.Endpoint(new Uri(EndpointUrl, UriKind.Absolute));
                                    _.ResolveMessageTypeBy(new MessageBindingResolver(typeof(Foo).Assembly));
                                });
         }
 
-        private static IChannel BuildReliableChannel()
+        private static IBroker BuildReliableBroker()
         {
-            return Channel.New(_ =>
+            return Broker.New(_ =>
                                {
                                    _.Endpoint(new Uri(EndpointUrl, UriKind.Absolute));
                                    _.ResolveMessageTypeBy(new MessageBindingResolver(typeof(Foo).Assembly));

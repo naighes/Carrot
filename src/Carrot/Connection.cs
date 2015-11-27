@@ -17,10 +17,10 @@ namespace Carrot
         private readonly IDateTimeProvider _dateTimeProvider;
 
         internal Connection(RabbitMQ.Client.IConnection connection,
-                                IEnumerable<ConsumerBase> consumers,
-                                IOutboundChannel outboundChannel,
-                                IDateTimeProvider dateTimeProvider,
-                                ChannelConfiguration configuration)
+                            IEnumerable<ConsumerBase> consumers,
+                            IOutboundChannel outboundChannel,
+                            IDateTimeProvider dateTimeProvider,
+                            ChannelConfiguration configuration)
         {
             _connection = connection;
             _consumers = consumers;

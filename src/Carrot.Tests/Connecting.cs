@@ -23,15 +23,13 @@ namespace Carrot.Tests
             configuration.ResolveMessageTypeBy(new Mock<IMessageTypeResolver>().Object);
             var connection = new Mock<RabbitMQ.Client.IConnection>();
             connection.Setup(_ => _.CreateModel()).Returns(model.Object);
-            var channel = new ChannelWrapper(connection.Object,
-                                             model.Object,
-                                             configuration);
+            var broker = new BrokerWrapper(connection.Object, model.Object, configuration);
             var consumer = new FakeConsumer(_ => Task.Factory.StartNew(() => { }));
-            var queue = channel.DeclareQueue(queueName);
-            var exchange = channel.DeclareDirectExchange(exchangeName);
-            channel.DeclareExchangeBinding(exchange, queue, routingKey);
-            channel.SubscribeByAtLeastOnce(queue, _ => { _.Consumes(consumer); });
-            channel.Connect();
+            var queue = broker.DeclareQueue(queueName);
+            var exchange = broker.DeclareDirectExchange(exchangeName);
+            broker.DeclareExchangeBinding(exchange, queue, routingKey);
+            broker.SubscribeByAtLeastOnce(queue, _ => { _.Consumes(consumer); });
+            broker.Connect();
             model.Verify(_ => _.QueueDeclare(queueName,
                                              false,
                                              false,
@@ -48,14 +46,14 @@ namespace Carrot.Tests
                                           It.IsAny<IDictionary<String, Object>>()));
         }
 
-        internal class ChannelWrapper : Channel
+        internal class BrokerWrapper : Broker
         {
             private readonly RabbitMQ.Client.IConnection _connection;
             private readonly IModel _model;
 
-            internal ChannelWrapper(RabbitMQ.Client.IConnection connection,
-                                    IModel model,
-                                    ChannelConfiguration configuration)
+            internal BrokerWrapper(RabbitMQ.Client.IConnection connection,
+                                   IModel model,
+                                   ChannelConfiguration configuration)
                 : base(configuration)
             {
                 _connection = connection;

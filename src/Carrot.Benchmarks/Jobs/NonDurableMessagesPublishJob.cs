@@ -6,8 +6,8 @@ namespace Carrot.Benchmarks.Jobs
     [JobName("publish-nondurable-messages")]
     public class NonDurableMessagesPublishJob : PublishJob
     {
-        public NonDurableMessagesPublishJob(IChannel channel, Exchange exchange, String routingKey)
-            : base(channel, exchange, routingKey)
+        public NonDurableMessagesPublishJob(IBroker broker, Exchange exchange, String routingKey)
+            : base(broker, exchange, routingKey)
         {
         }
 

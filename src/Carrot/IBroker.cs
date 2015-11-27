@@ -3,7 +3,7 @@ using Carrot.Configuration;
 
 namespace Carrot
 {
-    public interface IChannel
+    public interface IBroker
     {
         IConnection Connect();
 

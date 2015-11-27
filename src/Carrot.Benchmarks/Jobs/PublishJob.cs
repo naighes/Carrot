@@ -7,15 +7,15 @@ namespace Carrot.Benchmarks.Jobs
 {
     public abstract class PublishJob : IJob
     {
-        protected readonly IChannel Channel;
+        protected readonly IBroker Broker;
 
         private readonly String _routingKey;
         private readonly Exchange _exchange;
         private readonly Stopwatch _stopwatch;
 
-        protected PublishJob(IChannel channel, Exchange exchange, String routingKey)
+        protected PublishJob(IBroker broker, Exchange exchange, String routingKey)
         {
-            Channel = channel;
+            Broker = broker;
             _exchange = exchange;
             _routingKey = routingKey;
             _stopwatch = new Stopwatch();
@@ -23,7 +23,7 @@ namespace Carrot.Benchmarks.Jobs
 
         public Task<JobResult> RunAsync(Int32 count)
         {
-            var connection = Channel.Connect();
+            var connection = Broker.Connect();
             var tasks = new Task[count];
             _stopwatch.Start();
 

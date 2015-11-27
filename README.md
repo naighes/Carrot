@@ -33,9 +33,9 @@ Define your message consumer:
         }
     }
 
-Create an instance of `Channel` providing the RabbitMQ host as input.
+Create an instance of `Broker` providing the RabbitMQ host as input.
 
-    var channel = Channel.New(_ =>
+    var broker = Broker.New(_ =>
     {
         _.Endpoint(new Uri("amqp://guest:guest@localhost:5672/", UriKind.Absolute));
         _.ResolveMessageTypeBy(new MessageBindingResolver(typeof(Foo).Assembly));
@@ -43,14 +43,14 @@ Create an instance of `Channel` providing the RabbitMQ host as input.
 
 Declare your AMQP entities as the following:
 
-    var exchange = channel.DeclareDirectExchange("source_exchange");
-    var queue = channel.DeclareQueue("my_test_queue");
+    var exchange = broker.DeclareDirectExchange("source_exchange");
+    var queue = broker.DeclareQueue("my_test_queue");
 
-Bind entities, subscribe your queue and call `IChannel.Connect`:
+Bind entities, subscribe your queue and call `IBroker.Connect`:
 
-	channel.DeclareExchangeBinding(exchange, queue, "routing_key");
-	channel.SubscribeByAtLeastOnce(queue, _ => _.Consumes(new FooConsumer()));
-	var connection = channel.Connect();
+	broker.DeclareExchangeBinding(exchange, queue, "routing_key");
+	broker.SubscribeByAtLeastOnce(queue, _ => _.Consumes(new FooConsumer()));
+	var connection = broker.Connect();
 
 You're up 'n running!
 Do not forget to call `IConnection.Dispose()` when your application exits.
@@ -58,8 +58,8 @@ Do not forget to call `IConnection.Dispose()` when your application exits.
 Please note that exchanges, queues and messages are not durable by default.
 You can create durable entities by calling the proper builder methods.
 
-    var durableExchange = channel.DeclareDurableDurectExchange.Direct("source_exchange");
-    var durableQueue = channel.DeclareDurableQueue.Direct("my_test_queue");
+    var durableExchange = broker.DeclareDurableDurectExchange.Direct("source_exchange");
+    var durableQueue = broker.DeclareDurableQueue.Direct("my_test_queue");
 
 You can publish messages as the following:
 

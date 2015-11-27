@@ -8,24 +8,24 @@ namespace Carrot.Configuration
 {
     public class ConsumingConfiguration
     {
-        private readonly IChannel _channel;
+        private readonly IBroker _broker;
         private readonly Queue _queue;
         private readonly IDictionary<Type, ISet<IConsumer>> _subscriptions = new Dictionary<Type, ISet<IConsumer>>();
 
-        internal ConsumingConfiguration(IChannel channel, Queue queue)
+        internal ConsumingConfiguration(IBroker broker, Queue queue)
         {
-            _channel = channel;
+            _broker = broker;
             _queue = queue;
         }
 
         internal IFallbackStrategy FallbackStrategy { get; private set; } = NoFallbackStrategy.Instance;
 
-        public void FallbackBy(Func<IChannel, Queue, IFallbackStrategy> strategy)
+        public void FallbackBy(Func<IBroker, Queue, IFallbackStrategy> strategy)
         {
             if (strategy == null)
                 throw new ArgumentNullException(nameof(strategy));
 
-            FallbackStrategy = strategy(_channel, _queue);
+            FallbackStrategy = strategy(_broker, _queue);
         }
 
         public void Consumes<TMessage>(Consumer<TMessage> consumer) where TMessage : class
