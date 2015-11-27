@@ -78,7 +78,7 @@
     <Compile Include="Fallback\DeadLetterStrategy.cs" />
     <Compile Include="Fallback\IFallbackStrategy.cs" />
     <Compile Include="Fallback\NoFallbackStrategy.cs" />
-    <Compile Include="IAmqpConnection.cs" />
+    <Compile Include="IConnection.cs" />
     <Compile Include="IChannel.cs" />
     <Compile Include="IConsumer.cs" />
     <Compile Include="IDateTimeProvider.cs" />

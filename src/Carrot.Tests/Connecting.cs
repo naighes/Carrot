@@ -21,7 +21,7 @@ namespace Carrot.Tests
             var configuration = new ChannelConfiguration();
             configuration.GeneratesMessageIdBy(new Mock<INewId>().Object);
             configuration.ResolveMessageTypeBy(new Mock<IMessageTypeResolver>().Object);
-            var connection = new Mock<IConnection>();
+            var connection = new Mock<RabbitMQ.Client.IConnection>();
             connection.Setup(_ => _.CreateModel()).Returns(model.Object);
             var channel = new ChannelWrapper(connection.Object,
                                              model.Object,
@@ -50,10 +50,10 @@ namespace Carrot.Tests
 
         internal class ChannelWrapper : Channel
         {
-            private readonly IConnection _connection;
+            private readonly RabbitMQ.Client.IConnection _connection;
             private readonly IModel _model;
 
-            internal ChannelWrapper(IConnection connection,
+            internal ChannelWrapper(RabbitMQ.Client.IConnection connection,
                                     IModel model,
                                     ChannelConfiguration configuration)
                 : base(configuration)
@@ -62,12 +62,12 @@ namespace Carrot.Tests
                 _model = model;
             }
 
-            protected internal override IConnection CreateConnection()
+            protected internal override RabbitMQ.Client.IConnection CreateConnection()
             {
                 return _connection;
             }
 
-            protected internal override IModel CreateInboundModel(IConnection connection,
+            protected internal override IModel CreateInboundModel(RabbitMQ.Client.IConnection connection,
                                                                   UInt32 prefetchSize,
                                                                   UInt16 prefetchCount)
             {

@@ -5,7 +5,7 @@ namespace Carrot
 {
     public interface IChannel
     {
-        IAmqpConnection Connect();
+        IConnection Connect();
 
         Queue DeclareQueue(String name);
 

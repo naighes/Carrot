@@ -20,7 +20,7 @@ namespace Carrot.Tests
             var consumerModel2 = new Mock<IModel>();
             var consumer2 = new FakeConsumerBase(consumerModel2.Object, null, null);
             var outboundModel = new Mock<IModel>();
-            var connection = new Mock<IConnection>();
+            var connection = new Mock<RabbitMQ.Client.IConnection>();
             var amqpConnection = new AmqpConnection(connection.Object,
                                                     new List<ConsumerBase> { consumer1, consumer2 },
                                                     new ReliableOutboundChannel(outboundModel.Object),

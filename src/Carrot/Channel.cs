@@ -104,7 +104,7 @@ namespace Carrot
             return _bindings.Add(new ExchangeBinding(exchange, queue, routingKey));
         }
 
-        public IAmqpConnection Connect()
+        public IConnection Connect()
         {
             var connection = CreateConnection();
             var outboundModel = connection.CreateModel();
@@ -143,7 +143,7 @@ namespace Carrot
                       queue);
         }
 
-        protected internal virtual IConnection CreateConnection()
+        protected internal virtual RabbitMQ.Client.IConnection CreateConnection()
         {
             return new ConnectionFactory
                        {
@@ -153,7 +153,7 @@ namespace Carrot
                        }.CreateConnection();
         }
 
-        protected internal virtual IModel CreateInboundModel(IConnection connection,
+        protected internal virtual IModel CreateInboundModel(RabbitMQ.Client.IConnection connection,
                                                              UInt32 prefetchSize,
                                                              UInt16 prefetchCount)
         {
@@ -162,7 +162,7 @@ namespace Carrot
             return model;
         }
 
-        private ConsumerBase BuildConsumer(IConnection connection,
+        private ConsumerBase BuildConsumer(RabbitMQ.Client.IConnection connection,
                                            Func<IConsumedMessageBuilder, ConsumingPromise> promise,
                                            IConsumedMessageBuilder builder)
         {

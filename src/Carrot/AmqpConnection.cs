@@ -4,20 +4,19 @@ using System.Threading.Tasks;
 using Carrot.Configuration;
 using Carrot.Extensions;
 using Carrot.Messages;
-using RabbitMQ.Client;
 
 namespace Carrot
 {
-    public class AmqpConnection : IAmqpConnection
+    public class AmqpConnection : IConnection
     {
         protected readonly ChannelConfiguration Configuration;
 
-        private readonly IConnection _connection;
+        private readonly RabbitMQ.Client.IConnection _connection;
         private readonly IEnumerable<ConsumerBase> _consumers;
         private readonly IOutboundChannel _outboundChannel;
         private readonly IDateTimeProvider _dateTimeProvider;
 
-        internal AmqpConnection(IConnection connection,
+        internal AmqpConnection(RabbitMQ.Client.IConnection connection,
                                 IEnumerable<ConsumerBase> consumers,
                                 IOutboundChannel outboundChannel,
                                 IDateTimeProvider dateTimeProvider,

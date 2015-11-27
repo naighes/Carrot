@@ -4,7 +4,7 @@ using Carrot.Messages;
 
 namespace Carrot
 {
-    public interface IAmqpConnection : IDisposable
+    public interface IConnection : IDisposable
     {
         Task<IPublishResult> PublishAsync<TMessage>(OutboundMessage<TMessage> message,
                                                     Exchange exchange,
