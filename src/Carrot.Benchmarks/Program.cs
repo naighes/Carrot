@@ -104,7 +104,7 @@ namespace Carrot.Benchmarks
                                {
                                    _.Endpoint(new Uri(EndpointUrl, UriKind.Absolute));
                                    _.ResolveMessageTypeBy(new MessageBindingResolver(typeof(Foo).Assembly));
-                                   _.PublishBy(OutboundChannel.Reliable);
+                                   _.PublishBy(OutboundChannel.Reliable());
                                });
         }
     }

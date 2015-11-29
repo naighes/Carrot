@@ -10,8 +10,10 @@ namespace Carrot
     {
         private readonly EnvironmentConfiguration _configuration;
 
-        internal LoggedReliableOutboundChannel(IModel model, EnvironmentConfiguration configuration)
-            : base(model)
+        internal LoggedReliableOutboundChannel(IModel model,
+                                               NotConfirmedMessageHandler notConfirmedMessageHandler,
+                                               EnvironmentConfiguration configuration)
+            : base(model, notConfirmedMessageHandler)
         {
             _configuration = configuration;
         }

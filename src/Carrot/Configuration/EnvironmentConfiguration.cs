@@ -26,7 +26,7 @@ namespace Carrot.Configuration
 
         internal SerializationConfiguration SerializationConfiguration { get; }
 
-        internal Func<IModel, EnvironmentConfiguration, IOutboundChannel> OutboundChannelBuilder { get; private set; } = OutboundChannel.Default;
+        internal Func<IModel, EnvironmentConfiguration, IOutboundChannel> OutboundChannelBuilder { get; private set; } = OutboundChannel.Default();
 
         public void Endpoint(Uri uri)
         {

@@ -14,9 +14,12 @@ namespace Carrot
         private readonly ConcurrentDictionary<UInt64, Tuple<TaskCompletionSource<Boolean>, IMessage>> _confirms =
             new ConcurrentDictionary<UInt64, Tuple<TaskCompletionSource<Boolean>, IMessage>>();
 
-        internal ReliableOutboundChannel(IModel model)
+        private readonly NotConfirmedMessageHandler _notConfirmedMessageHandler;
+
+        internal ReliableOutboundChannel(IModel model, NotConfirmedMessageHandler notConfirmedMessageHandler)
             : base(model)
         {
+            _notConfirmedMessageHandler = notConfirmedMessageHandler;
             model.ConfirmSelect(); // TODO: not here! it issues a RPC call.
             Model.BasicAcks += OnModelBasicAcks;
             Model.BasicNacks += OnModelBasicNacks;
@@ -80,6 +83,7 @@ namespace Carrot
             {
                 var exception = new MessageNotConfirmedException(confirm.Value.Item2,
                                                                  "publish not confirmed before channel closed");
+                _notConfirmedMessageHandler?.Invoke(exception.SourceMessage);
                 confirm.Value.Item1.TrySetException(exception);
             }
         }
@@ -101,4 +105,6 @@ namespace Carrot
             }
         }
     }
+
+    public delegate void NotConfirmedMessageHandler(IMessage message);
 }

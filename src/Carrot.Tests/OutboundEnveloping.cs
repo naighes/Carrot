@@ -23,7 +23,7 @@ namespace Carrot.Tests
             const UInt64 deliveryTag = 0uL;
             var model = new Mock<IModel>();
             model.Setup(_ => _.NextPublishSeqNo).Returns(deliveryTag);
-            var channel = new OutboundChannelWrapper(model.Object);
+            var channel = new OutboundChannelWrapper(model.Object, null);
             var task = channel.PublishAsync(properties,
                                             new Byte[] { },
                                             new Exchange("target_exchange", "direct"),
@@ -46,7 +46,7 @@ namespace Carrot.Tests
             const UInt64 deliveryTag = 0uL;
             var model = new Mock<IModel>();
             model.Setup(_ => _.NextPublishSeqNo).Returns(deliveryTag);
-            var channel = new OutboundChannelWrapper(model.Object);
+            var channel = new OutboundChannelWrapper(model.Object, null);
             var task = channel.PublishAsync(properties,
                                             new Byte[] { },
                                             new Exchange("target_exchange", "direct"),
@@ -77,7 +77,7 @@ namespace Carrot.Tests
                                             It.IsAny<Byte[]>()))
                  .Throws(exception);
             
-            var channel = new ReliableOutboundChannel(model.Object);
+            var channel = new ReliableOutboundChannel(model.Object, null);
             var result = Assert.IsType<FailurePublishing>(channel.PublishAsync(properties,
                                                                                new Byte[] { },
                                                                                new Exchange(exchange, "direct"),
@@ -98,7 +98,8 @@ namespace Carrot.Tests
             const UInt64 deliveryTag = 0uL;
             var model = new Mock<IModel>();
             model.Setup(_ => _.NextPublishSeqNo).Returns(deliveryTag);
-            var channel = new OutboundChannelWrapper(model.Object);
+            var fallbackHandled = false;
+            var channel = new OutboundChannelWrapper(model.Object, _ => { fallbackHandled = true; });
             var task = channel.PublishAsync(properties,
                                             new Byte[] { },
                                             new Exchange("target_exchange", "direct"),
@@ -107,6 +108,7 @@ namespace Carrot.Tests
             channel.CallOnModelShutdown(new ShutdownEventArgs(ShutdownInitiator.Application, 3, "boom"));
             var result = Assert.IsType<FailurePublishing>(task.Result);
             Assert.IsType<MessageNotConfirmedException>(result.Exception);
+            Assert.True(fallbackHandled);
         }
 
         [Fact]
@@ -252,8 +254,8 @@ namespace Carrot.Tests
 
         internal class OutboundChannelWrapper : ReliableOutboundChannel
         {
-            internal OutboundChannelWrapper(IModel model)
-                : base(model)
+            internal OutboundChannelWrapper(IModel model, NotConfirmedMessageHandler notConfirmedMessageHandler)
+                : base(model, notConfirmedMessageHandler)
             {
             }
 
