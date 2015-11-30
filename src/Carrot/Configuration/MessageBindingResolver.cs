@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using Carrot.Messages;
 
 namespace Carrot.Configuration
 {
@@ -19,13 +20,12 @@ namespace Carrot.Configuration
                                                                                _.GetCustomAttribute<MessageBindingAttribute>(false).ExpiresAfter));
         }
 
-        public MessageBinding Resolve(String source)
+        public MessageBinding Resolve(ConsumedMessageContext context)
         {
-            if (source == null)
-                throw new ArgumentNullException(nameof(source));
-
-            return _internalMap.ContainsKey(source)
-                       ? BuildMessageBinding(source, _internalMap[source].Item1, _internalMap[source].Item2)
+            return _internalMap.ContainsKey(context.MessageType)
+                       ? BuildMessageBinding(context.MessageType,
+                                             _internalMap[context.MessageType].Item1,
+                                             _internalMap[context.MessageType].Item2)
                        : EmptyMessageBinding.Instance;
         }
 

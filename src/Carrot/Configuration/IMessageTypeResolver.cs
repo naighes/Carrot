@@ -1,10 +1,11 @@
 using System;
+using Carrot.Messages;
 
 namespace Carrot.Configuration
 {
     public interface IMessageTypeResolver
     {
-        MessageBinding Resolve(String source);
+        MessageBinding Resolve(ConsumedMessageContext context);
 
         MessageBinding Resolve<TMessage>() where TMessage : class;
     }

@@ -19,7 +19,8 @@ namespace Carrot.Messages
 
         public ConsumedMessageBase Build(BasicDeliverEventArgs args)
         {
-            var binding = _resolver.Resolve(args.BasicProperties.Type);
+            var context = ConsumedMessageContext.FromBasicDeliverEventArgs(args);
+            var binding = _resolver.Resolve(context);
 
             if (binding is EmptyMessageBinding)
                 return new UnresolvedMessage(args);

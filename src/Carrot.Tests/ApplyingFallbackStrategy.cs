@@ -84,7 +84,7 @@ namespace Carrot.Tests
                                              String.Empty,
                                              true,
                                              false,
-                                             It.Is<IBasicProperties>(properties => properties.Persistent == true),
+                                             It.Is<IBasicProperties>(__ => __.Persistent == true),
                                              args.Body),
                          Times.Once);
         }

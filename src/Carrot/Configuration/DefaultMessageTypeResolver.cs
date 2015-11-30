@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.Reflection;
+using Carrot.Messages;
 
 namespace Carrot.Configuration
 {
@@ -18,16 +19,14 @@ namespace Carrot.Configuration
             _assemblies = assemblies;
         }
 
-        public MessageBinding Resolve(String source)
+        public MessageBinding Resolve(ConsumedMessageContext context)
         {
-            if (source == null)
-                throw new ArgumentNullException(nameof(source));
-
-           var type = Type.GetType(source) ??
-           _assemblies.Select(_ => _.GetType(source))
+            var messageType = context.MessageType;
+            var type = Type.GetType(messageType) ??
+           _assemblies.Select(_ => _.GetType(messageType))
                       .FirstOrDefault(_ => _ != null);
 
-            return type == null ? EmptyMessageBinding.Instance : new MessageBinding(source, type);
+            return type == null ? EmptyMessageBinding.Instance : new MessageBinding(messageType, type);
         }
 
         public MessageBinding Resolve<TMessage>() where TMessage : class

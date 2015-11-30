@@ -16,9 +16,11 @@ namespace Carrot.Tests
         public void CannotResolve()
         {
             const String type = "fake-type";
+            var context = new ConsumedMessageContext(null, type, null, null);
             var serializationConfiguration = new SerializationConfiguration();
             var resolver = new Mock<IMessageTypeResolver>();
-            resolver.Setup(_ => _.Resolve(type)).Returns(EmptyMessageBinding.Instance);
+            resolver.Setup(_ => _.Resolve(It.Is<ConsumedMessageContext>(__ => __.MessageType == type)))
+                    .Returns(EmptyMessageBinding.Instance);
             var builder = new ConsumedMessageBuilder(serializationConfiguration, resolver.Object);
             var message = builder.Build(new BasicDeliverEventArgs
                                             {
@@ -46,6 +48,7 @@ namespace Carrot.Tests
         {
             const String type = "fake-type";
             const String contentType = "application/null";
+            var context = new ConsumedMessageContext(null, type, contentType, null);
             var runtimeType = typeof(Foo);
             var body = new Byte[] { };
             var serializer = new Mock<ISerializer>();
@@ -53,7 +56,7 @@ namespace Carrot.Tests
                       .Throws(new Exception("boom"));
             var serializationConfiguration = new SerializationConfigurationWrapper(serializer.Object);
             var resolver = new Mock<IMessageTypeResolver>();
-            resolver.Setup(_ => _.Resolve(type)).Returns(new MessageBinding(type, runtimeType));
+            resolver.Setup(_ => _.Resolve(context)).Returns(new MessageBinding(type, runtimeType));
             var builder = new ConsumedMessageBuilder(serializationConfiguration, resolver.Object);
             var message = builder.Build(new BasicDeliverEventArgs
                                             {
