@@ -5,69 +5,29 @@ using RabbitMQ.Client.Events;
 
 namespace Carrot.Messages
 {
-    public struct ConsumedMessageContext
+    public class ConsumedMessageContext
     {
-        public readonly String Source;
-        public readonly String MessageType;
-        public readonly String ContentType;
-        public readonly String ContentEncoding;
+        public String Source => _args.Exchange;
 
-        internal ConsumedMessageContext(String source,
-                                        String messageType,
-                                        String contentType,
-                                        String contentEncoding)
-        {
-            Source = source;
-            MessageType = messageType;
-            ContentType = contentType;
-            ContentEncoding = contentEncoding;
-        }
+        public String ContentType => _args.BasicProperties.ContentTypeOrDefault(SerializationConfiguration.DefaultContentType);
 
-        public static Boolean operator ==(ConsumedMessageContext left, ConsumedMessageContext right)
-        {
-            return left.Equals(right);
-        }
+        public String ContentEncoding => _args.BasicProperties.ContentEncodingOrDefault(SerializationConfiguration.DefaultContentEncoding);
 
-        public static Boolean operator !=(ConsumedMessageContext left, ConsumedMessageContext right)
+        public String MessageType => _args.BasicProperties.Type;
+
+        private readonly BasicDeliverEventArgs _args;
+
+        private ConsumedMessageContext(BasicDeliverEventArgs args)
         {
-            return !left.Equals(right);
+            _args = args;
         }
 
         public static ConsumedMessageContext FromBasicDeliverEventArgs(BasicDeliverEventArgs args)
         {
-            var source = args.Exchange;
-            var contentType = args.BasicProperties.ContentTypeOrDefault(SerializationConfiguration.DefaultContentType);
-            var contentEncoding = args.BasicProperties.ContentEncodingOrDefault(SerializationConfiguration.DefaultContentEncoding);
-            var messageType = args.BasicProperties.Type;
-            return new ConsumedMessageContext(source, messageType, contentType, contentEncoding);
-        }
+            if (args == null)
+                throw new ArgumentNullException(nameof(args));
 
-        public Boolean Equals(ConsumedMessageContext other)
-        {
-            return String.Equals(Source, other.Source) &&
-                   String.Equals(MessageType, other.MessageType) &&
-                   String.Equals(ContentType, other.ContentType) &&
-                   String.Equals(ContentEncoding, other.ContentEncoding);
-        }
-
-        public override Boolean Equals(Object obj)
-        {
-            if (ReferenceEquals(null, obj))
-                return false;
-
-            return obj is ConsumedMessageContext && Equals((ConsumedMessageContext)obj);
-        }
-
-        public override Int32 GetHashCode()
-        {
-            unchecked
-            {
-                var hashCode = Source?.GetHashCode() ?? 0;
-                hashCode = (hashCode * 397) ^ (MessageType?.GetHashCode() ?? 0);
-                hashCode = (hashCode * 397) ^ (ContentType?.GetHashCode() ?? 0);
-                hashCode = (hashCode * 397) ^ (ContentEncoding?.GetHashCode() ?? 0);
-                return hashCode;
-            }
+            return new ConsumedMessageContext(args);
         }
     }
 }

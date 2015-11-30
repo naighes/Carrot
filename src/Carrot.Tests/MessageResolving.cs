@@ -1,6 +1,8 @@
 using System;
 using Carrot.Configuration;
 using Carrot.Messages;
+using RabbitMQ.Client.Events;
+using RabbitMQ.Client.Framing;
 using Xunit;
 
 namespace Carrot.Tests
@@ -11,7 +13,8 @@ namespace Carrot.Tests
         public void Resolve()
         {
             const String source = "urn:message:foo";
-            var context = new ConsumedMessageContext(null, source, null, null);
+            var args = new BasicDeliverEventArgs { BasicProperties = new BasicProperties { Type = source } };
+            var context = ConsumedMessageContext.FromBasicDeliverEventArgs(args);
             var type = typeof(Foo);
             var resolver = new MessageBindingResolver(type.Assembly);
             var binding = resolver.Resolve(context);
@@ -23,7 +26,8 @@ namespace Carrot.Tests
         public void CannotResolve()
         {
             const String source = "urn:message:no-resolve";
-            var context = new ConsumedMessageContext(null, source, null, null);
+            var args = new BasicDeliverEventArgs { BasicProperties = new BasicProperties { Type = source } };
+            var context = ConsumedMessageContext.FromBasicDeliverEventArgs(args);
             var type = typeof(Foo);
             var resolver = new MessageBindingResolver(type.Assembly);
             Assert.IsType<EmptyMessageBinding>(resolver.Resolve(context));
@@ -62,7 +66,8 @@ namespace Carrot.Tests
         public void Default()
         {
             const String typeName = "Carrot.Tests.Foo";
-            var context = new ConsumedMessageContext(null, typeName, null, null);
+            var args = new BasicDeliverEventArgs { BasicProperties = new BasicProperties { Type = typeName } };
+            var context = ConsumedMessageContext.FromBasicDeliverEventArgs(args);
             var resolver = new DefaultMessageTypeResolver();
             var binding = resolver.Resolve(context);
             Assert.Equal(typeName, binding.RawName);

@@ -16,7 +16,6 @@ namespace Carrot.Tests
         public void CannotResolve()
         {
             const String type = "fake-type";
-            var context = new ConsumedMessageContext(null, type, null, null);
             var serializationConfiguration = new SerializationConfiguration();
             var resolver = new Mock<IMessageTypeResolver>();
             resolver.Setup(_ => _.Resolve(It.Is<ConsumedMessageContext>(__ => __.MessageType == type)))
@@ -48,9 +47,18 @@ namespace Carrot.Tests
         {
             const String type = "fake-type";
             const String contentType = "application/null";
-            var context = new ConsumedMessageContext(null, type, contentType, null);
-            var runtimeType = typeof(Foo);
             var body = new Byte[] { };
+            var args = new BasicDeliverEventArgs
+                           {
+                               Body = body,
+                               BasicProperties = new BasicProperties
+                               {
+                                   ContentType = contentType,
+                                   Type = type
+                               }
+                           };
+            var context = ConsumedMessageContext.FromBasicDeliverEventArgs(args);
+            var runtimeType = typeof(Foo);
             var serializer = new Mock<ISerializer>();
             serializer.Setup(_ => _.Deserialize(body, runtimeType, new UTF8Encoding(true)))
                       .Throws(new Exception("boom"));
@@ -58,15 +66,7 @@ namespace Carrot.Tests
             var resolver = new Mock<IMessageTypeResolver>();
             resolver.Setup(_ => _.Resolve(context)).Returns(new MessageBinding(type, runtimeType));
             var builder = new ConsumedMessageBuilder(serializationConfiguration, resolver.Object);
-            var message = builder.Build(new BasicDeliverEventArgs
-                                            {
-                                                Body = body,
-                                                BasicProperties = new BasicProperties
-                                                                      {
-                                                                          ContentType = contentType,
-                                                                          Type = type
-                                                                      }
-                                            });
+            var message = builder.Build(args);
             Assert.IsType<CorruptedMessage>(message);
         }
 
