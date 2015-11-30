@@ -13,7 +13,7 @@ namespace Carrot.Tests
 
         public AmqpEntities()
         {
-            _broker = new Broker(new EnvironmentConfiguration());
+            _broker = new Broker(new EnvironmentConfiguration(), new Mock<IConnectionBuilder>().Object);
         }
 
         [Fact]

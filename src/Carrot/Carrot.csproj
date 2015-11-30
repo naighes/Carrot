@@ -55,6 +55,7 @@
     <Compile Include="Configuration\EnvironmentConfiguration.cs" />
     <Compile Include="Configuration\DefaultMessageTypeResolver.cs" />
     <Compile Include="Configuration\SerializationConfiguration.cs" />
+    <Compile Include="ConnectionBuilder.cs" />
     <Compile Include="ExchangeBinding.cs" />
     <Compile Include="Broker.cs" />
     <Compile Include="Connection.cs" />

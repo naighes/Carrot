@@ -75,6 +75,7 @@
     <Compile Include="AtLeastOnceReplying.cs" />
     <Compile Include="AtMostOnceReplying.cs" />
     <Compile Include="Connecting.cs" />
+    <Compile Include="ConnectionBuilding.cs" />
     <Compile Include="ConsumedMessageBuilding.cs" />
     <Compile Include="ConsumingMessages.cs" />
     <Compile Include="ContentNegotiating.cs" />

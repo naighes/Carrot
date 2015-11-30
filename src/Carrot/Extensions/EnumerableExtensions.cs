@@ -9,5 +9,13 @@ namespace Carrot.Extensions
         {
             return source.Where(_ => _ != null);
         }
+
+        internal static T SingleOrDefault<T>(this IEnumerable<T> source, T @default)
+        {
+            if (source == null)
+                return @default;
+
+            return !source.Any() ? @default : source.SingleOrDefault();
+        }
     }
 }

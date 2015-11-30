@@ -16,16 +16,30 @@ namespace Carrot
         private readonly ISet<ExchangeBinding> _bindings = new HashSet<ExchangeBinding>();
         private readonly ISet<Func<IConsumedMessageBuilder, ConsumingPromise>> _promises = new HashSet<Func<IConsumedMessageBuilder, ConsumingPromise>>();
 
-        protected internal Broker(EnvironmentConfiguration configuration)
+        private readonly IConnectionBuilder _connectionBuilder;
+
+        protected internal Broker(EnvironmentConfiguration configuration, IConnectionBuilder connectionBuilder)
         {
             _configuration = configuration;
+            _connectionBuilder = connectionBuilder;
         }
 
         public static IBroker New(Action<EnvironmentConfiguration> configure)
         {
+            return New(configure, new ConnectionBuilder(new DateTimeProvider()));
+        }
+
+        public static IBroker New(Action<EnvironmentConfiguration> configure, IConnectionBuilder connectionBuilder)
+        {
+            if (configure == null)
+                throw new ArgumentNullException(nameof(configure));
+
+            if (connectionBuilder == null)
+                throw new ArgumentNullException(nameof(connectionBuilder));
+
             var configuration = new EnvironmentConfiguration();
             configure(configuration);
-            return new Broker(configuration);
+            return new Broker(configuration, connectionBuilder);
         }
 
         public Queue DeclareQueue(String name)
@@ -106,7 +120,7 @@ namespace Carrot
 
         public IConnection Connect()
         {
-            var connection = CreateConnection();
+            var connection = _connectionBuilder.CreateConnection(_configuration.EndpointUri);
             var outboundModel = connection.CreateModel();
 
             foreach (var exchange in _exchanges)
@@ -141,16 +155,6 @@ namespace Carrot
             Subscribe(configure,
                       (b, c) => new AtLeastOnceConsumingPromise(queue, b, c, () => _configuration.Log),
                       queue);
-        }
-
-        protected internal virtual RabbitMQ.Client.IConnection CreateConnection()
-        {
-            return new ConnectionFactory
-                       {
-                           Uri = _configuration.EndpointUri.ToString(),
-                           AutomaticRecoveryEnabled = true,
-                           TopologyRecoveryEnabled = true
-                       }.CreateConnection();
         }
 
         protected internal virtual IModel CreateInboundModel(RabbitMQ.Client.IConnection connection,
