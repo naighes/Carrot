@@ -8,7 +8,7 @@ namespace Carrot
     {
         public abstract Task ConsumeAsync(ConsumedMessage<TMessage> message);
 
-        Task IConsumer.ConsumeAsync(ConsumedMessage message)
+        Task IConsumer.ConsumeAsync(ConsumedMessageBase message)
         {
             return ConsumeAsync(message.As<TMessage>());
         }

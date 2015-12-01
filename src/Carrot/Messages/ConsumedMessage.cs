@@ -29,7 +29,7 @@ namespace Carrot.Messages
         {
             return Task.WhenAll(configuration.FindSubscriptions(this)
                                              .Select(_ => _.SafeConsumeAsync(this)))
-                       .ContinueWith(_ => AggregateResult(_, this, configuration.FallbackStrategy));
+                       .ContinueWith(_ => AggregateResult(_, configuration.FallbackStrategy));
         }
 
         private AggregateConsumingResult BuildErrorResult(IEnumerable<ConsumingResult> results,
@@ -45,20 +45,18 @@ namespace Carrot.Messages
             return new ConsumingFailure(this, fallbackStrategy, exceptions);
         }
 
-        private AggregateConsumingResult AggregateResult(Task<ConsumingResult[]> task,
-                                                         ConsumedMessageBase message,
-                                                         IFallbackStrategy fallbackStrategy)
+        private AggregateConsumingResult AggregateResult(Task<ConsumingResult[]> task, IFallbackStrategy fallbackStrategy)
         {
             return task.Result.OfType<Failure>().Any()
                     ? BuildErrorResult(task.Result, fallbackStrategy)
-                    : new Messages.Success(message);
+                    : new Messages.Success(this);
         }
 
         internal abstract class ConsumingResult
         {
-            protected readonly ConsumedMessage Message;
+            protected readonly ConsumedMessageBase Message;
 
-            protected ConsumingResult(ConsumedMessage message)
+            protected ConsumingResult(ConsumedMessageBase message)
             {
                 Message = message;
             }
@@ -68,7 +66,7 @@ namespace Carrot.Messages
         {
             internal readonly Exception Exception;
 
-            internal Failure(ConsumedMessage message, Exception exception)
+            internal Failure(ConsumedMessageBase message, Exception exception)
                 : base(message)
             {
                 Exception = exception;
@@ -77,7 +75,7 @@ namespace Carrot.Messages
 
         internal class Success : ConsumingResult
         {
-            public Success(ConsumedMessage message)
+            public Success(ConsumedMessageBase message)
                 : base(message)
             {
             }

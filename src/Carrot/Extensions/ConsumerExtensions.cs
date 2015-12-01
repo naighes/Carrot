@@ -29,7 +29,7 @@ namespace Carrot.Extensions
         }
 
         internal static Task<ConsumedMessage.ConsumingResult> SafeConsumeAsync(this IConsumer consumer,
-                                                                               ConsumedMessage message)
+                                                                               ConsumedMessageBase message)
         {
             try
             {
@@ -48,7 +48,7 @@ namespace Carrot.Extensions
         }
 
         private static ConsumedMessage.ConsumingResult BuildFailure(IConsumer consumer,
-                                                                    ConsumedMessage message,
+                                                                    ConsumedMessageBase message,
                                                                     Exception exception)
         {
             consumer.OnError(exception);
