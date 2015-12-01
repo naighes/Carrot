@@ -137,10 +137,10 @@ namespace Carrot
 
             var channel = _configuration.OutboundChannelBuilder(outboundModel, _configuration);
             return new Connection(connection,
-                                      _promises.Select(_ => BuildConsumer(connection, _, builder)).ToList(),
-                                      channel,
-                                      new DateTimeProvider(),
-                                      _configuration);
+                                  _promises.Select(_ => BuildConsumer(connection, _, builder)).ToList(),
+                                  channel,
+                                  new DateTimeProvider(),
+                                  _configuration);
         }
 
         public void SubscribeByAtMostOnce(Queue queue, Action<ConsumingConfiguration> configure)
