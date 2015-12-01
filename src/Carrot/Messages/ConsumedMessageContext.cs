@@ -1,6 +1,7 @@
 using System;
 using Carrot.Configuration;
 using Carrot.Extensions;
+using Carrot.Serialization;
 using RabbitMQ.Client.Events;
 
 namespace Carrot.Messages
@@ -28,6 +29,14 @@ namespace Carrot.Messages
                 throw new ArgumentNullException(nameof(args));
 
             return new ConsumedMessageContext(args);
+        }
+
+        internal ConsumedMessage AsConsumedMessage(ISerializer serializer, MessageBinding messageBinding)
+        {
+            return new ConsumedMessage(serializer.Deserialize(_args.Body,
+                                                              messageBinding.RuntimeType,
+                                                              _args.BasicProperties.CreateEncoding()),
+                                       _args);
         }
     }
 }

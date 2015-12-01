@@ -30,18 +30,8 @@ namespace Carrot.Messages
             if (serializer is NullSerializer)
                 return new UnsupportedMessage(args);
 
-            try { return Content(args, serializer, binding); }
+            try { return context.AsConsumedMessage(serializer, binding); }
             catch { return new CorruptedMessage(args); }
-        }
-
-        private static ConsumedMessage Content(BasicDeliverEventArgs args,
-                                               ISerializer serializer,
-                                               MessageBinding messageBinding)
-        {
-            return new ConsumedMessage(serializer.Deserialize(args.Body,
-                                                              messageBinding.RuntimeType,
-                                                              args.BasicProperties.CreateEncoding()),
-                                       args);
         }
     }
 }
