@@ -1,6 +1,6 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
-using Carrot.Configuration;
 using Carrot.Extensions;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
@@ -18,7 +18,7 @@ namespace Carrot.Messages
 
         internal abstract Object Content { get; }
 
-        internal abstract Task<AggregateConsumingResult> ConsumeAsync(ConsumingConfiguration configuration);
+        internal abstract Task<AggregateConsumingResult> ConsumeAsync(IEnumerable<IConsumer> subscriptions);
 
         internal ConsumedMessage<TMessage> As<TMessage>() where TMessage : class
         {

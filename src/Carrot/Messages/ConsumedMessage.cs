@@ -2,9 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Carrot.Configuration;
 using Carrot.Extensions;
-using Carrot.Fallback;
 using RabbitMQ.Client.Events;
 
 namespace Carrot.Messages
@@ -25,30 +23,28 @@ namespace Carrot.Messages
             return Content != null && type.IsInstanceOfType(Content);
         }
 
-        internal override Task<AggregateConsumingResult> ConsumeAsync(ConsumingConfiguration configuration)
+        internal override Task<AggregateConsumingResult> ConsumeAsync(IEnumerable<IConsumer> subscriptions)
         {
-            return Task.WhenAll(configuration.FindSubscriptions(this)
-                                             .Select(_ => _.SafeConsumeAsync(this)))
-                       .ContinueWith(_ => AggregateResult(_, configuration.FallbackStrategy));
+            return Task.WhenAll(subscriptions.Select(_ => _.SafeConsumeAsync(this)))
+                       .ContinueWith(AggregateResult);
         }
 
-        private AggregateConsumingResult BuildErrorResult(IEnumerable<ConsumingResult> results,
-                                                          IFallbackStrategy fallbackStrategy)
+        private AggregateConsumingResult BuildErrorResult(IEnumerable<ConsumingResult> results)
         {
             var exceptions = results.OfType<Failure>()
                                     .Select(_ => _.Exception)
                                     .ToArray();
 
             if (Args.Redelivered)
-                return new ReiteratedConsumingFailure(this, fallbackStrategy, exceptions);
+                return new ReiteratedConsumingFailure(this, exceptions);
 
-            return new ConsumingFailure(this, fallbackStrategy, exceptions);
+            return new ConsumingFailure(this, exceptions);
         }
 
-        private AggregateConsumingResult AggregateResult(Task<ConsumingResult[]> task, IFallbackStrategy fallbackStrategy)
+        private AggregateConsumingResult AggregateResult(Task<ConsumingResult[]> task)
         {
             return task.Result.OfType<Failure>().Any()
-                    ? BuildErrorResult(task.Result, fallbackStrategy)
+                    ? BuildErrorResult(task.Result)
                     : new Messages.Success(this);
         }
 

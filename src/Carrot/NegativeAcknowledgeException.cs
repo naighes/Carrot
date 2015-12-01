@@ -3,9 +3,9 @@ using Carrot.Messages;
 
 namespace Carrot
 {
-    public class NegativeAckReceivedException : Exception
+    public class NegativeAcknowledgeException : Exception
     {
-        internal NegativeAckReceivedException(IMessage source, String message)
+        internal NegativeAcknowledgeException(IMessage source, String message)
             : base(message)
         {
             SourceMessage = source;

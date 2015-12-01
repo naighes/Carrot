@@ -54,7 +54,7 @@ namespace Carrot.Tests
                                             message);
             channel.CallOnModelBasicNacks(new BasicNackEventArgs { DeliveryTag = deliveryTag });
             var result = Assert.IsType<FailurePublishing>(task.Result);
-            Assert.IsType<NegativeAckReceivedException>(result.Exception);
+            Assert.IsType<NegativeAcknowledgeException>(result.Exception);
         }
 
         [Fact]

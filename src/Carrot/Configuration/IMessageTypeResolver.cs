@@ -1,4 +1,3 @@
-using System;
 using Carrot.Messages;
 
 namespace Carrot.Configuration

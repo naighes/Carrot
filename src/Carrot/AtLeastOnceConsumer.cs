@@ -17,7 +17,7 @@ namespace Carrot
 
         protected override Task<AggregateConsumingResult> ConsumeInternalAsync(BasicDeliverEventArgs args)
         {
-            return ConsumeAsync(args).ContinueWith(_ => _.Result.Reply(Model));
+            return ConsumeAsync(args).ContinueWith(_ => _.Result.Reply(Model, Configuration.FallbackStrategy));
         }
     }
 }

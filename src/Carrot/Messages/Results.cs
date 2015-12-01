@@ -48,7 +48,7 @@ namespace Carrot.Messages
             Message = message;
         }
 
-        internal virtual AggregateConsumingResult Reply(IModel model)
+        internal virtual AggregateConsumingResult Reply(IModel model, IFallbackStrategy fallbackStrategy)
         {
             Message.Acknowledge(model);
             return this;
@@ -65,25 +65,15 @@ namespace Carrot.Messages
 
     public abstract class ConsumingFailureBase : AggregateConsumingResult
     {
-        private readonly IFallbackStrategy _fallbackStrategy;
         private readonly Exception[] _exceptions;
 
-        protected ConsumingFailureBase(ConsumedMessageBase message,
-                                       IFallbackStrategy fallbackStrategy,
-                                       params Exception[] exceptions)
+        protected ConsumingFailureBase(ConsumedMessageBase message, params Exception[] exceptions)
             : base(message)
         {
-            _fallbackStrategy = fallbackStrategy;
             _exceptions = exceptions;
         }
 
         internal Exception[] Exceptions => _exceptions ?? new Exception[] { };
-
-        internal override AggregateConsumingResult Reply(IModel model)
-        {
-            _fallbackStrategy.Apply(model, Message);
-            return base.Reply(model);
-        }
 
         internal void WithErrors(Action<Exception> action)
         {
@@ -98,24 +88,26 @@ namespace Carrot.Messages
 
     public class ReiteratedConsumingFailure : ConsumingFailureBase
     {
-        internal ReiteratedConsumingFailure(ConsumedMessageBase message,
-                                            IFallbackStrategy fallbackStrategy,
-                                            params Exception[] exceptions)
-            : base(message, fallbackStrategy, exceptions)
+        internal ReiteratedConsumingFailure(ConsumedMessageBase message, params Exception[] exceptions)
+            : base(message, exceptions)
         {
+        }
+
+        internal override AggregateConsumingResult Reply(IModel model, IFallbackStrategy fallbackStrategy)
+        {
+            fallbackStrategy.Apply(model, Message);
+            return base.Reply(model, fallbackStrategy);
         }
     }
 
     public class ConsumingFailure : ConsumingFailureBase
     {
-        internal ConsumingFailure(ConsumedMessageBase message,
-                                  IFallbackStrategy fallbackStrategy,
-                                  params Exception[] exceptions)
-            : base(message, fallbackStrategy, exceptions)
+        internal ConsumingFailure(ConsumedMessageBase message, params Exception[] exceptions)
+            : base(message, exceptions)
         {
         }
 
-        internal override AggregateConsumingResult Reply(IModel model)
+        internal override AggregateConsumingResult Reply(IModel model, IFallbackStrategy fallbackStrategy)
         {
             Message.Requeue(model);
             return this;
@@ -124,24 +116,24 @@ namespace Carrot.Messages
 
     internal class UnsupportedMessageConsumingFailure : ConsumingFailureBase
     {
-        internal UnsupportedMessageConsumingFailure(ConsumedMessageBase message, IFallbackStrategy fallbackStrategy)
-            : base(message, fallbackStrategy)
+        internal UnsupportedMessageConsumingFailure(ConsumedMessageBase message)
+            : base(message)
         {
         }
     }
 
     internal class UnresolvedMessageConsumingFailure : ConsumingFailureBase
     {
-        internal UnresolvedMessageConsumingFailure(ConsumedMessageBase message, IFallbackStrategy fallbackStrategy)
-            : base(message, fallbackStrategy)
+        internal UnresolvedMessageConsumingFailure(ConsumedMessageBase message)
+            : base(message)
         {
         }
     }
 
     internal class CorruptedMessageConsumingFailure : ConsumingFailureBase
     {
-        internal CorruptedMessageConsumingFailure(ConsumedMessageBase message, IFallbackStrategy fallbackStrategy)
-            : base(message, fallbackStrategy)
+        internal CorruptedMessageConsumingFailure(ConsumedMessageBase message)
+            : base(message)
         {
         }
     }

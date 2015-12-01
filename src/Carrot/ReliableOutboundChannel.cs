@@ -64,7 +64,7 @@ namespace Carrot
         {
             HandleServerResponse(args.DeliveryTag,
                                  args.Multiple,
-                                 (_, source) => _.TrySetException(new NegativeAckReceivedException(source,
+                                 (_, source) => _.TrySetException(new NegativeAcknowledgeException(source,
                                                                                                    "publish was NACK-ed")));
         }
 

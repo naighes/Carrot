@@ -1,4 +1,3 @@
-using Carrot.Fallback;
 using RabbitMQ.Client.Events;
 
 namespace Carrot.Messages
@@ -10,9 +9,9 @@ namespace Carrot.Messages
         {
         }
 
-        protected override ConsumingFailureBase Result(IFallbackStrategy fallbackStrategy)
+        protected override ConsumingFailureBase Result()
         {
-            return new UnresolvedMessageConsumingFailure(this, fallbackStrategy);
+            return new UnresolvedMessageConsumingFailure(this);
         }
     }
 }

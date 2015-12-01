@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Carrot.Configuration;
 using Carrot.Fallback;
 using Carrot.Messages;
@@ -24,13 +25,15 @@ namespace Carrot.Tests
         public void OnSuccess()
         {
             var model = new Mock<IModel>();
-            var strategy = new Mock<IFallbackStrategy>();
             var args = FakeBasicDeliverEventArgs();
             var message = new FakeConsumedMessage(new Object(), args);
+            var strategy = new Mock<IFallbackStrategy>();
             _configuration.FallbackBy((c, q) => strategy.Object);
-            var result = message.ConsumeAsync(_configuration).Result;
+            var builder = new Mock<IConsumedMessageBuilder>();
+            builder.Setup(_ => _.Build(args)).Returns(message);
+            var consumer = new AtLeastOnceConsumer(model.Object, builder.Object, _configuration);
+            var result = consumer.ConsumeAsync(args).Result;
             Assert.IsType<Success>(result);
-            result.Reply(model.Object);
             strategy.Verify(_ => _.Apply(model.Object, message), Times.Never);
         }
 
@@ -43,9 +46,11 @@ namespace Carrot.Tests
             var message = new FakeConsumedMessage(new Object(), args);
             _configuration.FallbackBy((c, q) => strategy.Object);
             _configuration.Consumes(new FakeConsumer(consumedMessage => { throw new Exception(); }));
-            var result = message.ConsumeAsync(_configuration).Result;
+            var builder = new Mock<IConsumedMessageBuilder>();
+            builder.Setup(_ => _.Build(args)).Returns(message);
+            var consumer = new AtLeastOnceConsumer(model.Object, builder.Object, _configuration);
+            var result = consumer.ConsumeAsync(args).Result;
             Assert.IsType<ConsumingFailure>(result);
-            result.Reply(model.Object);
             strategy.Verify(_ => _.Apply(model.Object, message), Times.Never);
         }
 
@@ -59,9 +64,11 @@ namespace Carrot.Tests
             var message = new FakeConsumedMessage(new Object(), args);
             _configuration.FallbackBy((c, q) => strategy.Object);
             _configuration.Consumes(new FakeConsumer(consumedMessage => { throw new Exception(); }));
-            var result = message.ConsumeAsync(_configuration).Result;
+            var builder = new Mock<IConsumedMessageBuilder>();
+            builder.Setup(_ => _.Build(args)).Returns(message);
+            var consumer = new AtLeastOnceConsumerWrapper(model.Object, builder.Object, _configuration);
+            var result = consumer.CallConsumeInternalAsync(args).Result;
             Assert.IsType<ReiteratedConsumingFailure>(result);
-            result.Reply(model.Object);
             strategy.Verify(_ => _.Apply(model.Object, message), Times.Once);
         }
 
@@ -98,6 +105,21 @@ namespace Carrot.Tests
                                                      Headers = new Dictionary<String, Object>()
                                                  }
                        };
+        }
+
+        internal class AtLeastOnceConsumerWrapper : AtLeastOnceConsumer
+        {
+            public AtLeastOnceConsumerWrapper(IModel model,
+                                              IConsumedMessageBuilder builder,
+                                              ConsumingConfiguration configuration)
+                : base(model, builder, configuration)
+            {
+            }
+
+            internal Task<AggregateConsumingResult> CallConsumeInternalAsync(BasicDeliverEventArgs args)
+            {
+                return ConsumeInternalAsync(args);
+            }
         }
     }
 }

@@ -9,8 +9,9 @@ namespace Carrot
 {
     public abstract class ConsumerBase : DefaultBasicConsumer, IDisposable
     {
+        protected readonly ConsumingConfiguration Configuration;
+
         private readonly IConsumedMessageBuilder _builder;
-        private readonly ConsumingConfiguration _configuration;
 
         protected internal ConsumerBase(IModel model,
                                         IConsumedMessageBuilder builder,
@@ -18,7 +19,7 @@ namespace Carrot
             : base(model)
         {
             _builder = builder;
-            _configuration = configuration;
+            Configuration = configuration;
 
             Model.BasicAcks += OnModelBasicAcks;
             Model.BasicNacks += OnModelBasicNacks;
@@ -71,7 +72,7 @@ namespace Carrot
 
         protected internal virtual Task<AggregateConsumingResult> ConsumeAsync(BasicDeliverEventArgs args)
         {
-            return _builder.Build(args).ConsumeAsync(_configuration);
+            return _builder.Build(args).ConsumeAsync(Configuration.FindSubscriptions(_builder.Build(args)));
         }
 
         protected abstract Task<AggregateConsumingResult> ConsumeInternalAsync(BasicDeliverEventArgs args);

@@ -1,7 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Carrot.Configuration;
-using Carrot.Fallback;
 using Carrot.Messages;
 using Moq;
 using RabbitMQ.Client;
@@ -35,7 +35,7 @@ namespace Carrot.Tests
         {
             const Int64 deliveryTag = 1234L;
             var model = BuildModel(deliveryTag,
-                                   _ => new ConsumingFailure(_, NoFallbackStrategy.Instance),
+                                   _ => new ConsumingFailure(_),
                                    _configuration);
             model.Verify(_ => _.BasicNack(deliveryTag, false, true));
         }
@@ -45,7 +45,7 @@ namespace Carrot.Tests
         {
             const Int64 deliveryTag = 1234L;
             var model = BuildModel(deliveryTag,
-                                   _ => new ReiteratedConsumingFailure(_, NoFallbackStrategy.Instance),
+                                   _ => new ReiteratedConsumingFailure(_),
                                    _configuration);
             model.Verify(_ => _.BasicAck(deliveryTag, false));
         }
@@ -55,7 +55,7 @@ namespace Carrot.Tests
         {
             const Int64 deliveryTag = 1234L;
             var model = BuildModel(deliveryTag,
-                                   _ => new CorruptedMessageConsumingFailure(_, NoFallbackStrategy.Instance),
+                                   _ => new CorruptedMessageConsumingFailure(_),
                                    _configuration);
             model.Verify(_ => _.BasicAck(deliveryTag, false));
         }
@@ -65,7 +65,7 @@ namespace Carrot.Tests
         {
             const Int64 deliveryTag = 1234L;
             var model = BuildModel(deliveryTag,
-                                   _ => new UnresolvedMessageConsumingFailure(_, NoFallbackStrategy.Instance),
+                                   _ => new UnresolvedMessageConsumingFailure(_),
                                    _configuration);
             model.Verify(_ => _.BasicAck(deliveryTag, false));
         }
@@ -75,7 +75,7 @@ namespace Carrot.Tests
         {
             const Int64 deliveryTag = 1234L;
             var model = BuildModel(deliveryTag,
-                                   _ => new UnsupportedMessageConsumingFailure(_, NoFallbackStrategy.Instance),
+                                   _ => new UnsupportedMessageConsumingFailure(_),
                                    _configuration);
             model.Verify(_ => _.BasicAck(deliveryTag, false));
         }
@@ -114,7 +114,7 @@ namespace Carrot.Tests
                 get { throw new NotImplementedException(); }
             }
 
-            internal override Task<AggregateConsumingResult> ConsumeAsync(ConsumingConfiguration configuration)
+            internal override Task<AggregateConsumingResult> ConsumeAsync(IEnumerable<IConsumer> subscriptions)
             {
                 return Task.FromResult(_result(this));
             }
