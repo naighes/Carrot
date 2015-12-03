@@ -134,10 +134,10 @@ namespace Carrot
 
             var builder = new ConsumedMessageBuilder(_configuration.SerializationConfiguration,
                                                      _configuration.MessageTypeResolver);
-
+            var consumers = _promises.Select(_ => BuildConsumer(connection, _(builder))).ToList();
             var channel = _configuration.OutboundChannelBuilder(outboundModel, _configuration);
             return new Connection(connection,
-                                  _promises.Select(_ => BuildConsumer(connection, _, builder)).ToList(),
+                                  consumers,
                                   channel,
                                   new DateTimeProvider(),
                                   _configuration);
@@ -166,13 +166,11 @@ namespace Carrot
             return model;
         }
 
-        private ConsumerBase BuildConsumer(RabbitMQ.Client.IConnection connection,
-                                           Func<IConsumedMessageBuilder, ConsumingPromise> promise,
-                                           IConsumedMessageBuilder builder)
+        private ConsumerBase BuildConsumer(RabbitMQ.Client.IConnection connection, ConsumingPromise promise)
         {
-            return promise(builder).Declare(CreateInboundModel(connection,
-                                                               _configuration.PrefetchSize,
-                                                               _configuration.PrefetchCount));
+            return promise.Declare(CreateInboundModel(connection,
+                                                      _configuration.PrefetchSize,
+                                                      _configuration.PrefetchCount));
         }
 
         private void Subscribe(Action<ConsumingConfiguration> configure,
