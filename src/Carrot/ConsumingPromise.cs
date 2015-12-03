@@ -8,11 +8,11 @@ namespace Carrot
 {
     public abstract class ConsumingPromise
     {
+        protected readonly IConsumedMessageBuilder Builder;
+        protected readonly ConsumingConfiguration Configuration;
         protected readonly Func<ILog> LogBuilder;
 
         private readonly Queue _queue;
-        private readonly IConsumedMessageBuilder _builder;
-        private readonly ConsumingConfiguration _configuration;
 
         protected internal ConsumingPromise(Queue queue,
                                             IConsumedMessageBuilder builder,
@@ -20,21 +20,19 @@ namespace Carrot
                                             Func<ILog> logBuilder)
         {
             _queue = queue;
-            _builder = builder;
-            _configuration = configuration;
+            Builder = builder;
+            Configuration = configuration;
             LogBuilder = logBuilder;
         }
 
         internal ConsumerBase Declare(IModel model)
         {
-            var consumer = BuildConsumer(model, _builder, _configuration);
+            var consumer = BuildConsumer(model);
             model.BasicConsume(_queue.Name, false, consumer);
             return consumer;
         }
 
-        protected internal abstract ConsumerBase BuildConsumer(IModel model,
-                                                               IConsumedMessageBuilder builder,
-                                                               ConsumingConfiguration configuration);
+        protected internal abstract ConsumerBase BuildConsumer(IModel model);
     }
 
     internal class AtMostOnceConsumingPromise : ConsumingPromise
@@ -47,11 +45,9 @@ namespace Carrot
         {
         }
 
-        protected internal override ConsumerBase BuildConsumer(IModel model,
-                                                               IConsumedMessageBuilder builder,
-                                                               ConsumingConfiguration configuration)
+        protected internal override ConsumerBase BuildConsumer(IModel model)
         {
-            return new LoggedAtMostOnceConsumer(model, builder, configuration, LogBuilder());
+            return new LoggedAtMostOnceConsumer(model, Builder, Configuration, LogBuilder());
         }
     }
 
@@ -65,11 +61,9 @@ namespace Carrot
         {
         }
 
-        protected internal override ConsumerBase BuildConsumer(IModel model,
-                                                               IConsumedMessageBuilder builder,
-                                                               ConsumingConfiguration configuration)
+        protected internal override ConsumerBase BuildConsumer(IModel model)
         {
-            return new LoggedAtLeastOnceConsumer(model, builder, configuration, LogBuilder());
+            return new LoggedAtLeastOnceConsumer(model, Builder, Configuration, LogBuilder());
         }
     }
 }
