@@ -31,7 +31,7 @@ namespace Carrot.Tests
             _configuration.FallbackBy((c, q) => strategy.Object);
             var builder = new Mock<IConsumedMessageBuilder>();
             builder.Setup(_ => _.Build(args)).Returns(message);
-            var consumer = new AtLeastOnceConsumer(model.Object, builder.Object, _configuration);
+            var consumer = new AtLeastOnceConsumer(model.Object, default(Queue), builder.Object, _configuration);
             var result = consumer.ConsumeAsync(args).Result;
             Assert.IsType<Success>(result);
             strategy.Verify(_ => _.Apply(model.Object, message), Times.Never);
@@ -48,7 +48,7 @@ namespace Carrot.Tests
             _configuration.Consumes(new FakeConsumer(consumedMessage => { throw new Exception(); }));
             var builder = new Mock<IConsumedMessageBuilder>();
             builder.Setup(_ => _.Build(args)).Returns(message);
-            var consumer = new AtLeastOnceConsumer(model.Object, builder.Object, _configuration);
+            var consumer = new AtLeastOnceConsumer(model.Object, default(Queue), builder.Object, _configuration);
             var result = consumer.ConsumeAsync(args).Result;
             Assert.IsType<ConsumingFailure>(result);
             strategy.Verify(_ => _.Apply(model.Object, message), Times.Never);
@@ -66,7 +66,7 @@ namespace Carrot.Tests
             _configuration.Consumes(new FakeConsumer(consumedMessage => { throw new Exception(); }));
             var builder = new Mock<IConsumedMessageBuilder>();
             builder.Setup(_ => _.Build(args)).Returns(message);
-            var consumer = new AtLeastOnceConsumerWrapper(model.Object, builder.Object, _configuration);
+            var consumer = new AtLeastOnceConsumerWrapper(model.Object, default(Queue), builder.Object, _configuration);
             var result = consumer.CallConsumeInternalAsync(args).Result;
             Assert.IsType<ReiteratedConsumingFailure>(result);
             strategy.Verify(_ => _.Apply(model.Object, message), Times.Once);
@@ -110,9 +110,10 @@ namespace Carrot.Tests
         internal class AtLeastOnceConsumerWrapper : AtLeastOnceConsumer
         {
             public AtLeastOnceConsumerWrapper(IModel model,
+                                              Queue queue,
                                               IConsumedMessageBuilder builder,
                                               ConsumingConfiguration configuration)
-                : base(model, builder, configuration)
+                : base(model, queue, builder, configuration)
             {
             }
 

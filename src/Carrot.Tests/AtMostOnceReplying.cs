@@ -26,7 +26,7 @@ namespace Carrot.Tests
             var model = new Mock<IModel>();
             model.Setup(_ => _.BasicAck(deliveryTag, false)).Throws(new Exception());
             var builder = new Mock<IConsumedMessageBuilder>();
-            var consumer = new AtMostOnceConsumerWrapper(model.Object, builder.Object, _configuration);
+            var consumer = new AtMostOnceConsumerWrapper(model.Object, default(Queue), builder.Object, _configuration);
             var args = new BasicDeliverEventArgs
                            {
                                DeliveryTag = deliveryTag,
@@ -39,9 +39,10 @@ namespace Carrot.Tests
         internal class AtMostOnceConsumerWrapper : AtMostOnceConsumer
         {
             internal AtMostOnceConsumerWrapper(IModel model,
+                                               Queue queue,
                                                IConsumedMessageBuilder builder,
                                                ConsumingConfiguration configuration)
-                : base(model, builder, configuration)
+                : base(model, queue, builder, configuration)
             {
             }
 

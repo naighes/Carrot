@@ -16,9 +16,9 @@ namespace Carrot.Tests
         public void OnConnectionDisposed()
         {
             var consumerModel1 = new Mock<IModel>();
-            var consumer1 = new FakeConsumerBase(consumerModel1.Object, null, null);
+            var consumer1 = new FakeConsumerBase(consumerModel1.Object, default(Queue), null, null);
             var consumerModel2 = new Mock<IModel>();
-            var consumer2 = new FakeConsumerBase(consumerModel2.Object, null, null);
+            var consumer2 = new FakeConsumerBase(consumerModel2.Object, default(Queue), null, null);
             var outboundModel = new Mock<IModel>();
             var connection = new Mock<RabbitMQ.Client.IConnection>();
             var amqpConnection = new Connection(connection.Object,
@@ -36,8 +36,11 @@ namespace Carrot.Tests
 
         internal class FakeConsumerBase : ConsumerBase
         {
-            public FakeConsumerBase(IModel model, IConsumedMessageBuilder builder, ConsumingConfiguration configuration)
-                : base(model, builder, configuration)
+            public FakeConsumerBase(IModel model,
+                                    Queue queue,
+                                    IConsumedMessageBuilder builder,
+                                    ConsumingConfiguration configuration)
+                : base(model, queue, builder, configuration)
             {
             }
 

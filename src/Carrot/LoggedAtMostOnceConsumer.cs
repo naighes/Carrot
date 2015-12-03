@@ -14,10 +14,11 @@ namespace Carrot
         private readonly ILog _log;
 
         internal LoggedAtMostOnceConsumer(IModel model,
+                                          Queue queue,
                                           IConsumedMessageBuilder builder,
                                           ConsumingConfiguration configuration,
                                           ILog log)
-            : base(model, builder, configuration)
+            : base(model, queue, builder, configuration)
         {
             _log = log;
         }

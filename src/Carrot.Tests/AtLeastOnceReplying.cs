@@ -93,7 +93,7 @@ namespace Carrot.Tests
             var message = new FakeConsumedMessage(args, func);
             builder.Setup(_ => _.Build(args)).Returns(message);
             var model = new Mock<IModel>();
-            var consumer = new AtLeastOnceConsumerWrapper(model.Object, builder.Object, configuration);
+            var consumer = new AtLeastOnceConsumerWrapper(model.Object, default(Queue), builder.Object, configuration);
             consumer.CallConsumeInternal(args).Wait();
             return model;
         }
@@ -128,9 +128,10 @@ namespace Carrot.Tests
         internal class AtLeastOnceConsumerWrapper : AtLeastOnceConsumer
         {
             internal AtLeastOnceConsumerWrapper(IModel model,
+                                                Queue queue,
                                                 IConsumedMessageBuilder builder,
                                                 ConsumingConfiguration configuration)
-                : base(model, builder, configuration)
+                : base(model, queue, builder, configuration)
             {
             }
 

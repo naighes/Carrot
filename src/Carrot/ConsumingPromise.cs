@@ -8,18 +8,17 @@ namespace Carrot
 {
     public abstract class ConsumingPromise
     {
+        protected readonly Queue Queue;
         protected readonly IConsumedMessageBuilder Builder;
         protected readonly ConsumingConfiguration Configuration;
         protected readonly Func<ILog> LogBuilder;
-
-        private readonly Queue _queue;
 
         protected internal ConsumingPromise(Queue queue,
                                             IConsumedMessageBuilder builder,
                                             ConsumingConfiguration configuration,
                                             Func<ILog> logBuilder)
         {
-            _queue = queue;
+            Queue = queue;
             Builder = builder;
             Configuration = configuration;
             LogBuilder = logBuilder;
@@ -28,7 +27,7 @@ namespace Carrot
         internal ConsumerBase Declare(IModel model)
         {
             var consumer = BuildConsumer(model);
-            model.BasicConsume(_queue.Name, false, consumer);
+            model.BasicConsume(Queue.Name, false, consumer);
             return consumer;
         }
 
@@ -47,7 +46,7 @@ namespace Carrot
 
         protected internal override ConsumerBase BuildConsumer(IModel model)
         {
-            return new LoggedAtMostOnceConsumer(model, Builder, Configuration, LogBuilder());
+            return new LoggedAtMostOnceConsumer(model, Queue, Builder, Configuration, LogBuilder());
         }
     }
 
@@ -63,7 +62,7 @@ namespace Carrot
 
         protected internal override ConsumerBase BuildConsumer(IModel model)
         {
-            return new LoggedAtLeastOnceConsumer(model, Builder, Configuration, LogBuilder());
+            return new LoggedAtLeastOnceConsumer(model, Queue, Builder, Configuration, LogBuilder());
         }
     }
 }

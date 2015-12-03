@@ -11,13 +11,16 @@ namespace Carrot
     {
         protected readonly ConsumingConfiguration Configuration;
 
+        private readonly Queue _queue;
         private readonly IConsumedMessageBuilder _builder;
 
         protected internal ConsumerBase(IModel model,
+                                        Queue queue,
                                         IConsumedMessageBuilder builder,
                                         ConsumingConfiguration configuration)
             : base(model)
         {
+            _queue = queue;
             _builder = builder;
             Configuration = configuration;
 

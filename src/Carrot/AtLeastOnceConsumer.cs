@@ -9,9 +9,10 @@ namespace Carrot
     public class AtLeastOnceConsumer : ConsumerBase
     {
         internal AtLeastOnceConsumer(IModel model,
+                                     Queue queue,
                                      IConsumedMessageBuilder builder,
                                      ConsumingConfiguration configuration)
-            : base(model, builder, configuration)
+            : base(model, queue, builder, configuration)
         {
         }
 
