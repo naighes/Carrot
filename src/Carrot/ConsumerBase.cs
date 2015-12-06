@@ -73,6 +73,11 @@ namespace Carrot
             Model.Dispose();
         }
 
+        internal void Declare(IModel model)
+        {
+            model.BasicConsume(_queue.Name, false, this);
+        }
+
         protected internal virtual Task<AggregateConsumingResult> ConsumeAsync(BasicDeliverEventArgs args)
         {
             return _builder.Build(args).ConsumeAsync(Configuration.FindSubscriptions(_builder.Build(args)));

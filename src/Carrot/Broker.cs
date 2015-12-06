@@ -137,7 +137,11 @@ namespace Carrot
             var model = CreateInboundModel(connection,
                                            _configuration.PrefetchSize,
                                            _configuration.PrefetchCount);
-            var consumers = _promises.Select(_ => BuildConsumer(model, _(builder))).ToList();
+            var consumers = _promises.Select(_ => _(builder).BuildConsumer(model)).ToList();
+
+            foreach (var consumer in consumers)
+                consumer.Declare(model);
+
             var channel = _configuration.OutboundChannelBuilder(outboundModel, _configuration);
             return new Connection(connection,
                                   consumers,
@@ -167,11 +171,6 @@ namespace Carrot
             var model = connection.CreateModel();
             model.BasicQos(prefetchSize, prefetchCount, false);
             return model;
-        }
-
-        private static ConsumerBase BuildConsumer(IModel model, ConsumingPromise promise)
-        {
-            return promise.Declare(model);
         }
 
         private void Subscribe(Action<ConsumingConfiguration> configure,
