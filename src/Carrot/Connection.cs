@@ -40,7 +40,7 @@ namespace Carrot
             var body = properties.CreateEncoding()
                                  .GetBytes(properties.CreateSerializer(Configuration.SerializationConfiguration)
                                                      .Serialize(message.Content));
-            return _channel.PublishAsync(properties, body, exchange, routingKey, message);
+            return _channel.PublishAsync(message, properties, body, exchange, routingKey);
         }
 
         public void Dispose()

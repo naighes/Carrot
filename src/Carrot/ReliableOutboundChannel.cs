@@ -25,11 +25,11 @@ namespace Carrot
             Model.BasicNacks += OnModelBasicNacks;
         }
 
-        public override Task<IPublishResult> PublishAsync<TMessage>(IBasicProperties properties,
+        public override Task<IPublishResult> PublishAsync<TMessage>(OutboundMessage<TMessage> source,
+                                                                    IBasicProperties properties,
                                                                     Byte[] body,
                                                                     Exchange exchange,
-                                                                    String routingKey,
-                                                                    OutboundMessage<TMessage> source)
+                                                                    String routingKey)
         {
             var message = source.BuildEnvelope(Model,
                                                properties,
@@ -37,8 +37,7 @@ namespace Carrot
                                                exchange,
                                                routingKey);
             var tcs = BuildTaskCompletionSource(message);
-            _confirms.TryAdd(message.Tag,
-                             new Tuple<TaskCompletionSource<Boolean>, IMessage>(tcs, message.Source));
+            _confirms.TryAdd(message.Tag, new Tuple<TaskCompletionSource<Boolean>, IMessage>(tcs, message.Source));
 
             try { PublishInternal(message); }
             catch (Exception exception)
@@ -64,8 +63,7 @@ namespace Carrot
         {
             HandleServerResponse(args.DeliveryTag,
                                  args.Multiple,
-                                 (_, source) => _.TrySetException(new NegativeAcknowledgeException(source,
-                                                                                                   "publish was NACK-ed")));
+                                 (_, source) => _.TrySetException(new NegativeAcknowledgeException(source, "publish was NACK-ed")));
         }
 
         protected virtual void OnModelBasicAcks(Object sender, BasicAckEventArgs args)

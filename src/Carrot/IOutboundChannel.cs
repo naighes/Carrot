@@ -7,11 +7,11 @@ namespace Carrot
 {
     public interface IOutboundChannel : IDisposable
     {
-        Task<IPublishResult> PublishAsync<TMessage>(IBasicProperties properties,
+        Task<IPublishResult> PublishAsync<TMessage>(OutboundMessage<TMessage> source,
+                                                    IBasicProperties properties,
                                                     Byte[] body,
                                                     Exchange exchange,
-                                                    String routingKey,
-                                                    OutboundMessage<TMessage> source)
+                                                    String routingKey)
             where TMessage : class;
     }
 }

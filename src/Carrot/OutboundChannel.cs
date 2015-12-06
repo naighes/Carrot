@@ -37,11 +37,11 @@ namespace Carrot
             Model.Dispose();
         }
 
-        public virtual Task<IPublishResult> PublishAsync<TMessage>(IBasicProperties properties,
+        public virtual Task<IPublishResult> PublishAsync<TMessage>(OutboundMessage<TMessage> source,
+                                                                   IBasicProperties properties,
                                                                    Byte[] body,
                                                                    Exchange exchange,
-                                                                   String routingKey,
-                                                                   OutboundMessage<TMessage> source)
+                                                                   String routingKey)
             where TMessage : class
         {
             var message = source.BuildEnvelope(Model,
