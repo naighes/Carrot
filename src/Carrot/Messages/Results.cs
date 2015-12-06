@@ -50,7 +50,7 @@ namespace Carrot.Messages
 
         internal virtual AggregateConsumingResult Reply(IModel model, IFallbackStrategy fallbackStrategy)
         {
-            Message.Acknowledge(model);
+            Message.Acknowledge(new InboundChannel(model));
             return this;
         }
     }

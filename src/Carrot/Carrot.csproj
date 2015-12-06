@@ -83,6 +83,7 @@
     <Compile Include="IBroker.cs" />
     <Compile Include="IConsumer.cs" />
     <Compile Include="IDateTimeProvider.cs" />
+    <Compile Include="InboundChannel.cs" />
     <Compile Include="INewId.cs" />
     <Compile Include="IOutboundChannel.cs" />
     <Compile Include="LoggedAtLeastOnceConsumer.cs" />

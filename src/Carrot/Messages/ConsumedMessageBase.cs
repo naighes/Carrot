@@ -34,9 +34,9 @@ namespace Carrot.Messages
 
         internal abstract Boolean Match(Type type);
 
-        internal void Acknowledge(IModel model)
+        internal void Acknowledge(IInboundChannel channel)
         {
-            model.BasicAck(Args.DeliveryTag, false);
+            channel.Acknowledge(Args.DeliveryTag);
         }
 
         internal void Requeue(IModel model)
