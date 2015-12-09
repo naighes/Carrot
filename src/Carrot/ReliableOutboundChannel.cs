@@ -39,7 +39,15 @@ namespace Carrot
             var tcs = BuildTaskCompletionSource(message);
             _confirms.TryAdd(message.Tag, new Tuple<TaskCompletionSource<Boolean>, IMessage>(tcs, message.Source));
 
-            try { PublishInternal(message); }
+            try
+            {
+                Model.BasicPublish(message.Exchange.Name,
+                                   message.RoutingKey,
+                                   false,
+                                   false,
+                                   message.Properties,
+                                   message.Body);
+            }
             catch (Exception exception)
             {
                 Tuple<TaskCompletionSource<Boolean>, IMessage> tuple;

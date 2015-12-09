@@ -53,7 +53,12 @@ namespace Carrot
 
             try
             {
-                PublishInternal(message);
+                Model.BasicPublish(message.Exchange.Name,
+                                   message.RoutingKey,
+                                   false,
+                                   false,
+                                   message.Properties,
+                                   message.Body);
                 tcs.TrySetResult(true);
             }
             catch (Exception exception) { tcs.TrySetException(exception); }
@@ -73,16 +78,6 @@ namespace Carrot
             where TMessage : class
         {
             return new TaskCompletionSource<Boolean>(message.Properties);
-        }
-
-        protected void PublishInternal<TMessage>(OutboundMessageEnvelope<TMessage> message) where TMessage : class
-        {
-            Model.BasicPublish(message.Exchange.Name,
-                               message.RoutingKey,
-                               false,
-                               false,
-                               message.Properties,
-                               message.Body);
         }
 
         protected virtual void OnModelShutdown(Object sender, ShutdownEventArgs args) { }
