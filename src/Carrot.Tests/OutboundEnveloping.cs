@@ -17,15 +17,16 @@ namespace Carrot.Tests
             const String messageId = "one-id";
 
             var message = NewMessage();
-            var properties = message.BuildBasicProperties(StubResolver().Object,
-                                                          StubDateTimeProvider().Object,
-                                                          StubNewId(messageId).Object);
             const UInt64 deliveryTag = 0uL;
             var model = new Mock<IModel>();
             model.Setup(_ => _.NextPublishSeqNo).Returns(deliveryTag);
-            var channel = new OutboundChannelWrapper(model.Object, new EnvironmentConfiguration(), null);
+            var configuration = new EnvironmentConfiguration();
+            configuration.GeneratesMessageIdBy(StubNewId(messageId).Object);
+            var channel = new OutboundChannelWrapper(model.Object,
+                                                     configuration,
+                                                     StubDateTimeProvider().Object,
+                                                     null);
             var task = channel.PublishAsync(message,
-                                            properties,
                                             new Exchange("target_exchange", "direct"),
                                             String.Empty);
             channel.CallOnModelBasicAcks(new BasicAckEventArgs { DeliveryTag = deliveryTag });
@@ -36,18 +37,15 @@ namespace Carrot.Tests
         [Fact]
         public void NegativeAck()
         {
-            const String messageId = "one-id";
-
             var message = NewMessage();
-            var properties = message.BuildBasicProperties(StubResolver().Object,
-                                                          StubDateTimeProvider().Object,
-                                                          StubNewId(messageId).Object);
             const UInt64 deliveryTag = 0uL;
             var model = new Mock<IModel>();
             model.Setup(_ => _.NextPublishSeqNo).Returns(deliveryTag);
-            var channel = new OutboundChannelWrapper(model.Object, new EnvironmentConfiguration(), null);
+            var channel = new OutboundChannelWrapper(model.Object,
+                                                     new EnvironmentConfiguration(),
+                                                     StubDateTimeProvider().Object,
+                                                     null);
             var task = channel.PublishAsync(message,
-                                            properties,
                                             new Exchange("target_exchange", "direct"),
                                             String.Empty);
             channel.CallOnModelBasicNacks(new BasicNackEventArgs { DeliveryTag = deliveryTag });
@@ -61,10 +59,6 @@ namespace Carrot.Tests
             const String exchange = "target_exchange";
 
             var message = NewMessage();
-            var properties = message.BuildBasicProperties(StubResolver().Object,
-                                                          StubDateTimeProvider().Object,
-                                                          new Mock<INewId>().Object);
-
             var exception = new Exception();
             var model = new Mock<IModel>();
             model.Setup(_ => _.BasicPublish(exchange,
@@ -75,9 +69,11 @@ namespace Carrot.Tests
                                             It.IsAny<Byte[]>()))
                  .Throws(exception);
             
-            var channel = new ReliableOutboundChannel(model.Object, new EnvironmentConfiguration(), null);
+            var channel = new ReliableOutboundChannel(model.Object,
+                                                      new EnvironmentConfiguration(),
+                                                      StubDateTimeProvider().Object,
+                                                      null);
             var result = Assert.IsType<FailurePublishing>(channel.PublishAsync(message,
-                                                                               properties,
                                                                                new Exchange(exchange, "direct"),
                                                                                String.Empty).Result);
             Assert.Equal(result.Exception, exception);
@@ -86,21 +82,16 @@ namespace Carrot.Tests
         [Fact]
         public void ModelShutdown()
         {
-            const String messageId = "one-id";
-
             var message = NewMessage();
-            var properties = message.BuildBasicProperties(StubResolver().Object,
-                                                          StubDateTimeProvider().Object,
-                                                          StubNewId(messageId).Object);
             const UInt64 deliveryTag = 0uL;
             var model = new Mock<IModel>();
             model.Setup(_ => _.NextPublishSeqNo).Returns(deliveryTag);
             var fallbackHandled = false;
             var channel = new OutboundChannelWrapper(model.Object,
                                                      new EnvironmentConfiguration(),
+                                                     StubDateTimeProvider().Object,
                                                      _ => { fallbackHandled = true; });
             var task = channel.PublishAsync(message,
-                                            properties,
                                             new Exchange("target_exchange", "direct"),
                                             String.Empty);
             channel.CallOnModelShutdown(new ShutdownEventArgs(ShutdownInitiator.Application, 3, "boom"));
@@ -238,13 +229,6 @@ namespace Carrot.Tests
             return newId;
         }
 
-        private static Mock<IMessageTypeResolver> StubResolver()
-        {
-            var resolver = new Mock<IMessageTypeResolver>();
-            resolver.Setup(_ => _.Resolve<Foo>()).Returns(new MessageBinding("urn:message:fake", typeof(Foo)));
-            return resolver;
-        }
-
         private static Mock<IDateTimeProvider> StubDateTimeProvider()
         {
             return new Mock<IDateTimeProvider>();
@@ -254,8 +238,9 @@ namespace Carrot.Tests
         {
             internal OutboundChannelWrapper(IModel model,
                                             EnvironmentConfiguration configuration,
+                                            IDateTimeProvider dateTimeProvider,
                                             NotConfirmedMessageHandler notConfirmedMessageHandler)
-                : base(model, configuration, notConfirmedMessageHandler)
+                : base(model, configuration, dateTimeProvider, notConfirmedMessageHandler)
             {
             }
 

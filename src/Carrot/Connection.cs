@@ -13,18 +13,15 @@ namespace Carrot
         private readonly RabbitMQ.Client.IConnection _connection;
         private readonly IEnumerable<ConsumerBase> _consumers;
         private readonly IOutboundChannel _channel;
-        private readonly IDateTimeProvider _dateTimeProvider;
 
         internal Connection(RabbitMQ.Client.IConnection connection,
                             IEnumerable<ConsumerBase> consumers,
                             IOutboundChannel channel,
-                            IDateTimeProvider dateTimeProvider,
                             EnvironmentConfiguration configuration)
         {
             _connection = connection;
             _consumers = consumers;
             _channel = channel;
-            _dateTimeProvider = dateTimeProvider;
             Configuration = configuration;
         }
         
@@ -33,10 +30,7 @@ namespace Carrot
                                                            String routingKey = "")
             where TMessage : class
         {
-            var properties = message.BuildBasicProperties(Configuration.MessageTypeResolver,
-                                                          _dateTimeProvider,
-                                                          Configuration.IdGenerator);
-            return _channel.PublishAsync(message, properties, exchange, routingKey);
+            return _channel.PublishAsync(message, exchange, routingKey);
         }
 
         public void Dispose()

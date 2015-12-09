@@ -146,7 +146,6 @@ namespace Carrot
             return new Connection(connection,
                                   consumers,
                                   channel,
-                                  new DateTimeProvider(),
                                   _configuration);
         }
 

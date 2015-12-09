@@ -10,8 +10,9 @@ namespace Carrot
     {
         internal LoggedReliableOutboundChannel(IModel model,
                                                EnvironmentConfiguration configuration,
+                                               IDateTimeProvider dateTimeProvider,
                                                NotConfirmedMessageHandler notConfirmedMessageHandler) // TODO: check if I can access this by EnvironmentConfiguration
-            : base(model, configuration, notConfirmedMessageHandler)
+            : base(model, configuration, dateTimeProvider, notConfirmedMessageHandler)
         {
         }
 

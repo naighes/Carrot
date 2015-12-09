@@ -10,24 +10,27 @@ namespace Carrot
     public class OutboundChannel : IOutboundChannel
     {
         protected readonly IModel Model;
-
         protected readonly EnvironmentConfiguration Configuration;
+        protected readonly IDateTimeProvider DateTimeProvider;
 
-        internal OutboundChannel(IModel model, EnvironmentConfiguration configuration)
+        internal OutboundChannel(IModel model,
+                                 EnvironmentConfiguration configuration,
+                                 IDateTimeProvider dateTimeProvider)
         {
             Model = model;
             Configuration = configuration;
+            DateTimeProvider = dateTimeProvider;
             Model.ModelShutdown += OnModelShutdown;
         }
 
         public static Func<IModel, EnvironmentConfiguration, IOutboundChannel> Default()
         {
-            return (m, c) => new LoggedOutboundChannel(m, c);
+            return (m, c) => new LoggedOutboundChannel(m, c, new DateTimeProvider());
         }
 
         public static Func<IModel, EnvironmentConfiguration, IOutboundChannel> Reliable(NotConfirmedMessageHandler handler = null)
         {
-            return (m, c) => new LoggedReliableOutboundChannel(m, c, handler ?? (_ => { }));
+            return (m, c) => new LoggedReliableOutboundChannel(m, c, new DateTimeProvider(), handler ?? (_ => { }));
         }
 
         public void Dispose()
@@ -41,11 +44,13 @@ namespace Carrot
         }
 
         public virtual Task<IPublishResult> PublishAsync<TMessage>(OutboundMessage<TMessage> source,
-                                                                   IBasicProperties properties,
                                                                    Exchange exchange,
                                                                    String routingKey)
             where TMessage : class
         {
+            var properties = source.BuildBasicProperties(Configuration.MessageTypeResolver,
+                                                         DateTimeProvider,
+                                                         Configuration.IdGenerator);
             var body = properties.CreateEncoding()
                                  .GetBytes(properties.CreateSerializer(Configuration.SerializationConfiguration)
                                                      .Serialize(source.Content));

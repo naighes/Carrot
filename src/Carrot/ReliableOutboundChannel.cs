@@ -19,8 +19,9 @@ namespace Carrot
 
         internal ReliableOutboundChannel(IModel model,
                                          EnvironmentConfiguration configuration,
+                                         IDateTimeProvider dateTimeProvider,
                                          NotConfirmedMessageHandler notConfirmedMessageHandler)
-            : base(model, configuration)
+            : base(model, configuration, dateTimeProvider)
         {
             _notConfirmedMessageHandler = notConfirmedMessageHandler;
             model.ConfirmSelect(); // TODO: not here! it issues a RPC call.
@@ -29,10 +30,12 @@ namespace Carrot
         }
 
         public override Task<IPublishResult> PublishAsync<TMessage>(OutboundMessage<TMessage> source,
-                                                                    IBasicProperties properties,
                                                                     Exchange exchange,
                                                                     String routingKey)
         {
+            var properties = source.BuildBasicProperties(Configuration.MessageTypeResolver,
+                                                         DateTimeProvider,
+                                                         Configuration.IdGenerator);
             var body = properties.CreateEncoding()
                                  .GetBytes(properties.CreateSerializer(Configuration.SerializationConfiguration)
                                                      .Serialize(source.Content));

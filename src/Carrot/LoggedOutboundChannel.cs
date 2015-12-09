@@ -7,8 +7,10 @@ namespace Carrot
 {
     internal class LoggedOutboundChannel : OutboundChannel
     {
-        public LoggedOutboundChannel(IModel model, EnvironmentConfiguration configuration)
-            : base(model, configuration)
+        public LoggedOutboundChannel(IModel model,
+                                     EnvironmentConfiguration configuration,
+                                     IDateTimeProvider dateTimeProvider)
+            : base(model, configuration, dateTimeProvider)
         {
         }
 
