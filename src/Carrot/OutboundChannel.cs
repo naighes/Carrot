@@ -11,9 +11,12 @@ namespace Carrot
     {
         protected readonly IModel Model;
 
-        internal OutboundChannel(IModel model)
+        protected readonly EnvironmentConfiguration Configuration;
+
+        internal OutboundChannel(IModel model, EnvironmentConfiguration configuration)
         {
             Model = model;
+            Configuration = configuration;
             Model.ModelShutdown += OnModelShutdown;
         }
 
@@ -24,7 +27,7 @@ namespace Carrot
 
         public static Func<IModel, EnvironmentConfiguration, IOutboundChannel> Reliable(NotConfirmedMessageHandler handler = null)
         {
-            return (m, c) => new LoggedReliableOutboundChannel(m, handler ?? (_ => { }), c);
+            return (m, c) => new LoggedReliableOutboundChannel(m, c, handler ?? (_ => { }));
         }
 
         public void Dispose()
@@ -39,11 +42,13 @@ namespace Carrot
 
         public virtual Task<IPublishResult> PublishAsync<TMessage>(OutboundMessage<TMessage> source,
                                                                    IBasicProperties properties,
-                                                                   Byte[] body,
                                                                    Exchange exchange,
                                                                    String routingKey)
             where TMessage : class
         {
+            var body = properties.CreateEncoding()
+                                 .GetBytes(properties.CreateSerializer(Configuration.SerializationConfiguration)
+                                                     .Serialize(source.Content));
             var message = source.BuildEnvelope(Model,
                                                properties,
                                                body,

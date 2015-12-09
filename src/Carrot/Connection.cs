@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Carrot.Configuration;
-using Carrot.Extensions;
 using Carrot.Messages;
 
 namespace Carrot
@@ -37,10 +36,7 @@ namespace Carrot
             var properties = message.BuildBasicProperties(Configuration.MessageTypeResolver,
                                                           _dateTimeProvider,
                                                           Configuration.IdGenerator);
-            var body = properties.CreateEncoding()
-                                 .GetBytes(properties.CreateSerializer(Configuration.SerializationConfiguration)
-                                                     .Serialize(message.Content));
-            return _channel.PublishAsync(message, properties, body, exchange, routingKey);
+            return _channel.PublishAsync(message, properties, exchange, routingKey);
         }
 
         public void Dispose()

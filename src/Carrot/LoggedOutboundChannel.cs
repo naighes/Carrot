@@ -7,12 +7,9 @@ namespace Carrot
 {
     internal class LoggedOutboundChannel : OutboundChannel
     {
-        private readonly EnvironmentConfiguration _configuration;
-
         public LoggedOutboundChannel(IModel model, EnvironmentConfiguration configuration)
-            : base(model)
+            : base(model, configuration)
         {
-            _configuration = configuration;
         }
 
         protected override void OnModelShutdown(Object sender, ShutdownEventArgs args)
@@ -24,7 +21,7 @@ namespace Carrot
 
         private ILog Log()
         {
-            return _configuration.Log;
+            return Configuration.Log;
         }
     }
 }

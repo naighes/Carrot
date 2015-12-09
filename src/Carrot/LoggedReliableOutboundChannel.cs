@@ -8,14 +8,11 @@ namespace Carrot
 {
     internal class LoggedReliableOutboundChannel : ReliableOutboundChannel
     {
-        private readonly EnvironmentConfiguration _configuration;
-
         internal LoggedReliableOutboundChannel(IModel model,
-                                               NotConfirmedMessageHandler notConfirmedMessageHandler,
-                                               EnvironmentConfiguration configuration)
-            : base(model, notConfirmedMessageHandler)
+                                               EnvironmentConfiguration configuration,
+                                               NotConfirmedMessageHandler notConfirmedMessageHandler) // TODO: check if I can access this by EnvironmentConfiguration
+            : base(model, configuration, notConfirmedMessageHandler)
         {
-            _configuration = configuration;
         }
 
         protected override void OnModelBasicAcks(Object sender, BasicAckEventArgs args)
@@ -41,7 +38,7 @@ namespace Carrot
 
         private ILog Log()
         {
-            return _configuration.Log;
+            return Configuration.Log;
         }
     }
 }

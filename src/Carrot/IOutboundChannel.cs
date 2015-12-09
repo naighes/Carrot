@@ -9,7 +9,6 @@ namespace Carrot
     {
         Task<IPublishResult> PublishAsync<TMessage>(OutboundMessage<TMessage> source,
                                                     IBasicProperties properties,
-                                                    Byte[] body,
                                                     Exchange exchange,
                                                     String routingKey)
             where TMessage : class;

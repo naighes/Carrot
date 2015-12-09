@@ -2,6 +2,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Linq;
 using System.Threading.Tasks;
+using Carrot.Configuration;
 using Carrot.Extensions;
 using Carrot.Messages;
 using RabbitMQ.Client;
@@ -16,8 +17,10 @@ namespace Carrot
 
         private readonly NotConfirmedMessageHandler _notConfirmedMessageHandler;
 
-        internal ReliableOutboundChannel(IModel model, NotConfirmedMessageHandler notConfirmedMessageHandler)
-            : base(model)
+        internal ReliableOutboundChannel(IModel model,
+                                         EnvironmentConfiguration configuration,
+                                         NotConfirmedMessageHandler notConfirmedMessageHandler)
+            : base(model, configuration)
         {
             _notConfirmedMessageHandler = notConfirmedMessageHandler;
             model.ConfirmSelect(); // TODO: not here! it issues a RPC call.
@@ -27,10 +30,12 @@ namespace Carrot
 
         public override Task<IPublishResult> PublishAsync<TMessage>(OutboundMessage<TMessage> source,
                                                                     IBasicProperties properties,
-                                                                    Byte[] body,
                                                                     Exchange exchange,
                                                                     String routingKey)
         {
+            var body = properties.CreateEncoding()
+                                 .GetBytes(properties.CreateSerializer(Configuration.SerializationConfiguration)
+                                                     .Serialize(source.Content));
             var message = source.BuildEnvelope(Model,
                                                properties,
                                                body,
