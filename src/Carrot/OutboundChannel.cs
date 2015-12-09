@@ -54,21 +54,16 @@ namespace Carrot
             var body = properties.CreateEncoding()
                                  .GetBytes(properties.CreateSerializer(Configuration.SerializationConfiguration)
                                                      .Serialize(source.Content));
-            var message = source.BuildEnvelope(Model,
-                                               properties,
-                                               body,
-                                               exchange,
-                                               routingKey);
-            var tcs = BuildTaskCompletionSource(message);
+            var tcs = BuildTaskCompletionSource(properties);
 
             try
             {
-                Model.BasicPublish(message.Exchange.Name,
-                                   message.RoutingKey,
+                Model.BasicPublish(exchange.Name,
+                                   routingKey,
                                    false,
                                    false,
-                                   message.Properties,
-                                   message.Body);
+                                   properties,
+                                   body);
                 tcs.TrySetResult(true);
             }
             catch (Exception exception) { tcs.TrySetException(exception); }
@@ -84,10 +79,9 @@ namespace Carrot
             return SuccessfulPublishing.FromBasicProperties(task.AsyncState as IBasicProperties);
         }
 
-        protected TaskCompletionSource<Boolean> BuildTaskCompletionSource<TMessage>(OutboundMessageEnvelope<TMessage> message)
-            where TMessage : class
+        protected TaskCompletionSource<Boolean> BuildTaskCompletionSource(IBasicProperties properties)
         {
-            return new TaskCompletionSource<Boolean>(message.Properties);
+            return new TaskCompletionSource<Boolean>(properties);
         }
 
         protected virtual void OnModelShutdown(Object sender, ShutdownEventArgs args) { }

@@ -39,27 +39,23 @@ namespace Carrot
             var body = properties.CreateEncoding()
                                  .GetBytes(properties.CreateSerializer(Configuration.SerializationConfiguration)
                                                      .Serialize(source.Content));
-            var message = source.BuildEnvelope(Model,
-                                               properties,
-                                               body,
-                                               exchange,
-                                               routingKey);
-            var tcs = BuildTaskCompletionSource(message);
-            _confirms.TryAdd(message.Tag, new Tuple<TaskCompletionSource<Boolean>, IMessage>(tcs, message.Source));
+            var tag = Model.NextPublishSeqNo;
+            var tcs = BuildTaskCompletionSource(properties);
+            _confirms.TryAdd(tag, new Tuple<TaskCompletionSource<Boolean>, IMessage>(tcs, source));
 
             try
             {
-                Model.BasicPublish(message.Exchange.Name,
-                                   message.RoutingKey,
+                Model.BasicPublish(exchange.Name,
+                                   routingKey,
                                    false,
                                    false,
-                                   message.Properties,
-                                   message.Body);
+                                   properties,
+                                   body);
             }
             catch (Exception exception)
             {
                 Tuple<TaskCompletionSource<Boolean>, IMessage> tuple;
-                _confirms.TryRemove(message.Tag, out tuple);
+                _confirms.TryRemove(tag, out tuple);
                 tcs.TrySetException(exception);
             }
 
