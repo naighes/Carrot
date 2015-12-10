@@ -1,4 +1,5 @@
 using System;
+using Carrot.Extensions;
 using Carrot.Messages;
 using RabbitMQ.Client;
 
@@ -27,7 +28,14 @@ namespace Carrot.Fallback
 
         public void Apply(IModel model, ConsumedMessageBase message)
         {
-            message.PersistentForwardTo(model, _exchange, String.Empty, true, false);
+            var properties = message.Args.BasicProperties.Copy();
+            properties.Persistent = true;
+            model.BasicPublish(_exchange.Name,
+                               String.Empty,
+                               true,
+                               false,
+                               properties,
+                               message.Args.Body);
         }
     }
 }

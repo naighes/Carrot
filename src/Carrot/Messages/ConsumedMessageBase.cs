@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Carrot.Extensions;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 
@@ -9,7 +8,7 @@ namespace Carrot.Messages
 {
     public abstract class ConsumedMessageBase
     {
-        protected readonly BasicDeliverEventArgs Args;
+        internal readonly BasicDeliverEventArgs Args;
 
         protected internal ConsumedMessageBase(BasicDeliverEventArgs args)
         {
@@ -42,41 +41,6 @@ namespace Carrot.Messages
         internal void Requeue(IModel model)
         {
             model.BasicNack(Args.DeliveryTag, false, true);
-        }
-
-        internal void PersistentForwardTo(IModel model,
-                                          Exchange exchange,
-                                          String routingKey = "",
-                                          Boolean mandatory = false,
-                                          Boolean immediate = false)
-        {
-            InternalForwardTo(model, exchange, routingKey, mandatory, immediate, true);
-        }
-
-        internal void ForwardTo(IModel model,
-                                Exchange exchange,
-                                String routingKey = "",
-                                Boolean mandatory = false,
-                                Boolean immediate = false)
-        {
-            InternalForwardTo(model, exchange, routingKey, mandatory, immediate, false);
-        }
-
-        internal void InternalForwardTo(IModel model,
-                                        Exchange exchange,
-                                        String routingKey = "",
-                                        Boolean mandatory = false,
-                                        Boolean immediate = false,
-                                        Boolean persistent = false)
-        {
-            var properties = Args.BasicProperties.Copy();
-            properties.Persistent = persistent;
-            model.BasicPublish(exchange.Name,
-                               routingKey,
-                               mandatory,
-                               immediate,
-                               properties,
-                               Args.Body);
         }
     }
 }
