@@ -3,7 +3,6 @@ using System.Collections.Concurrent;
 using System.Linq;
 using System.Threading.Tasks;
 using Carrot.Configuration;
-using Carrot.Extensions;
 using Carrot.Messages;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
@@ -33,12 +32,8 @@ namespace Carrot
                                                                     Exchange exchange,
                                                                     String routingKey)
         {
-            var properties = source.BuildBasicProperties(Configuration.MessageTypeResolver,
-                                                         DateTimeProvider,
-                                                         Configuration.IdGenerator);
-            var body = properties.CreateEncoding()
-                                 .GetBytes(properties.CreateSerializer(Configuration.SerializationConfiguration)
-                                                     .Serialize(source.Content));
+            var properties = BuildBasicProperties(source);
+            var body = BuildBody(source, properties);
             var tag = Model.NextPublishSeqNo;
             var tcs = BuildTaskCompletionSource(properties);
             _confirms.TryAdd(tag, new Tuple<TaskCompletionSource<Boolean>, IMessage>(tcs, source));

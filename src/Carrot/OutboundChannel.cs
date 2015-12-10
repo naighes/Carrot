@@ -48,12 +48,8 @@ namespace Carrot
                                                                    String routingKey)
             where TMessage : class
         {
-            var properties = source.BuildBasicProperties(Configuration.MessageTypeResolver,
-                                                         DateTimeProvider,
-                                                         Configuration.IdGenerator);
-            var body = properties.CreateEncoding()
-                                 .GetBytes(properties.CreateSerializer(Configuration.SerializationConfiguration)
-                                                     .Serialize(source.Content));
+            var properties = BuildBasicProperties(source);
+            var body = BuildBody(source, properties);
             var tcs = BuildTaskCompletionSource(properties);
 
             try
@@ -77,6 +73,22 @@ namespace Carrot
                 return new FailurePublishing(task.Exception.GetBaseException());
 
             return SuccessfulPublishing.FromBasicProperties(task.AsyncState as IBasicProperties);
+        }
+
+        protected IBasicProperties BuildBasicProperties<TMessage>(OutboundMessage<TMessage> source)
+            where TMessage : class
+        {
+            return source.BuildBasicProperties(Configuration.MessageTypeResolver,
+                                               DateTimeProvider,
+                                               Configuration.IdGenerator);
+        }
+
+        protected Byte[] BuildBody<TMessage>(OutboundMessage<TMessage> source, IBasicProperties properties)
+            where TMessage : class
+        {
+            return properties.CreateEncoding()
+                             .GetBytes(properties.CreateSerializer(Configuration.SerializationConfiguration)
+                             .Serialize(source.Content));
         }
 
         protected TaskCompletionSource<Boolean> BuildTaskCompletionSource(IBasicProperties properties)
