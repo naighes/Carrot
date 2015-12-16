@@ -1,5 +1,4 @@
 using Carrot.Messages;
-using RabbitMQ.Client;
 
 namespace Carrot.Fallback
 {
@@ -9,6 +8,6 @@ namespace Carrot.Fallback
 
         private NoFallbackStrategy() { }
 
-        public void Apply(IModel model, ConsumedMessageBase message) { }
+        public void Apply(IOutboundChannel channel, ConsumedMessageBase message) { }
     }
 }

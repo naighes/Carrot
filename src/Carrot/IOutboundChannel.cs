@@ -10,5 +10,9 @@ namespace Carrot
                                                     Exchange exchange,
                                                     String routingKey)
             where TMessage : class;
+
+        Task<IPublishResult> ForwardAsync(ConsumedMessageBase message,
+                                          Exchange exchange,
+                                          String routingKey);
     }
 }

@@ -5,7 +5,6 @@ using Carrot.Configuration;
 using Carrot.Fallback;
 using Carrot.Messages;
 using Moq;
-using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using RabbitMQ.Client.Framing;
 using Xunit;
@@ -24,23 +23,28 @@ namespace Carrot.Tests
         [Fact]
         public void OnSuccess()
         {
-            var model = new Mock<IModel>();
+            var inboundChannel = new Mock<IInboundChannel>();
             var args = FakeBasicDeliverEventArgs();
             var message = new FakeConsumedMessage(new Object(), args);
             var strategy = new Mock<IFallbackStrategy>();
             _configuration.FallbackBy((c, q) => strategy.Object);
             var builder = new Mock<IConsumedMessageBuilder>();
             builder.Setup(_ => _.Build(args)).Returns(message);
-            var consumer = new AtLeastOnceConsumer(model.Object, default(Queue), builder.Object, _configuration);
+            var outboundChannel = new Mock<IOutboundChannel>().Object;
+            var consumer = new AtLeastOnceConsumer(inboundChannel.Object,
+                                                   outboundChannel,
+                                                   default(Queue),
+                                                   builder.Object,
+                                                   _configuration);
             var result = consumer.ConsumeAsync(args).Result;
             Assert.IsType<Success>(result);
-            strategy.Verify(_ => _.Apply(model.Object, message), Times.Never);
+            strategy.Verify(_ => _.Apply(outboundChannel, message), Times.Never);
         }
 
         [Fact]
         public void OnError()
         {
-            var model = new Mock<IModel>();
+            var inboundChannel = new Mock<IInboundChannel>();
             var strategy = new Mock<IFallbackStrategy>();
             var args = FakeBasicDeliverEventArgs();
             var message = new FakeConsumedMessage(new Object(), args);
@@ -48,16 +52,21 @@ namespace Carrot.Tests
             _configuration.Consumes(new FakeConsumer(consumedMessage => { throw new Exception(); }));
             var builder = new Mock<IConsumedMessageBuilder>();
             builder.Setup(_ => _.Build(args)).Returns(message);
-            var consumer = new AtLeastOnceConsumer(model.Object, default(Queue), builder.Object, _configuration);
+            var outboundChannel = new Mock<IOutboundChannel>().Object;
+            var consumer = new AtLeastOnceConsumer(inboundChannel.Object,
+                                                   outboundChannel,
+                                                   default(Queue),
+                                                   builder.Object,
+                                                   _configuration);
             var result = consumer.ConsumeAsync(args).Result;
             Assert.IsType<ConsumingFailure>(result);
-            strategy.Verify(_ => _.Apply(model.Object, message), Times.Never);
+            strategy.Verify(_ => _.Apply(outboundChannel, message), Times.Never);
         }
 
         [Fact]
         public void OnReiteratedError()
         {
-            var model = new Mock<IModel>();
+            var inboundChannel = new Mock<IInboundChannel>();
             var strategy = new Mock<IFallbackStrategy>();
             var args = FakeBasicDeliverEventArgs();
             args.Redelivered = true;
@@ -66,10 +75,15 @@ namespace Carrot.Tests
             _configuration.Consumes(new FakeConsumer(consumedMessage => { throw new Exception(); }));
             var builder = new Mock<IConsumedMessageBuilder>();
             builder.Setup(_ => _.Build(args)).Returns(message);
-            var consumer = new AtLeastOnceConsumerWrapper(model.Object, default(Queue), builder.Object, _configuration);
+            var outboundChannel = new Mock<IOutboundChannel>().Object;
+            var consumer = new AtLeastOnceConsumerWrapper(inboundChannel.Object,
+                                                          outboundChannel,
+                                                          default(Queue),
+                                                          builder.Object,
+                                                          _configuration);
             var result = consumer.CallConsumeInternalAsync(args).Result;
             Assert.IsType<ReiteratedConsumingFailure>(result);
-            strategy.Verify(_ => _.Apply(model.Object, message), Times.Once);
+            strategy.Verify(_ => _.Apply(outboundChannel, message), Times.Once);
         }
 
         [Fact]
@@ -85,15 +99,12 @@ namespace Carrot.Tests
             var strategy = DeadLetterStrategy.New(broker.Object,
                                                   queue,
                                                   _ => $"{_}-DeadLetter");
-            var model = new Mock<IModel>();
-            strategy.Apply(model.Object, message);
-            model.Verify(_ => _.BasicPublish(dleName,
-                                             String.Empty,
-                                             true,
-                                             false,
-                                             It.Is<IBasicProperties>(__ => __.Persistent == true),
-                                             args.Body),
-                         Times.Once);
+            var outboundChannel = new Mock<IOutboundChannel>();
+            strategy.Apply(outboundChannel.Object, message);
+            outboundChannel.Verify(_ => _.ForwardAsync(message,
+                                                       It.Is<Exchange>(__ => __.Name == dleName),
+                                                       String.Empty),
+                                   Times.Once);
         }
 
         private static BasicDeliverEventArgs FakeBasicDeliverEventArgs()
@@ -109,11 +120,12 @@ namespace Carrot.Tests
 
         internal class AtLeastOnceConsumerWrapper : AtLeastOnceConsumer
         {
-            public AtLeastOnceConsumerWrapper(IModel model,
+            public AtLeastOnceConsumerWrapper(IInboundChannel inboundChannel,
+                                              IOutboundChannel outboundChannel,
                                               Queue queue,
                                               IConsumedMessageBuilder builder,
                                               ConsumingConfiguration configuration)
-                : base(model, queue, builder, configuration)
+                : base(inboundChannel, outboundChannel, queue, builder, configuration)
             {
             }
 

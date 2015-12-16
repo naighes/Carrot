@@ -10,23 +10,24 @@ namespace Carrot
     public abstract class ConsumerBase : DefaultBasicConsumer, IDisposable
     {
         protected readonly ConsumingConfiguration Configuration;
+        protected readonly IInboundChannel InboundChannel;
+        protected readonly IOutboundChannel OutboundChannel;
 
         private readonly Queue _queue;
         private readonly IConsumedMessageBuilder _builder;
 
-        protected internal ConsumerBase(IModel model,
+        protected internal ConsumerBase(IInboundChannel inboundChannel,
+                                        IOutboundChannel outboundChannel,
                                         Queue queue,
                                         IConsumedMessageBuilder builder,
                                         ConsumingConfiguration configuration)
-            : base(model)
         {
+            InboundChannel = inboundChannel;
+            OutboundChannel = outboundChannel;
             _queue = queue;
             _builder = builder;
             Configuration = configuration;
 
-            Model.BasicAcks += OnModelBasicAcks;
-            Model.BasicNacks += OnModelBasicNacks;
-            Model.BasicReturn += OnModelBasicReturn;
             ConsumerCancelled += OnConsumerCancelled;
         }
 
@@ -62,15 +63,13 @@ namespace Carrot
 
         public void Dispose()
         {
-            if (Model == null)
+            // TODO: if we've one channel for every consumer dispose will be called multiple times!
+            if (InboundChannel == null)
                 return;
 
-            Model.BasicAcks -= OnModelBasicAcks;
-            Model.BasicNacks -= OnModelBasicNacks;
-            Model.BasicReturn -= OnModelBasicReturn;
             ConsumerCancelled -= OnConsumerCancelled;
 
-            Model.Dispose();
+            InboundChannel.Dispose();
         }
 
         internal void Declare(IModel model)
@@ -84,12 +83,6 @@ namespace Carrot
         }
 
         protected abstract Task<AggregateConsumingResult> ConsumeInternalAsync(BasicDeliverEventArgs args);
-
-        protected virtual void OnModelBasicReturn(Object sender, BasicReturnEventArgs args) { }
-
-        protected virtual void OnModelBasicNacks(Object sender, BasicNackEventArgs args) { }
-
-        protected virtual void OnModelBasicAcks(Object sender, BasicAckEventArgs args) { }
 
         protected virtual void OnConsumerCancelled(Object sender, ConsumerEventArgs args) { }
     }

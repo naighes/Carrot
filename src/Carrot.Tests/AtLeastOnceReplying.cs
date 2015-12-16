@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using Carrot.Configuration;
 using Carrot.Messages;
 using Moq;
-using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using RabbitMQ.Client.Framing;
 using Xunit;
@@ -24,65 +23,65 @@ namespace Carrot.Tests
         public void ReplyOnSuccess()
         {
             const Int64 deliveryTag = 1234L;
-            var model = BuildModel(deliveryTag,
+            var model = BuildInboundChannel(deliveryTag,
                                    _ => new Success(_),
                                    _configuration);
-            model.Verify(_ => _.BasicAck(deliveryTag, false));
+            model.Verify(_ => _.Acknowledge(deliveryTag));
         }
 
         [Fact]
         public void ReplyOnConsumingFailure()
         {
             const Int64 deliveryTag = 1234L;
-            var model = BuildModel(deliveryTag,
+            var model = BuildInboundChannel(deliveryTag,
                                    _ => new ConsumingFailure(_),
                                    _configuration);
-            model.Verify(_ => _.BasicNack(deliveryTag, false, true));
+            model.Verify(_ => _.NegativeAcknowledge(deliveryTag, true));
         }
 
         [Fact]
         public void ReplyOnReiteratedConsumingFailure()
         {
             const Int64 deliveryTag = 1234L;
-            var model = BuildModel(deliveryTag,
+            var model = BuildInboundChannel(deliveryTag,
                                    _ => new ReiteratedConsumingFailure(_),
                                    _configuration);
-            model.Verify(_ => _.BasicAck(deliveryTag, false));
+            model.Verify(_ => _.Acknowledge(deliveryTag));
         }
 
         [Fact]
         public void ReplyOnCorruptedMessageConsumingFailure()
         {
             const Int64 deliveryTag = 1234L;
-            var model = BuildModel(deliveryTag,
+            var model = BuildInboundChannel(deliveryTag,
                                    _ => new CorruptedMessageConsumingFailure(_),
                                    _configuration);
-            model.Verify(_ => _.BasicAck(deliveryTag, false));
+            model.Verify(_ => _.Acknowledge(deliveryTag));
         }
 
         [Fact]
         public void ReplyOnUnresolvedMessageConsumingFailure()
         {
             const Int64 deliveryTag = 1234L;
-            var model = BuildModel(deliveryTag,
+            var model = BuildInboundChannel(deliveryTag,
                                    _ => new UnresolvedMessageConsumingFailure(_),
                                    _configuration);
-            model.Verify(_ => _.BasicAck(deliveryTag, false));
+            model.Verify(_ => _.Acknowledge(deliveryTag));
         }
 
         [Fact]
         public void ReplyOnUnsupportedMessageConsumingFailure()
         {
             const Int64 deliveryTag = 1234L;
-            var model = BuildModel(deliveryTag,
+            var model = BuildInboundChannel(deliveryTag,
                                    _ => new UnsupportedMessageConsumingFailure(_),
                                    _configuration);
-            model.Verify(_ => _.BasicAck(deliveryTag, false));
+            model.Verify(_ => _.Acknowledge(deliveryTag));
         }
 
-        private static Mock<IModel> BuildModel(UInt64 deliveryTag,
-                                               Func<ConsumedMessageBase, AggregateConsumingResult> func,
-                                               ConsumingConfiguration configuration)
+        private static Mock<IInboundChannel> BuildInboundChannel(UInt64 deliveryTag,
+                                                        Func<ConsumedMessageBase, AggregateConsumingResult> func,
+                                                        ConsumingConfiguration configuration)
         {
             var args = new BasicDeliverEventArgs
                            {
@@ -92,10 +91,14 @@ namespace Carrot.Tests
             var builder = new Mock<IConsumedMessageBuilder>();
             var message = new FakeConsumedMessage(args, func);
             builder.Setup(_ => _.Build(args)).Returns(message);
-            var model = new Mock<IModel>();
-            var consumer = new AtLeastOnceConsumerWrapper(model.Object, default(Queue), builder.Object, configuration);
+            var channel = new Mock<IInboundChannel>();
+            var consumer = new AtLeastOnceConsumerWrapper(channel.Object,
+                                                          new Mock<IOutboundChannel>().Object,
+                                                          default(Queue),
+                                                          builder.Object,
+                                                          configuration);
             consumer.CallConsumeInternal(args).Wait();
-            return model;
+            return channel;
         }
 
         internal class FakeConsumedMessage : ConsumedMessageBase
@@ -127,11 +130,12 @@ namespace Carrot.Tests
 
         internal class AtLeastOnceConsumerWrapper : AtLeastOnceConsumer
         {
-            internal AtLeastOnceConsumerWrapper(IModel model,
+            internal AtLeastOnceConsumerWrapper(IInboundChannel inboundChannel,
+                                                IOutboundChannel outboundChannel,
                                                 Queue queue,
                                                 IConsumedMessageBuilder builder,
                                                 ConsumingConfiguration configuration)
-                : base(model, queue, builder, configuration)
+                : base(inboundChannel, outboundChannel, queue, builder, configuration)
             {
             }
 

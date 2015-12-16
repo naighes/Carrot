@@ -15,10 +15,18 @@ namespace Carrot.Tests
         [Fact]
         public void OnConnectionDisposed()
         {
-            var consumerModel1 = new Mock<IModel>();
-            var consumer1 = new FakeConsumerBase(consumerModel1.Object, default(Queue), null, null);
-            var consumerModel2 = new Mock<IModel>();
-            var consumer2 = new FakeConsumerBase(consumerModel2.Object, default(Queue), null, null);
+            var consumerChannel1 = new Mock<IInboundChannel>();
+            var consumer1 = new FakeConsumerBase(consumerChannel1.Object,
+                                                 new Mock<IOutboundChannel>().Object,
+                                                 default(Queue),
+                                                 null,
+                                                 null);
+            var consumerChannel2 = new Mock<IInboundChannel>();
+            var consumer2 = new FakeConsumerBase(consumerChannel2.Object,
+                                                 new Mock<IOutboundChannel>().Object,
+                                                 default(Queue),
+                                                 null,
+                                                 null);
             var outboundModel = new Mock<IModel>();
             var connection = new Mock<RabbitMQ.Client.IConnection>();
             var amqpConnection = new Connection(connection.Object,
@@ -29,17 +37,18 @@ namespace Carrot.Tests
 
             connection.Verify(_ => _.Dispose(), Times.Once);
             outboundModel.Verify(_ => _.Dispose(), Times.Once);
-            consumerModel1.Verify(_ => _.Dispose(), Times.Once);
-            consumerModel2.Verify(_ => _.Dispose(), Times.Once);
+            consumerChannel1.Verify(_ => _.Dispose(), Times.Once);
+            consumerChannel2.Verify(_ => _.Dispose(), Times.Once);
         }
 
         internal class FakeConsumerBase : ConsumerBase
         {
-            public FakeConsumerBase(IModel model,
+            public FakeConsumerBase(IInboundChannel inboundChannel,
+                                    IOutboundChannel outboundChannel,
                                     Queue queue,
                                     IConsumedMessageBuilder builder,
                                     ConsumingConfiguration configuration)
-                : base(model, queue, builder, configuration)
+                : base(inboundChannel, outboundChannel, queue, builder, configuration)
             {
             }
 

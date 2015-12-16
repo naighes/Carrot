@@ -48,9 +48,11 @@ namespace Carrot.Messages
             Message = message;
         }
 
-        internal virtual AggregateConsumingResult Reply(IModel model, IFallbackStrategy fallbackStrategy)
+        internal virtual AggregateConsumingResult Reply(IInboundChannel inboundChannel,
+                                                        IOutboundChannel outboundChannel,
+                                                        IFallbackStrategy fallbackStrategy)
         {
-            Message.Acknowledge(new InboundChannel(model));
+            Message.Acknowledge(inboundChannel);
             return this;
         }
     }
@@ -93,10 +95,12 @@ namespace Carrot.Messages
         {
         }
 
-        internal override AggregateConsumingResult Reply(IModel model, IFallbackStrategy fallbackStrategy)
+        internal override AggregateConsumingResult Reply(IInboundChannel inboundChannel,
+                                                         IOutboundChannel outboundChannel,
+                                                         IFallbackStrategy fallbackStrategy)
         {
-            fallbackStrategy.Apply(model, Message);
-            return base.Reply(model, fallbackStrategy);
+            fallbackStrategy.Apply(outboundChannel, Message);
+            return base.Reply(inboundChannel, outboundChannel, fallbackStrategy);
         }
     }
 
@@ -107,9 +111,11 @@ namespace Carrot.Messages
         {
         }
 
-        internal override AggregateConsumingResult Reply(IModel model, IFallbackStrategy fallbackStrategy)
+        internal override AggregateConsumingResult Reply(IInboundChannel inboundChannel,
+                                                         IOutboundChannel outboundChannel,
+                                                         IFallbackStrategy fallbackStrategy)
         {
-            Message.Requeue(model);
+            Message.Requeue(inboundChannel);
             return this;
         }
     }

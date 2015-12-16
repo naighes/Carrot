@@ -3,7 +3,6 @@ using System.Threading.Tasks;
 using Carrot.Configuration;
 using Carrot.Messages;
 using Moq;
-using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using RabbitMQ.Client.Framing;
 using Xunit;
@@ -23,10 +22,14 @@ namespace Carrot.Tests
         public void AcknowledgeThrows()
         {
             const Int64 deliveryTag = 1234L;
-            var model = new Mock<IModel>();
-            model.Setup(_ => _.BasicAck(deliveryTag, false)).Throws(new Exception());
+            var inboundChannel = new Mock<IInboundChannel>();
+            inboundChannel.Setup(_ => _.Acknowledge(deliveryTag)).Throws(new Exception());
             var builder = new Mock<IConsumedMessageBuilder>();
-            var consumer = new AtMostOnceConsumerWrapper(model.Object, default(Queue), builder.Object, _configuration);
+            var consumer = new AtMostOnceConsumerWrapper(inboundChannel.Object,
+                                                         new Mock<IOutboundChannel>().Object,
+                                                         default(Queue),
+                                                         builder.Object,
+                                                         _configuration);
             var args = new BasicDeliverEventArgs
                            {
                                DeliveryTag = deliveryTag,
@@ -38,11 +41,12 @@ namespace Carrot.Tests
 
         internal class AtMostOnceConsumerWrapper : AtMostOnceConsumer
         {
-            internal AtMostOnceConsumerWrapper(IModel model,
+            internal AtMostOnceConsumerWrapper(IInboundChannel inboundChannel,
+                                               IOutboundChannel outboundChannel,
                                                Queue queue,
                                                IConsumedMessageBuilder builder,
                                                ConsumingConfiguration configuration)
-                : base(model, queue, builder, configuration)
+                : base(inboundChannel, outboundChannel, queue, builder, configuration)
             {
             }
 

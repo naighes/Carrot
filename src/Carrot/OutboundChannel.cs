@@ -43,6 +43,15 @@ namespace Carrot
             Model.Dispose();
         }
 
+        public virtual Task<IPublishResult> ForwardAsync(ConsumedMessageBase message,
+                                                         Exchange exchange,
+                                                         String routingKey)
+        {
+            var properties = message.Args.BasicProperties.Copy();
+            var body = message.Args.Body;
+            return PublishInternalAsync(exchange, routingKey, properties, body);
+        }
+
         public virtual Task<IPublishResult> PublishAsync<TMessage>(OutboundMessage<TMessage> source,
                                                                    Exchange exchange,
                                                                    String routingKey)
@@ -50,21 +59,7 @@ namespace Carrot
         {
             var properties = BuildBasicProperties(source);
             var body = BuildBody(source, properties);
-            var tcs = BuildTaskCompletionSource(properties);
-
-            try
-            {
-                Model.BasicPublish(exchange.Name,
-                                   routingKey,
-                                   false,
-                                   false,
-                                   properties,
-                                   body);
-                tcs.TrySetResult(true);
-            }
-            catch (Exception exception) { tcs.TrySetException(exception); }
-
-            return tcs.Task.ContinueWith(Result);
+            return PublishInternalAsync(exchange, routingKey, properties, body);
         }
 
         protected static IPublishResult Result(Task task)
@@ -98,5 +93,22 @@ namespace Carrot
         protected virtual void OnModelShutdown(Object sender, ShutdownEventArgs args) { }
 
         protected virtual void OnModelDisposing() { }
+
+        private Task<IPublishResult> PublishInternalAsync(Exchange exchange,
+                                                          String routingKey,
+                                                          IBasicProperties properties,
+                                                          Byte[] body)
+        {
+            var tcs = BuildTaskCompletionSource(properties);
+
+            try
+            {
+                Model.BasicPublish(exchange.Name, routingKey, false, false, properties, body);
+                tcs.TrySetResult(true);
+            }
+            catch (Exception exception) { tcs.TrySetException(exception); }
+
+            return tcs.Task.ContinueWith(Result);
+        }
     }
 }

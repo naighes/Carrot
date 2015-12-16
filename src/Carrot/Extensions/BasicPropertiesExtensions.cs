@@ -22,6 +22,7 @@ namespace Carrot.Extensions
                                  DeliveryMode = source.DeliveryMode,
                                  Expiration = source.Expiration,
                                  MessageId = source.MessageId,
+                                 Persistent = source.Persistent,
                                  Priority = source.Priority,
                                  Timestamp = source.Timestamp,
                                  Type = source.Type,

@@ -2,7 +2,6 @@ using System;
 using Carrot.Configuration;
 using Carrot.Logging;
 using Carrot.Messages;
-using RabbitMQ.Client;
 
 namespace Carrot
 {
@@ -24,7 +23,7 @@ namespace Carrot
             LogBuilder = logBuilder;
         }
 
-        internal abstract ConsumerBase BuildConsumer(IModel model);
+        internal abstract ConsumerBase BuildConsumer(IInboundChannel inboundChannel, IOutboundChannel outboundChannel);
     }
 
     internal class AtMostOnceConsumingPromise : ConsumingPromise
@@ -37,9 +36,14 @@ namespace Carrot
         {
         }
 
-        internal override ConsumerBase BuildConsumer(IModel model)
+        internal override ConsumerBase BuildConsumer(IInboundChannel inboundChannel, IOutboundChannel outboundChannel)
         {
-            return new LoggedAtMostOnceConsumer(model, Queue, Builder, Configuration, LogBuilder());
+            return new LoggedAtMostOnceConsumer(inboundChannel,
+                                                outboundChannel,
+                                                Queue,
+                                                Builder,
+                                                Configuration,
+                                                LogBuilder());
         }
     }
 
@@ -53,9 +57,14 @@ namespace Carrot
         {
         }
 
-        internal override ConsumerBase BuildConsumer(IModel model)
+        internal override ConsumerBase BuildConsumer(IInboundChannel inboundChannel, IOutboundChannel outboundChannel)
         {
-            return new LoggedAtLeastOnceConsumer(model, Queue, Builder, Configuration, LogBuilder());
+            return new LoggedAtLeastOnceConsumer(inboundChannel,
+                                                 outboundChannel,
+                                                 Queue,
+                                                 Builder,
+                                                 Configuration,
+                                                 LogBuilder());
         }
     }
 }

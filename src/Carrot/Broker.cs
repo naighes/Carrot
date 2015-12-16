@@ -134,18 +134,20 @@ namespace Carrot
 
             var builder = new ConsumedMessageBuilder(_configuration.SerializationConfiguration,
                                                      _configuration.MessageTypeResolver);
-            var model = CreateInboundModel(connection,
-                                           _configuration.PrefetchSize,
-                                           _configuration.PrefetchCount);
-            var consumers = _promises.Select(_ => _(builder).BuildConsumer(model)).ToList();
+            var inboundModel = CreateInboundModel(connection,
+                                                  _configuration.PrefetchSize,
+                                                  _configuration.PrefetchCount);
+            var outboundChannel = _configuration.OutboundChannelBuilder(outboundModel, _configuration);
+            var consumers = _promises.Select(_ => _(builder).BuildConsumer(new InboundChannel(inboundModel),
+                                                                                              outboundChannel))
+                                     .ToList();
 
             foreach (var consumer in consumers)
-                consumer.Declare(model);
+                consumer.Declare(inboundModel);
 
-            var channel = _configuration.OutboundChannelBuilder(outboundModel, _configuration);
             return new Connection(connection,
                                   consumers,
-                                  channel,
+                                  outboundChannel,
                                   _configuration);
         }
 

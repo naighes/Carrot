@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 
 namespace Carrot.Messages
@@ -38,9 +37,9 @@ namespace Carrot.Messages
             channel.Acknowledge(Args.DeliveryTag);
         }
 
-        internal void Requeue(IModel model)
+        internal void Requeue(IInboundChannel inboundChannel)
         {
-            model.BasicNack(Args.DeliveryTag, false, true);
+            inboundChannel.NegativeAcknowledge(Args.DeliveryTag, true);
         }
     }
 }

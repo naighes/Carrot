@@ -1,7 +1,5 @@
 using System;
-using Carrot.Extensions;
 using Carrot.Messages;
-using RabbitMQ.Client;
 
 namespace Carrot.Fallback
 {
@@ -26,16 +24,9 @@ namespace Carrot.Fallback
             return new DeadLetterStrategy(broker.DeclareDurableDirectExchange(exchangeNameBuilder(queue.Name)));
         }
 
-        public void Apply(IModel model, ConsumedMessageBase message)
+        public void Apply(IOutboundChannel channel, ConsumedMessageBase message)
         {
-            var properties = message.Args.BasicProperties.Copy();
-            properties.Persistent = true;
-            model.BasicPublish(_exchange.Name,
-                               String.Empty,
-                               true,
-                               false,
-                               properties,
-                               message.Args.Body);
+            channel.ForwardAsync(message, _exchange, String.Empty);
         }
     }
 }

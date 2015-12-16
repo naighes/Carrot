@@ -4,7 +4,6 @@ using Carrot.Configuration;
 using Carrot.Extensions;
 using Carrot.Logging;
 using Carrot.Messages;
-using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 
 namespace Carrot
@@ -13,12 +12,13 @@ namespace Carrot
     {
         private readonly ILog _log;
 
-        internal LoggedAtLeastOnceConsumer(IModel model,
+        internal LoggedAtLeastOnceConsumer(IInboundChannel inboundChannel,
+                                           IOutboundChannel outboundChannel,
                                            Queue queue,
                                            IConsumedMessageBuilder builder,
                                            ConsumingConfiguration configuration,
                                            ILog log)
-            : base(model, queue, builder, configuration)
+            : base(inboundChannel, outboundChannel, queue, builder, configuration)
         {
             _log = log;
         }
@@ -26,27 +26,6 @@ namespace Carrot
         protected internal override Task<AggregateConsumingResult> ConsumeAsync(BasicDeliverEventArgs args)
         {
             return base.ConsumeAsync(args).ContinueWith(_ => _.HandleErrorResult(_log));
-        }
-
-        protected override void OnModelBasicAcks(Object sender, BasicAckEventArgs args)
-        {
-            base.OnModelBasicAcks(sender, args);
-
-            _log.Info($"consumer-model basic.ack received (delivery-tag: {args.DeliveryTag}, multiple: {args.Multiple})");
-        }
-
-        protected override void OnModelBasicNacks(Object sender, BasicNackEventArgs args)
-        {
-            base.OnModelBasicNacks(sender, args);
-
-            _log.Info($"consumer-model basic.nack received (delivery-tag: {args.DeliveryTag}, multiple: {args.Multiple})");
-        }
-
-        protected override void OnModelBasicReturn(Object sender, BasicReturnEventArgs args)
-        {
-            base.OnModelBasicReturn(sender, args);
-
-            _log.Info($"consumer-model basic.return received (reply-text: '{args.ReplyText}', reply-code: {args.ReplyCode})");
         }
 
         protected override void OnConsumerCancelled(Object sender, ConsumerEventArgs args)
