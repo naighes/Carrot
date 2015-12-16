@@ -83,8 +83,7 @@ namespace Carrot
                                                Configuration.IdGenerator);
         }
 
-        protected Byte[] BuildBody<TMessage>(OutboundMessage<TMessage> source, IBasicProperties properties)
-            where TMessage : class
+        protected Byte[] BuildBody(IMessage source, IBasicProperties properties)
         {
             return properties.CreateEncoding()
                              .GetBytes(properties.CreateSerializer(Configuration.SerializationConfiguration)
