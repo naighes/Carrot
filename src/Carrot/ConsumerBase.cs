@@ -63,7 +63,6 @@ namespace Carrot
 
         public void Dispose()
         {
-            // TODO: if we've one channel for every consumer dispose will be called multiple times!
             if (InboundChannel == null)
                 return;
 
