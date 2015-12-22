@@ -9,5 +9,7 @@ namespace Carrot
         Task ConsumeAsync(ConsumedMessageBase message);
 
         void OnError(Exception exception);
+
+        void OnConsumeCompletion();
     }
 }

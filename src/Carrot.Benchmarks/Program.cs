@@ -4,6 +4,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
+using Carrot.Benchmarks.Extensions;
 using Carrot.Benchmarks.Jobs;
 using Carrot.Configuration;
 
@@ -14,22 +15,30 @@ namespace Carrot.Benchmarks
         protected const String RoutingKey = "routing_key";
         private const String EndpointUrl = "amqp://guest:guest@localhost:5672/";
         private const Int32 Count = 100000;
-        private const Int32 Times = 3;
+        private const Int32 Times = 1;
 
         private static Exchange DeclareExchange(IBroker broker)
         {
-            var exchange = broker.DeclareDirectExchange("test_benchmarks_exchange");
-            var queue = broker.DeclareQueue("test_benchmarks_queue");
+            return broker.DeclareDirectExchange("test_benchmarks_exchange");
+        }
+
+        private static Queue BindQueue(IBroker broker, String queueName, Exchange exchange)
+        {
+            var queue = broker.DeclareQueue(queueName);
             broker.TryDeclareExchangeBinding(exchange, queue, RoutingKey);
-            return exchange;
+            return queue;
         }
 
         private static Exchange DeclareDurableExchange(IBroker broker)
         {
-            var exchange = broker.DeclareDurableDirectExchange("test_benchmarks_durable_exchange");
-            var queue = broker.DeclareDurableQueue("test_benchmarks_durable_queue");
+            return broker.DeclareDurableDirectExchange("test_benchmarks_durable_exchange");
+        }
+
+        private static Queue BindDurableQueue(IBroker broker, String queueName, Exchange exchange)
+        {
+            var queue = broker.DeclareDurableQueue(queueName);
             broker.DeclareExchangeBinding(exchange, queue, RoutingKey);
-            return exchange;
+            return queue;
         }
 
         private static void Main()
@@ -72,14 +81,20 @@ namespace Carrot.Benchmarks
         private static void RunOn(IBroker broker, Int32 times, Int32 count, TextWriter writer)
         {
             var exchange = DeclareExchange(broker);
+            var queue = BindQueue(broker, "test_benchmarks_queue", exchange);
             var durableExchange = DeclareDurableExchange(broker);
+            var durableQueue = BindDurableQueue(broker, "test_benchmarks_durable_queue", durableExchange);
 
-            var jobs = Enumerable.Repeat(new DurableMessagesPublishJob(broker, durableExchange, RoutingKey),
-                                         times)
-                                 .Cast<IJob>()
-                                 .Concat(Enumerable.Repeat(new NonDurableMessagesPublishJob(broker, exchange, RoutingKey),
-                                                           times))
-                                 .ToArray();
+            var jobs = new IJob[]
+                           {
+                               new DurableMessagesPublishJob(broker, durableExchange, RoutingKey),
+                               new ConsumingJob(broker, durableQueue)
+                           }.Repeat(times)
+                            .Concat(new IJob[]
+                                        {
+                                            new NonDurableMessagesPublishJob(broker, exchange, RoutingKey),
+                                            new ConsumingJob(broker, queue)
+                                        }.Repeat(times));
 
             foreach (var job in jobs)
             {

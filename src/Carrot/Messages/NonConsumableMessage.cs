@@ -16,7 +16,7 @@ namespace Carrot.Messages
 
         internal override Task<AggregateConsumingResult> ConsumeAsync(IEnumerable<IConsumer> subscriptions)
         {
-            return Task.FromResult<AggregateConsumingResult>(Result());
+            return Task.FromResult<AggregateConsumingResult>(Result(new ConsumedMessage.ConsumingResult[] { }));
         }
 
         internal override Boolean Match(Type type)
@@ -24,6 +24,6 @@ namespace Carrot.Messages
             return false;
         }
 
-        protected abstract ConsumingFailureBase Result();
+        protected abstract ConsumingFailureBase Result(ConsumedMessage.ConsumingResult[] results);
     }
 }

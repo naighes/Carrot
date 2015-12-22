@@ -20,7 +20,12 @@ namespace Carrot
         {
             InboundChannel.Acknowledge(args.DeliveryTag);
 
-            return ConsumeAsync(args);
+            return ConsumeAsync(args).ContinueWith(_ =>
+                                                   {
+                                                       var result = _.Result;
+                                                       result.NotifyConsumingCompletion();
+                                                       return result;
+                                                   });
         }
     }
 }

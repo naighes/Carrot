@@ -37,7 +37,7 @@ namespace Carrot.Extensions
                                .ContinueWith(_ =>
                                              {
                                                  if (_.Exception == null)
-                                                     return new ConsumedMessage.Success(message);
+                                                     return new ConsumedMessage.Success(message, consumer);
                                              
                                                  return BuildFailure(consumer,
                                                                      message,
@@ -52,7 +52,7 @@ namespace Carrot.Extensions
                                                                     Exception exception)
         {
             consumer.OnError(exception);
-            return new ConsumedMessage.Failure(message, exception);
+            return new ConsumedMessage.Failure(message, consumer, exception);
         }
     }
 }

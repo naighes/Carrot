@@ -14,5 +14,7 @@ namespace Carrot
         }
 
         public virtual void OnError(Exception exception) { }
+
+        public virtual void OnConsumeCompletion() { }
     }
 }

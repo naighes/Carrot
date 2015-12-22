@@ -31,30 +31,38 @@ namespace Carrot.Messages
 
         private AggregateConsumingResult BuildErrorResult(IEnumerable<ConsumingResult> results)
         {
-            var exceptions = results.OfType<Failure>()
+            var consumingResults = results.ToArray();
+            var exceptions = consumingResults.OfType<Failure>()
                                     .Select(_ => _.Exception)
                                     .ToArray();
 
             if (Args.Redelivered)
-                return new ReiteratedConsumingFailure(this, exceptions);
+                return new ReiteratedConsumingFailure(this, consumingResults, exceptions);
 
-            return new ConsumingFailure(this, exceptions);
+            return new ConsumingFailure(this, consumingResults, exceptions);
         }
 
         private AggregateConsumingResult AggregateResult(Task<ConsumingResult[]> task)
         {
             return task.Result.OfType<Failure>().Any()
                     ? BuildErrorResult(task.Result)
-                    : new Messages.Success(this);
+                    : new Messages.Success(this, task.Result);
         }
 
-        internal abstract class ConsumingResult
+        public abstract class ConsumingResult
         {
             protected readonly ConsumedMessageBase Message;
+            protected readonly IConsumer Consumer;
 
-            protected ConsumingResult(ConsumedMessageBase message)
+            protected ConsumingResult(ConsumedMessageBase message, IConsumer consumer)
             {
                 Message = message;
+                Consumer = consumer;
+            }
+
+            internal void NotifyConsumingCompletion()
+            {
+                Consumer.OnConsumeCompletion();
             }
         }
 
@@ -62,8 +70,8 @@ namespace Carrot.Messages
         {
             internal readonly Exception Exception;
 
-            internal Failure(ConsumedMessageBase message, Exception exception)
-                : base(message)
+            internal Failure(ConsumedMessageBase message, IConsumer consumer, Exception exception)
+                : base(message, consumer)
             {
                 Exception = exception;
             }
@@ -71,8 +79,8 @@ namespace Carrot.Messages
 
         internal class Success : ConsumingResult
         {
-            public Success(ConsumedMessageBase message)
-                : base(message)
+            public Success(ConsumedMessageBase message, IConsumer consumer)
+                : base(message, consumer)
             {
             }
         }

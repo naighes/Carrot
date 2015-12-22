@@ -24,7 +24,7 @@ namespace Carrot.Tests
         {
             const Int64 deliveryTag = 1234L;
             var model = BuildInboundChannel(deliveryTag,
-                                   _ => new Success(_),
+                                   _ => new Success(_, new ConsumedMessage.ConsumingResult[] { }),
                                    _configuration);
             model.Verify(_ => _.Acknowledge(deliveryTag));
         }
@@ -34,7 +34,7 @@ namespace Carrot.Tests
         {
             const Int64 deliveryTag = 1234L;
             var model = BuildInboundChannel(deliveryTag,
-                                   _ => new ConsumingFailure(_),
+                                            _ => new ConsumingFailure(_, new ConsumedMessage.ConsumingResult[] { }),
                                    _configuration);
             model.Verify(_ => _.NegativeAcknowledge(deliveryTag, true));
         }
@@ -44,8 +44,8 @@ namespace Carrot.Tests
         {
             const Int64 deliveryTag = 1234L;
             var model = BuildInboundChannel(deliveryTag,
-                                   _ => new ReiteratedConsumingFailure(_),
-                                   _configuration);
+                                            _ => new ReiteratedConsumingFailure(_, new ConsumedMessage.ConsumingResult[] { }),
+                                            _configuration);
             model.Verify(_ => _.Acknowledge(deliveryTag));
         }
 
@@ -54,8 +54,8 @@ namespace Carrot.Tests
         {
             const Int64 deliveryTag = 1234L;
             var model = BuildInboundChannel(deliveryTag,
-                                   _ => new CorruptedMessageConsumingFailure(_),
-                                   _configuration);
+                                            _ => new CorruptedMessageConsumingFailure(_, new ConsumedMessage.ConsumingResult[] { }),
+                                            _configuration);
             model.Verify(_ => _.Acknowledge(deliveryTag));
         }
 
@@ -64,8 +64,8 @@ namespace Carrot.Tests
         {
             const Int64 deliveryTag = 1234L;
             var model = BuildInboundChannel(deliveryTag,
-                                   _ => new UnresolvedMessageConsumingFailure(_),
-                                   _configuration);
+                                            _ => new UnresolvedMessageConsumingFailure(_, new ConsumedMessage.ConsumingResult[] { }),
+                                            _configuration);
             model.Verify(_ => _.Acknowledge(deliveryTag));
         }
 
@@ -74,14 +74,14 @@ namespace Carrot.Tests
         {
             const Int64 deliveryTag = 1234L;
             var model = BuildInboundChannel(deliveryTag,
-                                   _ => new UnsupportedMessageConsumingFailure(_),
-                                   _configuration);
+                                            _ => new UnsupportedMessageConsumingFailure(_, new ConsumedMessage.ConsumingResult[] { }),
+                                            _configuration);
             model.Verify(_ => _.Acknowledge(deliveryTag));
         }
 
         private static Mock<IInboundChannel> BuildInboundChannel(UInt64 deliveryTag,
-                                                        Func<ConsumedMessageBase, AggregateConsumingResult> func,
-                                                        ConsumingConfiguration configuration)
+                                                                 Func<ConsumedMessageBase, AggregateConsumingResult> func,
+                                                                 ConsumingConfiguration configuration)
         {
             var args = new BasicDeliverEventArgs
                            {

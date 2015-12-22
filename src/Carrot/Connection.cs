@@ -12,16 +12,16 @@ namespace Carrot
 
         private readonly RabbitMQ.Client.IConnection _connection;
         private readonly IEnumerable<ConsumerBase> _consumers;
-        private readonly IOutboundChannel _channel;
+        private readonly IOutboundChannel _outboundChannel;
 
         internal Connection(RabbitMQ.Client.IConnection connection,
                             IEnumerable<ConsumerBase> consumers,
-                            IOutboundChannel channel,
+                            IOutboundChannel outboundChannel,
                             EnvironmentConfiguration configuration)
         {
             _connection = connection;
             _consumers = consumers;
-            _channel = channel;
+            _outboundChannel = outboundChannel;
             Configuration = configuration;
         }
         
@@ -30,7 +30,7 @@ namespace Carrot
                                                            String routingKey = "")
             where TMessage : class
         {
-            return _channel.PublishAsync(message, exchange, routingKey);
+            return _outboundChannel.PublishAsync(message, exchange, routingKey);
         }
 
         public void Dispose()
@@ -38,7 +38,7 @@ namespace Carrot
             foreach (var consumer in _consumers)
                 consumer.Dispose();
 
-            _channel?.Dispose();
+            _outboundChannel?.Dispose();
             _connection?.Dispose();
         }
     }

@@ -51,10 +51,12 @@
       <Link>Properties\CommonAssemblyInfo.cs</Link>
     </Compile>
     <Compile Include="BatchWriter.cs" />
+    <Compile Include="Extensions\EnumerableExtensions.cs" />
     <Compile Include="Extensions\JobExtensions.cs" />
     <Compile Include="Foo.cs" />
     <Compile Include="JobNameAttribute.cs" />
     <Compile Include="JobResult.cs" />
+    <Compile Include="Jobs\ConsumingJob.cs" />
     <Compile Include="Jobs\DurableMessagesPublishJob.cs" />
     <Compile Include="Jobs\IJob.cs" />
     <Compile Include="Jobs\NonDurableMessagesPublishJob.cs" />

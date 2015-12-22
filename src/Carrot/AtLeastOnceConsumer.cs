@@ -21,7 +21,13 @@ namespace Carrot
             return ConsumeAsync(args).ContinueWith(_ => _.Result
                                                          .Reply(InboundChannel,
                                                                 OutboundChannel,
-                                                                Configuration.FallbackStrategy));
+                                                                Configuration.FallbackStrategy))
+                                     .ContinueWith(_ =>
+                                                   {
+                                                       var result = _.Result;
+                                                       result.NotifyConsumingCompletion();
+                                                       return result;
+                                                   });
         }
     }
 }

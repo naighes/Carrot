@@ -42,10 +42,12 @@ namespace Carrot.Messages
     public abstract class AggregateConsumingResult
     {
         protected readonly ConsumedMessageBase Message;
+        protected readonly ConsumedMessage.ConsumingResult[] Results;
 
-        protected AggregateConsumingResult(ConsumedMessageBase message)
+        protected AggregateConsumingResult(ConsumedMessageBase message, ConsumedMessage.ConsumingResult[] results)
         {
             Message = message;
+            Results = results;
         }
 
         internal virtual AggregateConsumingResult Reply(IInboundChannel inboundChannel,
@@ -55,12 +57,17 @@ namespace Carrot.Messages
             Message.Acknowledge(inboundChannel);
             return this;
         }
+
+        internal void NotifyConsumingCompletion()
+        {
+            Results.ToList().ForEach(_ => _.NotifyConsumingCompletion());
+        }
     }
 
     public class Success : AggregateConsumingResult
     {
-        internal Success(ConsumedMessageBase message)
-            : base(message)
+        internal Success(ConsumedMessageBase message, ConsumedMessage.ConsumingResult[] results)
+            : base(message, results)
         {
         }
     }
@@ -69,8 +76,10 @@ namespace Carrot.Messages
     {
         private readonly Exception[] _exceptions;
 
-        protected ConsumingFailureBase(ConsumedMessageBase message, params Exception[] exceptions)
-            : base(message)
+        protected ConsumingFailureBase(ConsumedMessageBase message,
+                                       ConsumedMessage.ConsumingResult[] results,
+                                       params Exception[] exceptions)
+            : base(message, results)
         {
             _exceptions = exceptions;
         }
@@ -90,8 +99,10 @@ namespace Carrot.Messages
 
     public class ReiteratedConsumingFailure : ConsumingFailureBase
     {
-        internal ReiteratedConsumingFailure(ConsumedMessageBase message, params Exception[] exceptions)
-            : base(message, exceptions)
+        internal ReiteratedConsumingFailure(ConsumedMessageBase message,
+                                            ConsumedMessage.ConsumingResult[] results,
+                                            params Exception[] exceptions)
+            : base(message, results, exceptions)
         {
         }
 
@@ -106,8 +117,10 @@ namespace Carrot.Messages
 
     public class ConsumingFailure : ConsumingFailureBase
     {
-        internal ConsumingFailure(ConsumedMessageBase message, params Exception[] exceptions)
-            : base(message, exceptions)
+        internal ConsumingFailure(ConsumedMessageBase message,
+                                  ConsumedMessage.ConsumingResult[] results,
+                                  params Exception[] exceptions)
+            : base(message, results, exceptions)
         {
         }
 
@@ -122,24 +135,27 @@ namespace Carrot.Messages
 
     internal class UnsupportedMessageConsumingFailure : ConsumingFailureBase
     {
-        internal UnsupportedMessageConsumingFailure(ConsumedMessageBase message)
-            : base(message)
+        internal UnsupportedMessageConsumingFailure(ConsumedMessageBase message,
+                                                    ConsumedMessage.ConsumingResult[] results)
+            : base(message, results)
         {
         }
     }
 
     internal class UnresolvedMessageConsumingFailure : ConsumingFailureBase
     {
-        internal UnresolvedMessageConsumingFailure(ConsumedMessageBase message)
-            : base(message)
+        internal UnresolvedMessageConsumingFailure(ConsumedMessageBase message,
+                                                   ConsumedMessage.ConsumingResult[] results)
+            : base(message, results)
         {
         }
     }
 
     internal class CorruptedMessageConsumingFailure : ConsumingFailureBase
     {
-        internal CorruptedMessageConsumingFailure(ConsumedMessageBase message)
-            : base(message)
+        internal CorruptedMessageConsumingFailure(ConsumedMessageBase message,
+                                                  ConsumedMessage.ConsumingResult[] results)
+            : base(message, results)
         {
         }
     }
