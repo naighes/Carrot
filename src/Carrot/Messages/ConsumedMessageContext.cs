@@ -31,7 +31,7 @@ namespace Carrot.Messages
             return new ConsumedMessageContext(args);
         }
 
-        internal ConsumedMessage AsConsumedMessage(ISerializer serializer, MessageBinding messageBinding)
+        internal ConsumedMessage ToConsumedMessage(ISerializer serializer, MessageBinding messageBinding)
         {
             return new ConsumedMessage(serializer.Deserialize(_args.Body,
                                                               messageBinding.RuntimeType,

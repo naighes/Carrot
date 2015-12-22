@@ -30,7 +30,7 @@ namespace Carrot.Messages
             if (serializer is NullSerializer)
                 return new UnsupportedMessage(args);
 
-            try { return context.AsConsumedMessage(serializer, binding); }
+            try { return context.ToConsumedMessage(serializer, binding); }
             catch { return new CorruptedMessage(args); }
         }
     }

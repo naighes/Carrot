@@ -78,8 +78,8 @@ namespace Carrot
 
         protected internal virtual Task<AggregateConsumingResult> ConsumeAsync(BasicDeliverEventArgs args)
         {
-            return _builder.Build(args)
-                           .ConsumeAsync(Configuration.FindSubscriptions(_builder.Build(args)));
+            var message = _builder.Build(args);
+            return message.ConsumeAsync(Configuration.FindSubscriptions(message));
         }
 
         protected abstract Task<AggregateConsumingResult> ConsumeInternalAsync(BasicDeliverEventArgs args);
