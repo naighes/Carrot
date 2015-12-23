@@ -25,7 +25,7 @@ namespace Carrot.Messages
             if (binding is EmptyMessageBinding)
                 return new UnresolvedMessage(args);
 
-            var serializer = args.BasicProperties.CreateSerializer(_serializarionconfiguration);
+            var serializer = context.CreateSerializer(_serializarionconfiguration);
 
             if (serializer is NullSerializer)
                 return new UnsupportedMessage(args);

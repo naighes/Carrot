@@ -18,7 +18,7 @@ namespace Carrot.Messages
 
         internal abstract Task<AggregateConsumingResult> ConsumeAsync(IEnumerable<IConsumer> subscriptions);
 
-        internal ConsumedMessage<TMessage> As<TMessage>() where TMessage : class
+        internal ConsumedMessage<TMessage> To<TMessage>() where TMessage : class
         {
             var content = Content as TMessage;
 

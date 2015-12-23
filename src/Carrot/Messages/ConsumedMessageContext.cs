@@ -38,5 +38,10 @@ namespace Carrot.Messages
                                                               _args.BasicProperties.CreateEncoding()),
                                        _args);
         }
+
+        internal ISerializer CreateSerializer(SerializationConfiguration configuration)
+        {
+            return _args.BasicProperties.CreateSerializer(configuration);
+        }
     }
 }

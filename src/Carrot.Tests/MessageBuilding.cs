@@ -14,7 +14,7 @@ namespace Carrot.Tests
         {
             var content = new Foo();
             var message = new FakeConsumedMessage(content, FakeBasicDeliverEventArgs());
-            var actual = message.As<Foo>();
+            var actual = message.To<Foo>();
             Assert.Equal(content, actual.Content);
         }
 
@@ -23,7 +23,7 @@ namespace Carrot.Tests
         {
             var content = new Foo();
             var message = new FakeConsumedMessage(content, FakeBasicDeliverEventArgs());
-            Assert.Throws<InvalidCastException>(() => message.As<Bar>());
+            Assert.Throws<InvalidCastException>(() => message.To<Bar>());
         }
 
         [Fact]
@@ -41,7 +41,7 @@ namespace Carrot.Tests
                                                      }
                            };
             var message = new FakeConsumedMessage(content, args);
-            var actual = message.As<Foo>();
+            var actual = message.To<Foo>();
             Assert.Equal(messageId, actual.Headers.MessageId);
             Assert.Equal(timestamp, actual.Headers.Timestamp);
         }
@@ -57,7 +57,7 @@ namespace Carrot.Tests
                                BasicProperties = new BasicProperties()
                            };
             var message = new FakeConsumedMessage(content, args);
-            var actual = message.As<Foo>();
+            var actual = message.To<Foo>();
             Assert.Equal(consumerTag, actual.ConsumerTag);
         }
 
@@ -76,7 +76,7 @@ namespace Carrot.Tests
                                                      }
                            };
             var message = new FakeConsumedMessage(content, args);
-            var actual = message.As<Foo>();
+            var actual = message.To<Foo>();
             Assert.Equal("b", actual.Headers["a"]);
         }
 

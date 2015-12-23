@@ -10,7 +10,7 @@ namespace Carrot
 
         Task IConsumer.ConsumeAsync(ConsumedMessageBase message)
         {
-            return ConsumeAsync(message.As<TMessage>());
+            return ConsumeAsync(message.To<TMessage>());
         }
 
         public virtual void OnError(Exception exception) { }
