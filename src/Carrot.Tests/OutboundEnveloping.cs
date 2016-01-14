@@ -64,7 +64,6 @@ namespace Carrot.Tests
             model.Setup(_ => _.BasicPublish(exchange,
                                             String.Empty,
                                             false,
-                                            false,
                                             It.IsAny<IBasicProperties>(),
                                             It.IsAny<Byte[]>()))
                  .Throws(exception);
