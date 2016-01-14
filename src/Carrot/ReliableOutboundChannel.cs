@@ -43,7 +43,6 @@ namespace Carrot
                 Model.BasicPublish(exchange.Name,
                                    routingKey,
                                    false,
-                                   false,
                                    properties,
                                    body);
             }

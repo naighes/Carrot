@@ -103,7 +103,7 @@ namespace Carrot
 
             try
             {
-                Model.BasicPublish(exchange.Name, routingKey, false, false, properties, body);
+                Model.BasicPublish(exchange.Name, routingKey, false, properties, body);
                 tcs.TrySetResult(true);
             }
             catch (Exception exception) { tcs.TrySetException(exception); }
