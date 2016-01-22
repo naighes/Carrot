@@ -39,22 +39,22 @@ namespace Carrot.Messages
 
         public void SetContentEncoding(String value)
         {
-            Set("content_encoding", value);
+            Headers.Set(HeaderCollection.ContentEncodingKey, value);
         }
 
         public void SetContentType(String value)
         {
-            Set("content_type", value);
+            Headers.Set(HeaderCollection.ContentTypeKey, value);
         }
 
         public void SetCorrelationId(string correlationId)
         {
-            Set("correlation_id", correlationId);
+            Headers.Set(HeaderCollection.CorrelationIdKey, correlationId);
         }
 
         public void SetReplyTo(string replyTo)
         {
-            Set("reply_to", replyTo);
+            Headers.Set(HeaderCollection.ReplyToKey, replyTo);
         }
 
         internal virtual IBasicProperties BuildBasicProperties(IMessageTypeResolver resolver,
@@ -87,17 +87,6 @@ namespace Carrot.Messages
             Headers.NonReservedHeaders().ToList().ForEach(_ => properties.Headers.Add(_.Key, _.Value));
 
             return properties;
-        }
-
-        private void Set<T>(String key, T value)
-        {
-            if (value == null)
-                throw new ArgumentNullException(nameof(value));
-
-            if (!Headers.InternalDictionary.ContainsKey(key))
-                Headers.InternalDictionary.Add(key, value);
-            else
-                Headers.InternalDictionary[key] = value;
         }
     }
 }

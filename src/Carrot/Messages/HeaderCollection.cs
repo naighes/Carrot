@@ -7,14 +7,21 @@ namespace Carrot.Messages
 {
     public class HeaderCollection
     {
+        private const string MessageIdKey = "message_id";
+        private const string TimestampKey = "timestamp";
+        internal const string ContentEncodingKey = "content_encoding";
+        internal const string ContentTypeKey = "content_type";
+        internal const string CorrelationIdKey = "correlation_id";
+        internal const string ReplyToKey = "reply_to";
+
         protected internal readonly ISet<String> ReservedKeys = new HashSet<String>
                                                                     {
-                                                                        "message_id",
-                                                                        "timestamp",
-                                                                        "content_type",
-                                                                        "content_encoding",
-                                                                        "correlation_id",
-                                                                        "reply_to"
+                                                                        MessageIdKey,
+                                                                        TimestampKey,
+                                                                        ContentTypeKey,
+                                                                        ContentEncodingKey,
+                                                                        CorrelationIdKey,
+                                                                        ReplyToKey
                                                                     };
 
         internal readonly IDictionary<String, Object> InternalDictionary;
@@ -29,17 +36,17 @@ namespace Carrot.Messages
             InternalDictionary = dictionary;
         }
 
-        public String MessageId => ValueOrDefault<String>("message_id");
+        public String MessageId => ValueOrDefault<String>(MessageIdKey);
 
-        public Int64 Timestamp => ValueOrDefault<Int64>("timestamp");
+        public Int64 Timestamp => ValueOrDefault<Int64>(TimestampKey);
 
-        public String ContentType => ValueOrDefault<String>("content_type");
+        public String ContentType => ValueOrDefault<String>(ContentTypeKey);
 
-        public String ContentEncoding => ValueOrDefault<String>("content_encoding");
+        public String ContentEncoding => ValueOrDefault<String>(ContentEncodingKey);
 
-        public String CorrelationId => ValueOrDefault<String>("correlation_id");
+        public String CorrelationId => ValueOrDefault<String>(CorrelationIdKey);
 
-        public String ReplyTo => ValueOrDefault<String>("reply_to");
+        public String ReplyTo => ValueOrDefault<String>(ReplyToKey);
 
         public Object this[String key]
         {
@@ -59,12 +66,12 @@ namespace Carrot.Messages
         {
             var headers = new Dictionary<String, Object>(StringComparer.OrdinalIgnoreCase)
                               {
-                                  { "message_id", properties.MessageId },
-                                  { "timestamp", properties.Timestamp.UnixTime },
-                                  { "content_type", properties.ContentType },
-                                  { "content_encoding", properties.ContentEncoding },
-                                  { "correlation_id", properties.CorrelationId },
-                                  { "reply_to", properties.ReplyTo }
+                                  { MessageIdKey, properties.MessageId },
+                                  { TimestampKey, properties.Timestamp.UnixTime },
+                                  { ContentTypeKey, properties.ContentType },
+                                  { ContentEncodingKey, properties.ContentEncoding },
+                                  { CorrelationIdKey, properties.CorrelationId },
+                                  { ReplyToKey, properties.ReplyTo }
                               };
 
             if (properties.Headers != null)
@@ -106,6 +113,17 @@ namespace Carrot.Messages
         {
             return InternalDictionary.Where(_ => !ReservedKeys.Contains(_.Key))
                                      .ToDictionary(_ => _.Key, _ => _.Value);
+        }
+
+        internal void Set<T>(String key, T value)
+        {
+            if (value == null)
+                throw new ArgumentNullException(nameof(value));
+
+            if (!InternalDictionary.ContainsKey(key))
+                InternalDictionary.Add(key, value);
+            else
+                InternalDictionary[key] = value;
         }
     }
 }
