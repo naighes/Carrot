@@ -52,6 +52,11 @@ namespace Carrot.Messages
             Set("correlation_id", correlationId);
         }
 
+        public void SetReplyTo(string replyTo)
+        {
+            Set("reply_to", replyTo);
+        }
+
         internal virtual IBasicProperties BuildBasicProperties(IMessageTypeResolver resolver,
                                                                IDateTimeProvider dateTimeProvider,
                                                                INewId idGenerator)
