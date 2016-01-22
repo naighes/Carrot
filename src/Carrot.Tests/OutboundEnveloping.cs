@@ -177,6 +177,18 @@ namespace Carrot.Tests
         }
 
         [Fact]
+        public void CorrelationId()
+        {
+            String correlationId = Guid.NewGuid().ToString();
+            var message = new OutboundMessage<Bar>(new Bar());
+            message.SetCorrelationId(correlationId);
+            var properties = message.BuildBasicProperties(StubResolver<Bar>(null).Object,
+                                                          StubDateTimeProvider().Object,
+                                                          new Mock<INewId>().Object);
+            Assert.Equal(correlationId, properties.CorrelationId);
+        }
+
+        [Fact]
         public void NonDurableMessage()
         {
             var message = new OutboundMessage<Bar>(new Bar());

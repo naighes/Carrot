@@ -47,6 +47,11 @@ namespace Carrot.Messages
             Set("content_type", value);
         }
 
+        public void SetCorrelationId(string correlationId)
+        {
+            Set("correlation_id", correlationId);
+        }
+
         internal virtual IBasicProperties BuildBasicProperties(IMessageTypeResolver resolver,
                                                                IDateTimeProvider dateTimeProvider,
                                                                INewId idGenerator)
