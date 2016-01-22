@@ -35,6 +35,10 @@ namespace Carrot.Messages
 
         public String ContentEncoding => ValueOrDefault<String>("content_encoding");
 
+        public String CorrelationId => ValueOrDefault<String>("correlation_id");
+
+        public String ReplyTo => ValueOrDefault<String>("reply_to");
+
         public Object this[String key]
         {
             get
@@ -56,7 +60,9 @@ namespace Carrot.Messages
                                   { "message_id", properties.MessageId },
                                   { "timestamp", properties.Timestamp.UnixTime },
                                   { "content_type", properties.ContentType },
-                                  { "content_encoding", properties.ContentEncoding }
+                                  { "content_encoding", properties.ContentEncoding },
+                                  { "correlation_id", properties.CorrelationId },
+                                  { "reply_to", properties.ReplyTo }
                               };
 
             if (properties.Headers != null)
