@@ -12,7 +12,9 @@ namespace Carrot.Messages
                                                                         "message_id",
                                                                         "timestamp",
                                                                         "content_type",
-                                                                        "content_encoding"
+                                                                        "content_encoding",
+                                                                        "correlation_id",
+                                                                        "reply_to"
                                                                     };
 
         internal readonly IDictionary<String, Object> InternalDictionary;

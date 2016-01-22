@@ -58,6 +58,8 @@ namespace Carrot.Messages
                 ContentType = Headers.ContentType ?? SerializationConfiguration.DefaultContentType,
                 ContentEncoding = Headers.ContentEncoding ?? SerializationConfiguration.DefaultContentEncoding,
                 MessageId = Headers.MessageId ?? idGenerator.Next(),
+                CorrelationId = Headers.CorrelationId,
+                ReplyTo = Headers.ReplyTo,
                 Timestamp = new AmqpTimestamp(Headers.Timestamp <= 0L
                                              ? dateTimeProvider.UtcNow().ToUnixTimestamp()
                                              : Headers.Timestamp)
