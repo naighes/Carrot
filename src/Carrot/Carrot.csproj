@@ -107,6 +107,7 @@
     <Compile Include="Messages\Replies\DirectReplyConfiguration.cs" />
     <Compile Include="Messages\Replies\FanoutReplyConfiguration.cs" />
     <Compile Include="Messages\Replies\ReplyConfiguration.cs" />
+    <Compile Include="Messages\Replies\ReplyConfigurationFactory.cs" />
     <Compile Include="Messages\Replies\TopicReplyConfiguration.cs" />
     <Compile Include="Messages\Results.cs" />
     <Compile Include="Messages\UnresolvedMessage.cs" />

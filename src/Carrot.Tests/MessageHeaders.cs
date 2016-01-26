@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Carrot.Configuration;
 using Carrot.Extensions;
 using Carrot.Messages;
+using Carrot.Messages.Replies;
 using Moq;
 using RabbitMQ.Client;
 using Xunit;
@@ -28,8 +29,10 @@ namespace Carrot.Tests
             const String contentEncoding = "UTF-16";
             const String messageId = "one-id";
             const Int64 timestamp = 123456789L;
-            const String replyTo = "reply-queue-name";
+            const String replyExchangeName = "reply-queue-name";
+            const String replyRoutingKey = "reply-queue-name";
             String correlationId = Guid.NewGuid().ToString();
+            var directReplyConfiguration = new DirectReplyConfiguration(replyExchangeName, replyRoutingKey);
             var collection = new HeaderCollection(new Dictionary<String, Object>(StringComparer.OrdinalIgnoreCase)
                                                       {
                                                           { "message_id", messageId },
@@ -37,7 +40,7 @@ namespace Carrot.Tests
                                                           { "content_type", contentType },
                                                           { "content_encoding", contentEncoding },
                                                           { "correlation_id", correlationId },
-                                                          { "reply_to", replyTo }
+                                                          { "reply_configuration", directReplyConfiguration }
                                                       });
             const String key = "foo";
             const String value = "bar";
@@ -52,7 +55,7 @@ namespace Carrot.Tests
             Assert.Equal(contentType, properties.ContentType);
             Assert.Equal(contentEncoding, properties.ContentEncoding);
             Assert.Equal(correlationId, properties.CorrelationId);
-            Assert.Equal(replyTo, properties.ReplyTo);
+            Assert.Equal(directReplyConfiguration.ToString(), properties.ReplyTo);
             Assert.Equal(value, collection[key]);
         }
 

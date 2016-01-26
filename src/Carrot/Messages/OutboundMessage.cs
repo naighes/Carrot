@@ -55,7 +55,7 @@ namespace Carrot.Messages
 
         public void SetReply(ReplyConfiguration replyConfiguration)
         {
-            Headers.Set(HeaderCollection.ReplyToKey, replyConfiguration.ToString());
+            Headers.Set(HeaderCollection.ReplyConfigurationKey, replyConfiguration);
         }
 
         internal virtual IBasicProperties BuildBasicProperties(IMessageTypeResolver resolver,
@@ -70,7 +70,7 @@ namespace Carrot.Messages
                 ContentEncoding = Headers.ContentEncoding ?? SerializationConfiguration.DefaultContentEncoding,
                 MessageId = Headers.MessageId ?? idGenerator.Next(),
                 CorrelationId = Headers.CorrelationId,
-                ReplyTo = Headers.ReplyTo,
+                ReplyTo = Headers.ReplyConfiguration == null ? null : Headers.ReplyConfiguration.ToString(),
                 Timestamp = new AmqpTimestamp(Headers.Timestamp <= 0L
                                              ? dateTimeProvider.UtcNow().ToUnixTimestamp()
                                              : Headers.Timestamp)

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Carrot.Messages.Replies;
 using RabbitMQ.Client;
 
 namespace Carrot.Messages
@@ -13,6 +14,7 @@ namespace Carrot.Messages
         internal const string ContentTypeKey = "content_type";
         internal const string CorrelationIdKey = "correlation_id";
         internal const string ReplyToKey = "reply_to";
+        internal const string ReplyConfigurationKey = "reply_configuration";
 
         protected internal readonly ISet<String> ReservedKeys = new HashSet<String>
                                                                     {
@@ -21,7 +23,8 @@ namespace Carrot.Messages
                                                                         ContentTypeKey,
                                                                         ContentEncodingKey,
                                                                         CorrelationIdKey,
-                                                                        ReplyToKey
+                                                                        ReplyToKey,
+                                                                        ReplyConfigurationKey
                                                                     };
 
         internal readonly IDictionary<String, Object> InternalDictionary;
@@ -46,7 +49,7 @@ namespace Carrot.Messages
 
         public String CorrelationId => ValueOrDefault<String>(CorrelationIdKey);
 
-        public String ReplyTo => ValueOrDefault<String>(ReplyToKey);
+        public ReplyConfiguration ReplyConfiguration => ValueOrDefault<ReplyConfiguration>(ReplyConfigurationKey);
 
         public Object this[String key]
         {
@@ -71,7 +74,11 @@ namespace Carrot.Messages
                                   { ContentTypeKey, properties.ContentType },
                                   { ContentEncodingKey, properties.ContentEncoding },
                                   { CorrelationIdKey, properties.CorrelationId },
-                                  { ReplyToKey, properties.ReplyTo }
+                                  { ReplyConfigurationKey, (properties.ReplyTo == null || properties.ReplyToAddress ==  null)
+                                                            ? null : 
+                                                            ReplyConfigurationFactory.Create(properties.ReplyToAddress.ExchangeType, 
+                                                                                             properties.ReplyToAddress.ExchangeName, 
+                                                                                             properties.ReplyToAddress.RoutingKey) }
                               };
 
             if (properties.Headers != null)

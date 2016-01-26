@@ -32,7 +32,11 @@ namespace Carrot.Tests
             var content = new Foo();
             const String messageId = "one-id";
             const Int64 timestamp = 123456789L;
-            const String replyTo = "reply-queue-name";
+            const String replyExchangeType = "direct";
+            const String replyExchangeName = "exchange-name";
+            const String replyRoutingKey = "routing-key";
+            String replyTo = $"{replyExchangeType}://{replyExchangeName}/{replyRoutingKey}";
+
             String correlationId = Guid.NewGuid().ToString();
             var args = new BasicDeliverEventArgs
             {
@@ -49,7 +53,7 @@ namespace Carrot.Tests
             Assert.Equal(messageId, actual.Headers.MessageId);
             Assert.Equal(timestamp, actual.Headers.Timestamp);
             Assert.Equal(correlationId, actual.Headers.CorrelationId);
-            Assert.Equal(replyTo, actual.Headers.ReplyTo);
+            Assert.Equal(replyTo, actual.Headers.ReplyConfiguration.ToString());
         }
 
         [Fact]

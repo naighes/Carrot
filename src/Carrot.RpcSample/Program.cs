@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using Carrot.Configuration;
 using Carrot.Messages;
+using Carrot.Messages.Replies;
 
 namespace Carrot.RpcSample
 {
@@ -9,8 +10,11 @@ namespace Carrot.RpcSample
     {
         static void Main(string[] args)
         {
-            const String routingKey = "routing_key";
+            const String routingKey = "request_routing_key";
             const String endpointUrl = "amqp://guest:guest@localhost:5672/";
+            const String replyQueueName = "reply_to_queue";
+            const String replyExchangeName = "reply_exchange";
+
             IMessageTypeResolver resolver = new MessageBindingResolver(typeof(Request).Assembly);
 
             var broker = Broker.New(_ =>
@@ -21,22 +25,21 @@ namespace Carrot.RpcSample
 
             var fooConsumer1 = new FooConsumer1(endpointUrl);
 
-            var exchange = broker.DeclareDirectExchange("source_exchange");
+            var exchange = broker.DeclareDirectExchange("request_exchange");
             var queue = broker.DeclareQueue("request_queue");
             broker.DeclareExchangeBinding(exchange, queue, routingKey);
             broker.SubscribeByAtLeastOnce(queue, _ => _.Consumes(fooConsumer1));
 
-            var replyToQueue = "reply_to_queue";
-            var replyQueue = broker.DeclareQueue(replyToQueue);
-            var replyExchange = broker.DeclareDirectExchange("reply_exchange");
-            broker.DeclareExchangeBinding(replyExchange, replyQueue, replyToQueue); //?????
+            var replyQueue = broker.DeclareQueue(replyQueueName);
+            var replyExchange = broker.DeclareDirectExchange(replyExchangeName);
+            broker.DeclareExchangeBinding(replyExchange, replyQueue, replyQueueName);
             broker.SubscribeByAtLeastOnce(replyQueue, _ => _.Consumes(new FooConsumer2()));
             
             var connection = broker.Connect();
 
             var message = new OutboundMessage<Request>(new Request { Bar = 42 });
             message.SetCorrelationId(Guid.NewGuid().ToString());
-            //message.SetReplyTo($"//direct://{replyExchange.Name}/{replyQueue.Name}"); //exchangeType://exchangeName/routingKey
+            message.SetReply(new DirectReplyConfiguration(replyExchangeName, replyQueueName));
             connection.PublishAsync(message, exchange, routingKey);
 
             Console.ReadLine();
@@ -48,7 +51,7 @@ namespace Carrot.RpcSample
     internal class FooConsumer1 : Consumer<Request>, IDisposable
     {
         private readonly IConnection _connection;
-        private IBroker _broker;
+        private readonly IBroker _broker;
 
         public FooConsumer1(string endpointUrl)
         {
@@ -69,11 +72,11 @@ namespace Carrot.RpcSample
                                   message.Headers.MessageId,
                                   GetType().Name);
 
-                var exchange = _broker.DeclareDirectExchange(message.Headers.ReplyTo);
+                //var exchange = _broker.DeclareDirectExchange(message.Headers.ReplyTo); //?????
 
                 var outboundMessage = new OutboundMessage<Response>(new Response {BarBar = message.Content.Bar*2});
                 outboundMessage.SetCorrelationId(message.Headers.CorrelationId);
-                _connection.PublishAsync(outboundMessage, exchange, message.Headers.ReplyTo);
+                //_connection.PublishAsync(outboundMessage, exchange, message.Headers.ReplyTo);
             });
         }
 
