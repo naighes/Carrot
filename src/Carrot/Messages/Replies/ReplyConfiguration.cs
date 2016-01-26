@@ -15,7 +15,7 @@ namespace Carrot.Messages.Replies
 
         public override string ToString()
         {
-            return _exchangeName == "" ? _routingKey : $"{_exchangeType}://{_exchangeName}/{_routingKey}";
+            return $"{_exchangeType}://{_exchangeName}/{_routingKey}";
         }
     }
 }

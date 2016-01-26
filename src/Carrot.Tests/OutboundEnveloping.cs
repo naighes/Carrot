@@ -226,8 +226,7 @@ namespace Carrot.Tests
             var properties = message.BuildBasicProperties(StubResolver<Bar>(null).Object,
                                                           StubDateTimeProvider().Object,
                                                           new Mock<INewId>().Object);
-            Assert.Null(properties.ReplyToAddress);
-            Assert.Equal("replyRoutingKey", properties.ReplyTo);
+            Assert.Equal("direct:///replyRoutingKey", properties.ReplyTo);
         }
 
         [Fact]
