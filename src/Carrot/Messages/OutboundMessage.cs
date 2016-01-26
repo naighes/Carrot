@@ -53,11 +53,6 @@ namespace Carrot.Messages
             Headers.Set(HeaderCollection.CorrelationIdKey, correlationId);
         }
 
-        public void SetReplyTo(string replyTo)
-        {
-            Headers.Set(HeaderCollection.ReplyToKey, replyTo);
-        }
-
         public void SetReply(ReplyConfiguration replyConfiguration)
         {
             Headers.Set(HeaderCollection.ReplyToKey, replyConfiguration.ToString());

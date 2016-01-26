@@ -190,18 +190,6 @@ namespace Carrot.Tests
         }
 
         [Fact]
-        public void ReplyTo()
-        {
-            String replyTo = "reply-to-queue-name";
-            var message = new OutboundMessage<Bar>(new Bar());
-            message.SetReplyTo(replyTo);
-            var properties = message.BuildBasicProperties(StubResolver<Bar>(null).Object,
-                                                          StubDateTimeProvider().Object,
-                                                          new Mock<INewId>().Object);
-            Assert.Equal(replyTo, properties.ReplyTo);
-        }
-
-        [Fact]
         public void DirectReply()
         {
             const String replyExchangeName = "replyExchangeName";
