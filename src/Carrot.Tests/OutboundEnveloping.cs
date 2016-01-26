@@ -234,6 +234,21 @@ namespace Carrot.Tests
         }
 
         [Fact]
+        public void FanoutReply()
+        {
+            const string replyExchangeName = "replyExchangeName";
+            var message = new OutboundMessage<Bar>(new Bar());
+            message.SetReply(new FanoutReplyConfiguration(replyExchangeName));
+            var properties = message.BuildBasicProperties(StubResolver<Bar>(null).Object,
+                                                          StubDateTimeProvider().Object,
+                                                          new Mock<INewId>().Object);
+            Assert.Equal("fanout", properties.ReplyToAddress.ExchangeType);
+            Assert.Equal(replyExchangeName, properties.ReplyToAddress.ExchangeName);
+            Assert.Equal(string.Empty, properties.ReplyToAddress.RoutingKey);
+            Assert.Equal("fanout://replyExchangeName/", properties.ReplyTo);
+        }
+
+        [Fact]
         public void NonDurableMessage()
         {
             var message = new OutboundMessage<Bar>(new Bar());
