@@ -218,6 +218,22 @@ namespace Carrot.Tests
         }
 
         [Fact]
+        public void TopicReply()
+        {
+            const string replyExchangeName = "replyExchangeName";
+            const string replyRoutingKey = "replyRoutingKey";
+            var message = new OutboundMessage<Bar>(new Bar());
+            message.SetReply(new TopicReplyConfiguration(replyExchangeName, replyRoutingKey));
+            var properties = message.BuildBasicProperties(StubResolver<Bar>(null).Object,
+                                                          StubDateTimeProvider().Object,
+                                                          new Mock<INewId>().Object);
+            Assert.Equal("topic", properties.ReplyToAddress.ExchangeType);
+            Assert.Equal(replyExchangeName, properties.ReplyToAddress.ExchangeName);
+            Assert.Equal(replyRoutingKey, properties.ReplyToAddress.RoutingKey);
+            Assert.Equal("topic://replyExchangeName/replyRoutingKey", properties.ReplyTo);
+        }
+
+        [Fact]
         public void NonDurableMessage()
         {
             var message = new OutboundMessage<Bar>(new Bar());
