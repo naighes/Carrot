@@ -25,7 +25,10 @@ namespace Carrot.Tests
             const String messageId = "456";
             const Byte priority = 3;
             const String userId = "me";
-            const String replyTo = "amqp://my.host";
+            const String exchangeType = "direct";
+            const String exchangeName = "exchange-name";
+            const String routingKey = "routing-key";
+            String replyTo = $"{exchangeType}://{exchangeName}/{routingKey}";
             var timestamp = new AmqpTimestamp(1445843868L);
 
             var properties = new BasicProperties
@@ -62,7 +65,9 @@ namespace Carrot.Tests
             Assert.Equal(priority, copy.Priority);
             Assert.Equal(userId, copy.UserId);
             Assert.Equal(replyTo, copy.ReplyTo);
-            Assert.Equal(PublicationAddress.Parse(replyTo), copy.ReplyToAddress);
+            Assert.Equal(exchangeType, copy.ReplyToAddress.ExchangeType);
+            Assert.Equal(exchangeName, copy.ReplyToAddress.ExchangeName);
+            Assert.Equal(routingKey, copy.ReplyToAddress.RoutingKey);
             Assert.Equal(1, copy.Headers.Count);
             Assert.True(copy.Headers.ContainsKey("h"));
             Assert.Equal("a", copy.Headers["h"]);
