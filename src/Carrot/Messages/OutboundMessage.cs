@@ -60,7 +60,7 @@ namespace Carrot.Messages
 
         public void SetReply(ReplyConfiguration replyConfiguration)
         {
-            Headers.Set(HeaderCollection.ReplyToKey, $"{replyConfiguration.ExchangeType}://{replyConfiguration.ExcgangeName}/{replyConfiguration.RoutingKey}");
+            Headers.Set(HeaderCollection.ReplyToKey, replyConfiguration.ToString());
         }
 
         internal virtual IBasicProperties BuildBasicProperties(IMessageTypeResolver resolver,

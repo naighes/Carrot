@@ -204,8 +204,8 @@ namespace Carrot.Tests
         [Fact]
         public void DirectReply()
         {
-            const string replyExchangeName = "replyExchangeName";
-            const string replyRoutingKey = "replyRoutingKey";
+            const String replyExchangeName = "replyExchangeName";
+            const String replyRoutingKey = "replyRoutingKey";
             var message = new OutboundMessage<Bar>(new Bar());
             message.SetReply(new DirectReplyConfiguration(replyExchangeName, replyRoutingKey));
             var properties = message.BuildBasicProperties(StubResolver<Bar>(null).Object,
@@ -218,10 +218,23 @@ namespace Carrot.Tests
         }
 
         [Fact]
+        public void DirectReplyWithDefaultExchange()
+        {
+            const String replyRoutingKey = "replyRoutingKey";
+            var message = new OutboundMessage<Bar>(new Bar());
+            message.SetReply(new DirectReplyConfiguration(replyRoutingKey));
+            var properties = message.BuildBasicProperties(StubResolver<Bar>(null).Object,
+                                                          StubDateTimeProvider().Object,
+                                                          new Mock<INewId>().Object);
+            Assert.Null(properties.ReplyToAddress);
+            Assert.Equal("replyRoutingKey", properties.ReplyTo);
+        }
+
+        [Fact]
         public void TopicReply()
         {
-            const string replyExchangeName = "replyExchangeName";
-            const string replyRoutingKey = "replyRoutingKey";
+            const String replyExchangeName = "replyExchangeName";
+            const String replyRoutingKey = "replyRoutingKey";
             var message = new OutboundMessage<Bar>(new Bar());
             message.SetReply(new TopicReplyConfiguration(replyExchangeName, replyRoutingKey));
             var properties = message.BuildBasicProperties(StubResolver<Bar>(null).Object,
@@ -236,7 +249,7 @@ namespace Carrot.Tests
         [Fact]
         public void FanoutReply()
         {
-            const string replyExchangeName = "replyExchangeName";
+            const String replyExchangeName = "replyExchangeName";
             var message = new OutboundMessage<Bar>(new Bar());
             message.SetReply(new FanoutReplyConfiguration(replyExchangeName));
             var properties = message.BuildBasicProperties(StubResolver<Bar>(null).Object,

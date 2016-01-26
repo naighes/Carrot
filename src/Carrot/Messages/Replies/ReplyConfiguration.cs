@@ -2,16 +2,20 @@ namespace Carrot.Messages.Replies
 {
     public abstract class ReplyConfiguration
     {
-        protected ReplyConfiguration(string exchangeType, string excgangeName, string routingKey)
+        private readonly string _exchangeType;
+        private readonly string _exchangeName;
+        private readonly string _routingKey;
+
+        protected ReplyConfiguration(string exchangeType, string exchangeName, string routingKey)
         {
-            RoutingKey = routingKey;
-            ExcgangeName = excgangeName;
-            ExchangeType = exchangeType;
+            _exchangeType = exchangeType;
+            _exchangeName = exchangeName;
+            _routingKey = routingKey;
         }
 
-        public string ExchangeType { get; }
-        public string ExcgangeName { get; }
-
-        public string RoutingKey { get; }
+        public override string ToString()
+        {
+            return _exchangeName == "" ? _routingKey : $"{_exchangeType}://{_exchangeName}/{_routingKey}";
+        }
     }
 }
