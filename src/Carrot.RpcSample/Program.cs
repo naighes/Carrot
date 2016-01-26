@@ -36,7 +36,7 @@ namespace Carrot.RpcSample
 
             var message = new OutboundMessage<Request>(new Request { Bar = 42 });
             message.SetCorrelationId(Guid.NewGuid().ToString());
-            message.SetReplyTo($"//{"direct"}://{replyExchange.Name}/{replyQueue.Name}"); //exchangeType://exchangeName/routingKey
+            message.SetReplyTo($"//direct://{replyExchange.Name}/{replyQueue.Name}"); //exchangeType://exchangeName/routingKey
             connection.PublishAsync(message, exchange, routingKey);
 
             Console.ReadLine();

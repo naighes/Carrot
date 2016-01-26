@@ -2,6 +2,7 @@ using System;
 using Carrot.Configuration;
 using Carrot.Extensions;
 using Carrot.Messages;
+using Carrot.Messages.Replies;
 using Moq;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
@@ -198,6 +199,22 @@ namespace Carrot.Tests
                                                           StubDateTimeProvider().Object,
                                                           new Mock<INewId>().Object);
             Assert.Equal(replyTo, properties.ReplyTo);
+        }
+
+        [Fact]
+        public void DirectReply()
+        {
+            const string replyExchangeName = "replyExchangeName";
+            const string replyRoutingKey = "replyRoutingKey";
+            var message = new OutboundMessage<Bar>(new Bar());
+            message.SetReply(new DirectReplyConfiguration(replyExchangeName, replyRoutingKey));
+            var properties = message.BuildBasicProperties(StubResolver<Bar>(null).Object,
+                                                          StubDateTimeProvider().Object,
+                                                          new Mock<INewId>().Object);
+            Assert.Equal("direct", properties.ReplyToAddress.ExchangeType);
+            Assert.Equal(replyExchangeName, properties.ReplyToAddress.ExchangeName);
+            Assert.Equal(replyRoutingKey, properties.ReplyToAddress.RoutingKey);
+            Assert.Equal("direct://replyExchangeName/replyRoutingKey", properties.ReplyTo);
         }
 
         [Fact]

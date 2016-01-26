@@ -4,6 +4,7 @@ using System.Globalization;
 using System.Linq;
 using Carrot.Configuration;
 using Carrot.Extensions;
+using Carrot.Messages.Replies;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Framing;
 
@@ -55,6 +56,11 @@ namespace Carrot.Messages
         public void SetReplyTo(string replyTo)
         {
             Headers.Set(HeaderCollection.ReplyToKey, replyTo);
+        }
+
+        public void SetReply(ReplyConfiguration replyConfiguration)
+        {
+            Headers.Set(HeaderCollection.ReplyToKey, $"{replyConfiguration.ExchangeType}://{replyConfiguration.ExcgangeName}/{replyConfiguration.RoutingKey}");
         }
 
         internal virtual IBasicProperties BuildBasicProperties(IMessageTypeResolver resolver,
