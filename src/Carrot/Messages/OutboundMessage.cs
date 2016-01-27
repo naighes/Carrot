@@ -69,12 +69,16 @@ namespace Carrot.Messages
                 ContentType = Headers.ContentType ?? SerializationConfiguration.DefaultContentType,
                 ContentEncoding = Headers.ContentEncoding ?? SerializationConfiguration.DefaultContentEncoding,
                 MessageId = Headers.MessageId ?? idGenerator.Next(),
-                CorrelationId = Headers.CorrelationId,
-                ReplyTo = Headers.ReplyConfiguration == null ? null : Headers.ReplyConfiguration.ToString(),
                 Timestamp = new AmqpTimestamp(Headers.Timestamp <= 0L
                                              ? dateTimeProvider.UtcNow().ToUnixTimestamp()
                                              : Headers.Timestamp)
             };
+
+            if (!String.IsNullOrWhiteSpace(Headers.CorrelationId))
+                properties.CorrelationId = Headers.CorrelationId;
+
+            if (Headers.ReplyConfiguration != null)
+                properties.ReplyTo = Headers.ReplyConfiguration.ToString();
 
             var binding = resolver.Resolve<TMessage>();
             properties.Type = binding.RawName;

@@ -15,7 +15,7 @@ namespace Carrot.RpcSample
             const String replyQueueName = "reply_to_queue";
             const String replyExchangeName = "reply_exchange";
 
-            IMessageTypeResolver resolver = new MessageBindingResolver(typeof(Request).Assembly);
+            IMessageTypeResolver resolver = new MessageBindingResolver(typeof(Response).Assembly);
 
             var broker = Broker.New(_ =>
             {
@@ -23,18 +23,18 @@ namespace Carrot.RpcSample
                 _.ResolveMessageTypeBy(resolver);
             });
 
-            var fooConsumer1 = new FooConsumer1(endpointUrl);
+            var requestConsumer = new RequestConsumer(endpointUrl);
 
             var exchange = broker.DeclareDirectExchange("request_exchange");
             var queue = broker.DeclareQueue("request_queue");
             broker.DeclareExchangeBinding(exchange, queue, routingKey);
-            broker.SubscribeByAtLeastOnce(queue, _ => _.Consumes(fooConsumer1));
+            broker.SubscribeByAtLeastOnce(queue, _ => _.Consumes(requestConsumer));
 
-            var replyQueue = broker.DeclareQueue(replyQueueName);
             var replyExchange = broker.DeclareDirectExchange(replyExchangeName);
+            var replyQueue = broker.DeclareQueue(replyQueueName);
             broker.DeclareExchangeBinding(replyExchange, replyQueue, replyQueueName);
-            broker.SubscribeByAtLeastOnce(replyQueue, _ => _.Consumes(new FooConsumer2()));
-            
+            broker.SubscribeByAtLeastOnce(replyQueue, _ => _.Consumes(new ResponseConsumer()));
+
             var connection = broker.Connect();
 
             var message = new OutboundMessage<Request>(new Request { Bar = 42 });
@@ -43,21 +43,24 @@ namespace Carrot.RpcSample
             connection.PublishAsync(message, exchange, routingKey);
 
             Console.ReadLine();
-            fooConsumer1.Dispose();
+            requestConsumer.Dispose();
             connection.Dispose();
         }
     }
 
-    internal class FooConsumer1 : Consumer<Request>, IDisposable
+    internal class RequestConsumer : Consumer<Request>, IDisposable
     {
         private readonly IConnection _connection;
         private readonly IBroker _broker;
 
-        public FooConsumer1(string endpointUrl)
+        private readonly IMessageTypeResolver _resolver = new MessageBindingResolver(typeof(Response).Assembly);
+
+        public RequestConsumer(string endpointUrl)
         {
             _broker = Broker.New(_ =>
             {
                 _.Endpoint(new Uri(endpointUrl, UriKind.Absolute));
+                _.ResolveMessageTypeBy(_resolver);
             });
 
             _connection = _broker.Connect();
@@ -67,16 +70,19 @@ namespace Carrot.RpcSample
         {
             return Task.Factory.StartNew(() =>
             {
-                Console.WriteLine("[{0}]received '{1}' by '{2}'",
+                Console.WriteLine("[{0}]received '{1}' by '{2}' with correlation id {3}",
                                   message.ConsumerTag,
                                   message.Headers.MessageId,
-                                  GetType().Name);
+                                  GetType().Name,
+                                  message.Headers.CorrelationId);
 
-                //var exchange = _broker.DeclareDirectExchange(message.Headers.ReplyTo); //?????
+                var exchange = _broker.DeclareDirectExchange(message.Headers.ReplyConfiguration.ExchangeName);
+                var queue = _broker.DeclareQueue(message.Headers.ReplyConfiguration.RoutingKey);
+                _broker.DeclareExchangeBinding(exchange, queue, message.Headers.ReplyConfiguration.RoutingKey);
 
-                var outboundMessage = new OutboundMessage<Response>(new Response {BarBar = message.Content.Bar*2});
+                var outboundMessage = new OutboundMessage<Response>(new Response { BarBar = message.Content.Bar * 2 });
                 outboundMessage.SetCorrelationId(message.Headers.CorrelationId);
-                //_connection.PublishAsync(outboundMessage, exchange, message.Headers.ReplyTo);
+                _connection.PublishAsync(outboundMessage, exchange, message.Headers.ReplyConfiguration.RoutingKey);
             });
         }
 
@@ -86,16 +92,17 @@ namespace Carrot.RpcSample
         }
     }
 
-    internal class FooConsumer2 : Consumer<Response>
+    internal class ResponseConsumer : Consumer<Response>
     {
         public override Task ConsumeAsync(ConsumedMessage<Response> message)
         {
             return Task.Factory.StartNew(() =>
             {
-                Console.WriteLine("[{0}]received '{1}' by '{2}'",
+                Console.WriteLine("[{0}]received '{1}' by '{2}' with correlation id {3}",
                                   message.ConsumerTag,
                                   message.Headers.MessageId,
-                                  GetType().Name);
+                                  GetType().Name,
+                                  message.Headers.CorrelationId);
             });
         }
     }
