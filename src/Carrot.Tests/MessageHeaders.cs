@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Carrot.Configuration;
 using Carrot.Extensions;
 using Carrot.Messages;
+using Carrot.Messages.Replies;
 using Moq;
 using RabbitMQ.Client;
 using Xunit;
@@ -28,12 +29,18 @@ namespace Carrot.Tests
             const String contentEncoding = "UTF-16";
             const String messageId = "one-id";
             const Int64 timestamp = 123456789L;
+            const String replyExchangeName = "reply-queue-name";
+            const String replyRoutingKey = "reply-queue-name";
+            String correlationId = Guid.NewGuid().ToString();
+            var directReplyConfiguration = new DirectReplyConfiguration(replyExchangeName, replyRoutingKey);
             var collection = new HeaderCollection(new Dictionary<String, Object>(StringComparer.OrdinalIgnoreCase)
                                                       {
                                                           { "message_id", messageId },
                                                           { "timestamp", timestamp },
                                                           { "content_type", contentType },
-                                                          { "content_encoding", contentEncoding }
+                                                          { "content_encoding", contentEncoding },
+                                                          { "correlation_id", correlationId },
+                                                          { "reply_configuration", directReplyConfiguration }
                                                       });
             const String key = "foo";
             const String value = "bar";
@@ -47,6 +54,8 @@ namespace Carrot.Tests
             Assert.Equal(new AmqpTimestamp(timestamp), properties.Timestamp);
             Assert.Equal(contentType, properties.ContentType);
             Assert.Equal(contentEncoding, properties.ContentEncoding);
+            Assert.Equal(correlationId, properties.CorrelationId);
+            Assert.Equal(directReplyConfiguration.ToString(), properties.ReplyTo);
             Assert.Equal(value, collection[key]);
         }
 
@@ -89,11 +98,15 @@ namespace Carrot.Tests
             Assert.Throws<InvalidOperationException>(() => collection.AddHeader("timestamp", 12345678L));
             Assert.Throws<InvalidOperationException>(() => collection.AddHeader("content_type", "application/json"));
             Assert.Throws<InvalidOperationException>(() => collection.AddHeader("content_encoding", "UTF-8"));
+            Assert.Throws<InvalidOperationException>(() => collection.AddHeader("correlation_id", Guid.NewGuid().ToString()));
+            Assert.Throws<InvalidOperationException>(() => collection.AddHeader("reply_to", "reply-queue-name"));
 
             Assert.Throws<InvalidOperationException>(() => collection.RemoveHeader("message_id"));
             Assert.Throws<InvalidOperationException>(() => collection.RemoveHeader("timestamp"));
             Assert.Throws<InvalidOperationException>(() => collection.RemoveHeader("content_type"));
             Assert.Throws<InvalidOperationException>(() => collection.RemoveHeader("content_encoding"));
+            Assert.Throws<InvalidOperationException>(() => collection.RemoveHeader("correlation_id"));
+            Assert.Throws<InvalidOperationException>(() => collection.RemoveHeader("reply_to"));
         }
 
         [Fact]
@@ -104,6 +117,8 @@ namespace Carrot.Tests
             Assert.Throws<InvalidOperationException>(() => collection["timestamp"]);
             Assert.Throws<InvalidOperationException>(() => collection["content_type"]);
             Assert.Throws<InvalidOperationException>(() => collection["content_encoding"]);
+            Assert.Throws<InvalidOperationException>(() => collection["correlation_id"]);
+            Assert.Throws<InvalidOperationException>(() => collection["reply_to"]);
         }
     }
 }
