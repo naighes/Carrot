@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection;
 using Carrot.Extensions;
-using RabbitMQ.Client;
 
 namespace Carrot
 {
@@ -31,9 +30,9 @@ namespace Carrot
             return connectionFactory.CreateConnection();
         }
 
-        protected virtual ConnectionFactory BuildConnectionFactory(Uri endpointUri)
+        protected virtual RabbitMQ.Client.ConnectionFactory BuildConnectionFactory(Uri endpointUri)
         {
-            var factory = new ConnectionFactory
+            var factory = new RabbitMQ.Client.ConnectionFactory
                               {
                                   Uri = endpointUri.ToString(),
                                   AutomaticRecoveryEnabled = true,

@@ -1,5 +1,4 @@
 using Carrot.Configuration;
-using Carrot.Extensions;
 using Carrot.Serialization;
 using RabbitMQ.Client.Events;
 
