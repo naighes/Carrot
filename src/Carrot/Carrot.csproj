@@ -104,6 +104,11 @@
     <Compile Include="Messages\IConsumedMessageBuilder.cs" />
     <Compile Include="Messages\IMessage.cs" />
     <Compile Include="Messages\OutboundMessage.cs" />
+    <Compile Include="Messages\Replies\DirectReplyConfiguration.cs" />
+    <Compile Include="Messages\Replies\FanoutReplyConfiguration.cs" />
+    <Compile Include="Messages\Replies\ReplyConfiguration.cs" />
+    <Compile Include="Messages\Replies\ReplyConfigurationFactory.cs" />
+    <Compile Include="Messages\Replies\TopicReplyConfiguration.cs" />
     <Compile Include="Messages\Results.cs" />
     <Compile Include="Messages\UnresolvedMessage.cs" />
     <Compile Include="Messages\UnsupportedMessage.cs" />

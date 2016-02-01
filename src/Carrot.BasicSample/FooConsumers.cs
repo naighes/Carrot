@@ -8,13 +8,14 @@ namespace Carrot.BasicSample
     {
         public override Task ConsumeAsync(ConsumedMessage<Foo> message)
         {
-            return Task.Factory.StartNew(() =>
-            {
-                Console.WriteLine("[{0}]received '{1}' by '{2}'",
-                                  message.ConsumerTag,
-                                  message.Headers.MessageId,
-                                  GetType().Name);
-            });
+            return Task.Factory
+                       .StartNew(() =>
+                                 {
+                                     Console.WriteLine("[{0}]received '{1}' by '{2}'",
+                                                       message.ConsumerTag,
+                                                       message.Headers.MessageId,
+                                                       GetType().Name);
+                                 });
         }
     }
 
@@ -22,13 +23,14 @@ namespace Carrot.BasicSample
     {
         public override Task ConsumeAsync(ConsumedMessage<Foo> message)
         {
-            return Task.Factory.StartNew(() =>
-            {
-                Console.WriteLine("[{0}]received '{1}' by '{2}'",
-                                  message.ConsumerTag,
-                                  message.Headers.MessageId,
-                                  GetType().Name);
-            });
+            return Task.Factory
+                       .StartNew(() =>
+                                 {
+                                     Console.WriteLine("[{0}]received '{1}' by '{2}'",
+                                                       message.ConsumerTag,
+                                                       message.Headers.MessageId,
+                                                       GetType().Name);
+                                 });
         }
     }
 }

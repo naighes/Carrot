@@ -2,6 +2,7 @@ using System;
 using Carrot.Configuration;
 using Carrot.Extensions;
 using Carrot.Messages;
+using Carrot.Messages.Replies;
 using Moq;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
@@ -174,6 +175,77 @@ namespace Carrot.Tests
                                                           StubDateTimeProvider().Object,
                                                           new Mock<INewId>().Object);
             Assert.Equal("application/json", properties.ContentType);
+        }
+
+        [Fact]
+        public void CorrelationId()
+        {
+            String correlationId = Guid.NewGuid().ToString();
+            var message = new OutboundMessage<Bar>(new Bar());
+            message.SetCorrelationId(correlationId);
+            var properties = message.BuildBasicProperties(StubResolver<Bar>(null).Object,
+                                                          StubDateTimeProvider().Object,
+                                                          new Mock<INewId>().Object);
+            Assert.Equal(correlationId, properties.CorrelationId);
+        }
+
+        [Fact]
+        public void DirectReply()
+        {
+            const String replyExchangeName = "replyExchangeName";
+            const String replyRoutingKey = "replyRoutingKey";
+            var message = new OutboundMessage<Bar>(new Bar());
+            message.SetReply(new DirectReplyConfiguration(replyExchangeName, replyRoutingKey));
+            var properties = message.BuildBasicProperties(StubResolver<Bar>(null).Object,
+                                                          StubDateTimeProvider().Object,
+                                                          new Mock<INewId>().Object);
+            Assert.Equal("direct", properties.ReplyToAddress.ExchangeType);
+            Assert.Equal(replyExchangeName, properties.ReplyToAddress.ExchangeName);
+            Assert.Equal(replyRoutingKey, properties.ReplyToAddress.RoutingKey);
+            Assert.Equal("direct://replyExchangeName/replyRoutingKey", properties.ReplyTo);
+        }
+
+        [Fact]
+        public void DirectReplyWithDefaultExchange()
+        {
+            const String replyRoutingKey = "replyRoutingKey";
+            var message = new OutboundMessage<Bar>(new Bar());
+            message.SetReply(new DirectReplyConfiguration(replyRoutingKey));
+            var properties = message.BuildBasicProperties(StubResolver<Bar>(null).Object,
+                                                          StubDateTimeProvider().Object,
+                                                          new Mock<INewId>().Object);
+            Assert.Equal("direct:///replyRoutingKey", properties.ReplyTo);
+        }
+
+        [Fact]
+        public void TopicReply()
+        {
+            const String replyExchangeName = "replyExchangeName";
+            const String replyRoutingKey = "replyRoutingKey";
+            var message = new OutboundMessage<Bar>(new Bar());
+            message.SetReply(new TopicReplyConfiguration(replyExchangeName, replyRoutingKey));
+            var properties = message.BuildBasicProperties(StubResolver<Bar>(null).Object,
+                                                          StubDateTimeProvider().Object,
+                                                          new Mock<INewId>().Object);
+            Assert.Equal("topic", properties.ReplyToAddress.ExchangeType);
+            Assert.Equal(replyExchangeName, properties.ReplyToAddress.ExchangeName);
+            Assert.Equal(replyRoutingKey, properties.ReplyToAddress.RoutingKey);
+            Assert.Equal("topic://replyExchangeName/replyRoutingKey", properties.ReplyTo);
+        }
+
+        [Fact]
+        public void FanoutReply()
+        {
+            const String replyExchangeName = "replyExchangeName";
+            var message = new OutboundMessage<Bar>(new Bar());
+            message.SetReply(new FanoutReplyConfiguration(replyExchangeName));
+            var properties = message.BuildBasicProperties(StubResolver<Bar>(null).Object,
+                                                          StubDateTimeProvider().Object,
+                                                          new Mock<INewId>().Object);
+            Assert.Equal("fanout", properties.ReplyToAddress.ExchangeType);
+            Assert.Equal(replyExchangeName, properties.ReplyToAddress.ExchangeName);
+            Assert.Equal(String.Empty, properties.ReplyToAddress.RoutingKey);
+            Assert.Equal("fanout://replyExchangeName/", properties.ReplyTo);
         }
 
         [Fact]

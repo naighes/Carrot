@@ -32,18 +32,28 @@ namespace Carrot.Tests
             var content = new Foo();
             const String messageId = "one-id";
             const Int64 timestamp = 123456789L;
+            const String replyExchangeType = "direct";
+            const String replyExchangeName = "exchange-name";
+            const String replyRoutingKey = "routing-key";
+            const String correlationId = "one-correlation-id";
+            var replyTo = $"{replyExchangeType}://{replyExchangeName}/{replyRoutingKey}";
+
             var args = new BasicDeliverEventArgs
                            {
                                BasicProperties = new BasicProperties
                                                      {
                                                          MessageId = messageId,
-                                                         Timestamp = new AmqpTimestamp(timestamp)
+                                                         Timestamp = new AmqpTimestamp(timestamp),
+                                                         CorrelationId = correlationId,
+                                                         ReplyTo = replyTo
                                                      }
                            };
             var message = new FakeConsumedMessage(content, args);
             var actual = message.To<Foo>();
             Assert.Equal(messageId, actual.Headers.MessageId);
             Assert.Equal(timestamp, actual.Headers.Timestamp);
+            Assert.Equal(correlationId, actual.Headers.CorrelationId);
+            Assert.Equal(replyTo, actual.Headers.ReplyConfiguration.ToString());
         }
 
         [Fact]

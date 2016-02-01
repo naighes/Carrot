@@ -4,6 +4,7 @@ using System.Globalization;
 using System.Linq;
 using Carrot.Configuration;
 using Carrot.Extensions;
+using Carrot.Messages.Replies;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Framing;
 
@@ -39,12 +40,22 @@ namespace Carrot.Messages
 
         public void SetContentEncoding(String value)
         {
-            Set("content_encoding", value);
+            Headers.Set(HeaderCollection.ContentEncodingKey, value);
         }
 
         public void SetContentType(String value)
         {
-            Set("content_type", value);
+            Headers.Set(HeaderCollection.ContentTypeKey, value);
+        }
+
+        public void SetCorrelationId(String correlationId)
+        {
+            Headers.Set(HeaderCollection.CorrelationIdKey, correlationId);
+        }
+
+        public void SetReply(ReplyConfiguration replyConfiguration)
+        {
+            Headers.Set(HeaderCollection.ReplyConfigurationKey, replyConfiguration);
         }
 
         internal virtual IBasicProperties BuildBasicProperties(IMessageTypeResolver resolver,
@@ -63,6 +74,12 @@ namespace Carrot.Messages
                                              : Headers.Timestamp)
             };
 
+            if (!String.IsNullOrWhiteSpace(Headers.CorrelationId))
+                properties.CorrelationId = Headers.CorrelationId;
+
+            if (Headers.ReplyConfiguration != null)
+                properties.ReplyTo = Headers.ReplyConfiguration.ToString();
+
             var binding = resolver.Resolve<TMessage>();
             properties.Type = binding.RawName;
 
@@ -75,17 +92,6 @@ namespace Carrot.Messages
             Headers.NonReservedHeaders().ToList().ForEach(_ => properties.Headers.Add(_.Key, _.Value));
 
             return properties;
-        }
-
-        private void Set<T>(String key, T value)
-        {
-            if (value == null)
-                throw new ArgumentNullException(nameof(value));
-
-            if (!Headers.InternalDictionary.ContainsKey(key))
-                Headers.InternalDictionary.Add(key, value);
-            else
-                Headers.InternalDictionary[key] = value;
         }
     }
 }
