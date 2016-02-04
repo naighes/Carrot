@@ -47,7 +47,7 @@ namespace Carrot
                                                          Exchange exchange,
                                                          String routingKey)
         {
-            var properties = message.Args.BasicProperties.Copy();
+            var properties = message.Args.BasicProperties.Clone() as IBasicProperties;
             var body = message.Args.Body;
             return PublishInternalAsync(exchange, routingKey, properties, body);
         }
