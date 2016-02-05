@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Text;
 using Carrot.Configuration;
 using Carrot.Extensions;
-using RabbitMQ.Client;
 using RabbitMQ.Client.Framing;
 using Xunit;
 
