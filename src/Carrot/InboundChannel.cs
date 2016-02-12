@@ -12,7 +12,7 @@ namespace Carrot
         void NegativeAcknowledge(UInt64 deliveryTag, Boolean requeue);
     }
 
-    public class LoggedInboundChannel : InboundChannel
+    internal class LoggedInboundChannel : InboundChannel
     {
         private readonly ILog _log;
 

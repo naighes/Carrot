@@ -8,7 +8,7 @@ using RabbitMQ.Client.Events;
 
 namespace Carrot
 {
-    public class LoggedAtMostOnceConsumer : AtMostOnceConsumer
+    internal class LoggedAtMostOnceConsumer : AtMostOnceConsumer
     {
         private readonly ILog _log;
 
