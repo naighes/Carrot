@@ -38,9 +38,9 @@ namespace Carrot.Tests
                     .Throws<Exception>();
             var builder = new ConsumedMessageBuilder(serializationConfiguration, resolver.Object);
             var message = builder.Build(new BasicDeliverEventArgs
-            {
-                BasicProperties = new BasicProperties { Type = type }
-            });
+                                            {
+                                                BasicProperties = new BasicProperties { Type = type }
+                                            });
             Assert.IsType<UnresolvedMessage>(message);
         }
 

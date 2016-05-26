@@ -21,6 +21,7 @@ namespace Carrot.Messages
         {
             var context = ConsumedMessageContext.FromBasicDeliverEventArgs(args);
             MessageBinding binding;
+
             try { binding = _resolver.Resolve(context); }
             catch (Exception) { return new UnresolvedMessage(args); }
 
