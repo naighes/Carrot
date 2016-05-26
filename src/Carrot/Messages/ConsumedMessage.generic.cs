@@ -5,7 +5,7 @@ namespace Carrot.Messages
     public class ConsumedMessage<TMessage> : Message<TMessage>
         where TMessage : class
     {
-        internal ConsumedMessage(TMessage content, HeaderCollection headers, String consumerTag)
+        protected internal ConsumedMessage(TMessage content, HeaderCollection headers, String consumerTag)
         {
             Content = content;
             Headers = headers;
