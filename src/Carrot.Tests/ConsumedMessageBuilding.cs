@@ -29,6 +29,22 @@ namespace Carrot.Tests
         }
 
         [Fact]
+        public void ExceptionOnResolve()
+        {
+            const String type = "fake-type";
+            var serializationConfiguration = new SerializationConfiguration();
+            var resolver = new Mock<IMessageTypeResolver>();
+            resolver.Setup(_ => _.Resolve(It.Is<ConsumedMessageContext>(__ => __.MessageType == type)))
+                    .Throws<Exception>();
+            var builder = new ConsumedMessageBuilder(serializationConfiguration, resolver.Object);
+            var message = builder.Build(new BasicDeliverEventArgs
+            {
+                BasicProperties = new BasicProperties { Type = type }
+            });
+            Assert.IsType<UnresolvedMessage>(message);
+        }
+
+        [Fact]
         public void MissingContentType()
         {
             const String contentType = "application/null";

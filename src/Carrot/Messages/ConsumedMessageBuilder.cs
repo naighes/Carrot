@@ -1,3 +1,4 @@
+using System;
 using Carrot.Configuration;
 using Carrot.Serialization;
 using RabbitMQ.Client.Events;
@@ -19,7 +20,9 @@ namespace Carrot.Messages
         public ConsumedMessageBase Build(BasicDeliverEventArgs args)
         {
             var context = ConsumedMessageContext.FromBasicDeliverEventArgs(args);
-            var binding = _resolver.Resolve(context);
+            MessageBinding binding;
+            try { binding = _resolver.Resolve(context); }
+            catch (Exception) { return new UnresolvedMessage(args); }
 
             if (binding is EmptyMessageBinding)
                 return new UnresolvedMessage(args);
