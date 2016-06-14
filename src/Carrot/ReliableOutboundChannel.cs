@@ -34,7 +34,7 @@ namespace Carrot
         {
             var properties = BuildBasicProperties(source);
             var body = BuildBody(source, properties);
-            var tcs = BuildTaskCompletionSource(properties);
+            var tcs = new TaskCompletionSource<Boolean>(properties);
             var tag = Model.NextPublishSeqNo;
             _confirms.TryAdd(tag, new Tuple<TaskCompletionSource<Boolean>, IMessage>(tcs, source));
 
