@@ -123,36 +123,9 @@ namespace Carrot
             var connection = _connectionBuilder.CreateConnection(_configuration.EndpointUri);
             var outboundModel = connection.CreateModel();
 
-            foreach (var exchange in _exchanges)
-                exchange.Declare(outboundModel);
+            ApplyEntitiesDeclarations(outboundModel);
 
-            foreach (var queue in _queues)
-                queue.Declare(outboundModel);
-
-            foreach (var binding in _bindings)
-                binding.Declare(outboundModel);
-
-            var builder = new ConsumedMessageBuilder(_configuration.SerializationConfiguration,
-                                                     _configuration.MessageTypeResolver);
-            var outboundChannel = _configuration.OutboundChannelBuilder(outboundModel, _configuration);
-            var consumers = _promises.Select(_ =>
-                                             {
-                                                 var model = CreateInboundModel(connection,
-                                                                                _configuration.PrefetchSize,
-                                                                                _configuration.PrefetchCount);
-                                                 var consumer = _(builder).BuildConsumer(new InboundChannel(model),
-                                                                                         outboundChannel);
-                                                 return new { Model = model, Consumer = consumer };
-                                             })
-                                             .ToList();
-
-            foreach (var consumer in consumers)
-                consumer.Consumer.Declare(consumer.Model);
-
-            return new Connection(connection,
-                                  consumers.Select(_ => _.Consumer),
-                                  outboundChannel,
-                                  _configuration);
+            return CreateConnection(connection, outboundModel);
         }
 
         public void SubscribeByAtMostOnce(Queue queue, Action<ConsumingConfiguration> configure)
@@ -200,6 +173,39 @@ namespace Carrot
             var exchange = new Exchange(name, type, isDurable);
             _exchanges.Add(exchange);
             return exchange;
+        }
+
+        void ApplyEntitiesDeclarations(IModel outboundModel)
+        {
+            foreach (var exchange in _exchanges)
+                exchange.Declare(outboundModel);
+
+            foreach (var queue in _queues)
+                queue.Declare(outboundModel);
+
+            foreach (var binding in _bindings)
+                binding.Declare(outboundModel);
+        }
+
+        IConnection CreateConnection(RabbitMQ.Client.IConnection connection, IModel outboundModel)
+        {
+            var builder = new ConsumedMessageBuilder(_configuration.SerializationConfiguration, _configuration.MessageTypeResolver);
+            var outboundChannel = _configuration.OutboundChannelBuilder(outboundModel, _configuration);
+            var consumers = _promises.Select(_ =>
+                                                {
+                                                    var model = CreateInboundModel(connection,
+                                                        _configuration.PrefetchSize,
+                                                        _configuration.PrefetchCount);
+                                                    var consumer = _(builder).BuildConsumer(new InboundChannel(model),
+                                                        outboundChannel);
+                                                    return new { Model = model, Consumer = consumer };
+                                                })
+                                                .ToList();
+
+            foreach (var consumer in consumers)
+                consumer.Consumer.Declare(consumer.Model);
+
+            return new Connection(connection, consumers.Select(_ => _.Consumer), outboundChannel, _configuration);
         }
     }
 }
