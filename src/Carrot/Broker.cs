@@ -144,7 +144,7 @@ namespace Carrot
                                                                                          outboundChannel);
                                                  return new { Model = model, Consumer = consumer };
                                              })
-                                     .ToList();
+                                             .ToList();
 
             foreach (var consumer in consumers)
                 consumer.Consumer.Declare(consumer.Model);

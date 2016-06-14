@@ -89,7 +89,7 @@ namespace Carrot.Messages
                                                .TotalMilliseconds
                                                .ToString(CultureInfo.InvariantCulture);
 
-            Headers.NonReservedHeaders().ToList().ForEach(_ => properties.Headers.Add(_.Key, _.Value));
+            Headers.NonReservedHeaders().ForEach(_ => properties.Headers.Add(_.Key, _.Value));
 
             return properties;
         }
