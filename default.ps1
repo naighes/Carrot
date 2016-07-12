@@ -13,7 +13,7 @@ properties {
     $msbuildParralel = $true
     $platform = "AnyCPU"
     $productVersion = "0"
-    $patchVersion = "0"
+    $patchVersion = "1"
     $nugetOutputPath = "$baseDir\nuget-out"
     $preRelease = "alpha"
     $buildNumber = Get-BuildNumber
