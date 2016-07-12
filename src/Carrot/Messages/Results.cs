@@ -60,7 +60,7 @@ namespace Carrot.Messages
 
         internal void NotifyConsumingCompletion()
         {
-            Results.ToList().ForEach(_ => _.NotifyConsumingCompletion());
+            Results.ForEach(_ => _.NotifyConsumingCompletion());
         }
     }
 
@@ -92,7 +92,6 @@ namespace Carrot.Messages
                 throw new ArgumentNullException(nameof(action));
 
             Exceptions.NotNull()
-                      .ToList()
                       .ForEach(action);
         }
     }

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -16,6 +17,14 @@ namespace Carrot.Extensions
                 return @default;
 
             return !source.Any() ? @default : source.SingleOrDefault();
+        }
+
+        internal static void ForEach<T>(this IEnumerable<T> source, Action<T> action)
+        {
+            if (source == null) return;
+
+            foreach (var item in source)
+                action(item);
         }
     }
 }

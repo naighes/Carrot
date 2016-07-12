@@ -85,11 +85,6 @@ namespace Carrot
                              .Serialize(source.Content));
         }
 
-        protected TaskCompletionSource<Boolean> BuildTaskCompletionSource(IBasicProperties properties)
-        {
-            return new TaskCompletionSource<Boolean>(properties);
-        }
-
         protected virtual void OnModelShutdown(Object sender, ShutdownEventArgs args) { }
 
         protected virtual void OnModelDisposing() { }
@@ -99,7 +94,7 @@ namespace Carrot
                                                           IBasicProperties properties,
                                                           Byte[] body)
         {
-            var tcs = BuildTaskCompletionSource(properties);
+            var tcs = new TaskCompletionSource<Boolean>(properties);
 
             try
             {
