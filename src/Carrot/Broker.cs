@@ -29,7 +29,8 @@ namespace Carrot
             return New(configure, new ConnectionBuilder(new DateTimeProvider()));
         }
 
-        public static IBroker New(Action<EnvironmentConfiguration> configure, IConnectionBuilder connectionBuilder)
+        public static IBroker New(Action<EnvironmentConfiguration> configure,
+                                  IConnectionBuilder connectionBuilder)
         {
             if (configure == null)
                 throw new ArgumentNullException(nameof(configure));
@@ -175,7 +176,7 @@ namespace Carrot
             return exchange;
         }
 
-        void ApplyEntitiesDeclarations(IModel outboundModel)
+        private void ApplyEntitiesDeclarations(IModel outboundModel)
         {
             foreach (var exchange in _exchanges)
                 exchange.Declare(outboundModel);
@@ -187,25 +188,31 @@ namespace Carrot
                 binding.Declare(outboundModel);
         }
 
-        IConnection CreateConnection(RabbitMQ.Client.IConnection connection, IModel outboundModel)
+        private IConnection CreateConnection(RabbitMQ.Client.IConnection connection,
+                                             IModel outboundModel)
         {
-            var builder = new ConsumedMessageBuilder(_configuration.SerializationConfiguration, _configuration.MessageTypeResolver);
-            var outboundChannel = _configuration.OutboundChannelBuilder(outboundModel, _configuration);
+            var builder = new ConsumedMessageBuilder(_configuration.SerializationConfiguration,
+                                                     _configuration.MessageTypeResolver);
+            var outboundChannel = _configuration.OutboundChannelBuilder(outboundModel,
+                                                                        _configuration);
             var consumers = _promises.Select(_ =>
                                                 {
                                                     var model = CreateInboundModel(connection,
-                                                        _configuration.PrefetchSize,
-                                                        _configuration.PrefetchCount);
+                                                                                   _configuration.PrefetchSize,
+                                                                                   _configuration.PrefetchCount);
                                                     var consumer = _(builder).BuildConsumer(new InboundChannel(model),
-                                                        outboundChannel);
+                                                                                            outboundChannel);
                                                     return new { Model = model, Consumer = consumer };
                                                 })
-                                                .ToList();
+                                     .ToList();
 
             foreach (var consumer in consumers)
                 consumer.Consumer.Declare(consumer.Model);
 
-            return new Connection(connection, consumers.Select(_ => _.Consumer), outboundChannel, _configuration);
+            return new Connection(connection,
+                                  consumers.Select(_ => _.Consumer),
+                                  outboundChannel,
+                                  _configuration);
         }
     }
 }

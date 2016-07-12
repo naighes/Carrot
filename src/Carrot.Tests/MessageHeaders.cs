@@ -1,11 +1,13 @@
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using Carrot.Configuration;
 using Carrot.Extensions;
 using Carrot.Messages;
 using Carrot.Messages.Replies;
 using Moq;
 using RabbitMQ.Client;
+using RabbitMQ.Client.Framing;
 using Xunit;
 
 namespace Carrot.Tests
@@ -31,8 +33,10 @@ namespace Carrot.Tests
             const Int64 timestamp = 123456789L;
             const String replyExchangeName = "reply-queue-name";
             const String replyRoutingKey = "reply-queue-name";
-            String correlationId = Guid.NewGuid().ToString();
-            var directReplyConfiguration = new DirectReplyConfiguration(replyExchangeName, replyRoutingKey);
+            var correlationId = new Guid(1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 1).ToString();
+            var directReplyConfiguration = new DirectReplyConfiguration(replyExchangeName,
+                                                                        replyRoutingKey);
+
             var collection = new HeaderCollection(new Dictionary<String, Object>(StringComparer.OrdinalIgnoreCase)
                                                       {
                                                           { "message_id", messageId },
@@ -98,8 +102,9 @@ namespace Carrot.Tests
             Assert.Throws<InvalidOperationException>(() => collection.AddHeader("timestamp", 12345678L));
             Assert.Throws<InvalidOperationException>(() => collection.AddHeader("content_type", "application/json"));
             Assert.Throws<InvalidOperationException>(() => collection.AddHeader("content_encoding", "UTF-8"));
-            Assert.Throws<InvalidOperationException>(() => collection.AddHeader("correlation_id", Guid.NewGuid().ToString()));
+            Assert.Throws<InvalidOperationException>(() => collection.AddHeader("correlation_id", new Guid(1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 1).ToString()));
             Assert.Throws<InvalidOperationException>(() => collection.AddHeader("reply_to", "reply-queue-name"));
+            Assert.Throws<InvalidOperationException>(() => collection.AddHeader("type", "urn:message:sample"));
 
             Assert.Throws<InvalidOperationException>(() => collection.RemoveHeader("message_id"));
             Assert.Throws<InvalidOperationException>(() => collection.RemoveHeader("timestamp"));
@@ -107,6 +112,7 @@ namespace Carrot.Tests
             Assert.Throws<InvalidOperationException>(() => collection.RemoveHeader("content_encoding"));
             Assert.Throws<InvalidOperationException>(() => collection.RemoveHeader("correlation_id"));
             Assert.Throws<InvalidOperationException>(() => collection.RemoveHeader("reply_to"));
+            Assert.Throws<InvalidOperationException>(() => collection.RemoveHeader("type"));
         }
 
         [Fact]
@@ -119,6 +125,31 @@ namespace Carrot.Tests
             Assert.Throws<InvalidOperationException>(() => collection["content_encoding"]);
             Assert.Throws<InvalidOperationException>(() => collection["correlation_id"]);
             Assert.Throws<InvalidOperationException>(() => collection["reply_to"]);
+            Assert.Throws<InvalidOperationException>(() => collection["type"]);
+        }
+
+        [Fact]
+        public void Parsing()
+        {
+            var messageType = typeof(Foo).GetCustomAttribute<MessageBindingAttribute>().MessageType;
+            const String contentEncoding = "UTF-8";
+            const String contentType = "application/json";
+            const String correlationId = "some-id";
+            const String messageId = "some-message-id";
+            var properties = new BasicProperties
+                                 {
+                                     Type = messageType,
+                                     ContentEncoding = contentEncoding,
+                                     ContentType = contentType,
+                                     CorrelationId = correlationId,
+                                     MessageId = messageId
+                                 };
+            var headers = HeaderCollection.Parse(properties);
+            Assert.Equal(messageType, headers.Type);
+            Assert.Equal(contentEncoding, headers.ContentEncoding);
+            Assert.Equal(contentType, headers.ContentType);
+            Assert.Equal(correlationId, headers.CorrelationId);
+            Assert.Equal(messageId, headers.MessageId);
         }
     }
 }

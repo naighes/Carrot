@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 using Carrot.Configuration;
 using Carrot.Extensions;
 using Carrot.Messages.Replies;
@@ -63,16 +62,16 @@ namespace Carrot.Messages
                                                                INewId idGenerator)
         {
             var properties = new BasicProperties
-            {
-                Headers = new Dictionary<String, Object>(),
-                Persistent = false,
-                ContentType = Headers.ContentType ?? SerializationConfiguration.DefaultContentType,
-                ContentEncoding = Headers.ContentEncoding ?? SerializationConfiguration.DefaultContentEncoding,
-                MessageId = Headers.MessageId ?? idGenerator.Next(),
-                Timestamp = new AmqpTimestamp(Headers.Timestamp <= 0L
-                                             ? dateTimeProvider.UtcNow().ToUnixTimestamp()
-                                             : Headers.Timestamp)
-            };
+                                 {
+                                     Headers = new Dictionary<String, Object>(),
+                                     Persistent = false,
+                                     ContentType = Headers.ContentType ?? SerializationConfiguration.DefaultContentType,
+                                     ContentEncoding = Headers.ContentEncoding ?? SerializationConfiguration.DefaultContentEncoding,
+                                     MessageId = Headers.MessageId ?? idGenerator.Next(),
+                                     Timestamp = new AmqpTimestamp(Headers.Timestamp <= 0L
+                                                                  ? dateTimeProvider.UtcNow().ToUnixTimestamp()
+                                                                  : Headers.Timestamp)
+                                 };
 
             if (!String.IsNullOrWhiteSpace(Headers.CorrelationId))
                 properties.CorrelationId = Headers.CorrelationId;

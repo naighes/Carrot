@@ -8,13 +8,14 @@ namespace Carrot.Messages
 {
     public class HeaderCollection
     {
-        private const String MessageIdKey = "message_id";
-        private const String TimestampKey = "timestamp";
+        internal const String MessageIdKey = "message_id";
+        internal const String TimestampKey = "timestamp";
         internal const String ContentEncodingKey = "content_encoding";
         internal const String ContentTypeKey = "content_type";
         internal const String CorrelationIdKey = "correlation_id";
         internal const String ReplyToKey = "reply_to";
         internal const String ReplyConfigurationKey = "reply_configuration";
+        internal const String TypeKey = "type";
 
         protected internal readonly ISet<String> ReservedKeys = new HashSet<String>
                                                                     {
@@ -24,7 +25,8 @@ namespace Carrot.Messages
                                                                         ContentEncodingKey,
                                                                         CorrelationIdKey,
                                                                         ReplyToKey,
-                                                                        ReplyConfigurationKey
+                                                                        ReplyConfigurationKey,
+                                                                        TypeKey
                                                                     };
 
         internal readonly IDictionary<String, Object> InternalDictionary;
@@ -48,6 +50,8 @@ namespace Carrot.Messages
         public String ContentEncoding => ValueOrDefault<String>(ContentEncodingKey);
 
         public String CorrelationId => ValueOrDefault<String>(CorrelationIdKey);
+
+        public String Type => ValueOrDefault<String>(TypeKey);
 
         public ReplyConfiguration ReplyConfiguration => ValueOrDefault<ReplyConfiguration>(ReplyConfigurationKey);
 
@@ -78,7 +82,8 @@ namespace Carrot.Messages
                                                                 ? null : 
                                                                 ReplyConfigurationFactory.Create(properties.ReplyToAddress.ExchangeType,
                                                                                                  properties.ReplyToAddress.ExchangeName,
-                                                                                                 properties.ReplyToAddress.RoutingKey) }
+                                                                                                 properties.ReplyToAddress.RoutingKey) },
+                                  { TypeKey, properties.Type }
                               };
 
             if (properties.Headers != null)
