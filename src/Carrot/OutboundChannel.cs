@@ -4,6 +4,7 @@ using Carrot.Configuration;
 using Carrot.Extensions;
 using Carrot.Messages;
 using RabbitMQ.Client;
+using RabbitMQ.Client.Impl;
 
 namespace Carrot
 {
@@ -47,7 +48,7 @@ namespace Carrot
                                                          Exchange exchange,
                                                          String routingKey)
         {
-            var properties = message.Args.BasicProperties.Clone() as IBasicProperties;
+            var properties = ((BasicProperties)message.Args.BasicProperties).Clone() as IBasicProperties;
             var body = message.Args.Body;
             return PublishInternalAsync(exchange, routingKey, properties, body);
         }
