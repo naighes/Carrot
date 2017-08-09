@@ -9,12 +9,14 @@ namespace Carrot
         private readonly Exchange _exchange;
         private readonly Queue _queue;
         private readonly String _routingKey;
+        private readonly IDictionary<string, object> _arguments;
 
-        public ExchangeBinding(Exchange exchange, Queue queue, String routingKey)
+        public ExchangeBinding(Exchange exchange, Queue queue, String routingKey, IDictionary<String, Object> arguments)
         {
             _exchange = exchange;
             _queue = queue;
             _routingKey = routingKey;
+            _arguments = arguments;
         }
 
         public static Boolean operator ==(ExchangeBinding left, ExchangeBinding right)
