@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Carrot.Configuration;
 
 namespace Carrot
@@ -27,9 +28,9 @@ namespace Carrot
 
         Exchange DeclareDurableHeadersExchange(String name);
 
-        void DeclareExchangeBinding(Exchange exchange, Queue queue, String routingKey = "");
+        void DeclareExchangeBinding(Exchange exchange, Queue queue, String routingKey = "", IDictionary<String, Object> arguments = null);
 
-        Boolean TryDeclareExchangeBinding(Exchange exchange, Queue queue, String routingKey = "");
+        Boolean TryDeclareExchangeBinding(Exchange exchange, Queue queue, String routingKey = "", IDictionary<String, Object> arguments = null);
 
         void SubscribeByAtMostOnce(Queue queue, Action<ConsumingConfiguration> configure);
 

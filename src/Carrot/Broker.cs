@@ -93,7 +93,7 @@ namespace Carrot
             return DeclareExchange(name, "headers", true);
         }
 
-        public void DeclareExchangeBinding(Exchange exchange, Queue queue, String routingKey = "")
+        public void DeclareExchangeBinding(Exchange exchange, Queue queue, String routingKey = "", IDictionary<String, Object> arguments = null)
         {
             if (exchange == null)
                 throw new ArgumentNullException(nameof(exchange));
@@ -104,11 +104,11 @@ namespace Carrot
             if (routingKey == null)
                 throw new ArgumentNullException(nameof(routingKey));
 
-            if (!_bindings.Add(new ExchangeBinding(exchange, queue, routingKey)))
+            if (!_bindings.Add(new ExchangeBinding(exchange, queue, routingKey, arguments)))
                 throw new ArgumentException("dupicate binding detected");
         }
 
-        public Boolean TryDeclareExchangeBinding(Exchange exchange, Queue queue, String routingKey = "")
+        public Boolean TryDeclareExchangeBinding(Exchange exchange, Queue queue, String routingKey = "", IDictionary<String, Object> arguments = null)
         {
             if (queue == null)
                 throw new ArgumentNullException(nameof(queue));
@@ -116,7 +116,7 @@ namespace Carrot
             if (routingKey == null)
                 throw new ArgumentNullException(nameof(routingKey));
 
-            return _bindings.Add(new ExchangeBinding(exchange, queue, routingKey));
+            return _bindings.Add(new ExchangeBinding(exchange, queue, routingKey, arguments));
         }
 
         public IConnection Connect()
