@@ -9,12 +9,17 @@ namespace Carrot
         private readonly Exchange _exchange;
         private readonly Queue _queue;
         private readonly String _routingKey;
+        private readonly IDictionary<String, Object> _arguments;
 
-        public ExchangeBinding(Exchange exchange, Queue queue, String routingKey)
+        public ExchangeBinding(Exchange exchange,
+                               Queue queue,
+                               String routingKey,
+                               IDictionary<String, Object> arguments = null)
         {
             _exchange = exchange;
             _queue = queue;
             _routingKey = routingKey;
+            _arguments = arguments ?? new Dictionary<String, Object>();
         }
 
         public static Boolean operator ==(ExchangeBinding left, ExchangeBinding right)
@@ -65,7 +70,10 @@ namespace Carrot
 
         internal void Declare(IModel model)
         {
-            model.QueueBind(_queue.Name, _exchange.Name, _routingKey, new Dictionary<String, Object>());
+            model.QueueBind(_queue.Name,
+                            _exchange.Name,
+                            _routingKey,
+                            _arguments);
         }
     }
 }
