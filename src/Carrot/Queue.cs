@@ -8,14 +8,18 @@ namespace Carrot
     {
         public readonly String Name;
         internal readonly Boolean IsDurable;
+        internal readonly IDictionary<String, Object> Arguments;
 
-        internal Queue(String name, Boolean isDurable = false)
+        internal Queue(String name,
+                       Boolean isDurable = false,
+                       IDictionary<String, Object> arguments = null)
         {
             if (name == null)
                 throw new ArgumentNullException(nameof(name));
 
             Name = name;
             IsDurable = isDurable;
+            Arguments = arguments ?? new Dictionary<String, Object>();
         }
 
         public static Boolean operator ==(Queue left, Queue right)
@@ -48,7 +52,11 @@ namespace Carrot
 
         internal void Declare(IModel model)
         {
-            model.QueueDeclare(Name, IsDurable, false, false, new Dictionary<String, Object>());
+            model.QueueDeclare(Name,
+                               IsDurable,
+                               false,
+                               false,
+                               Arguments);
         }
     }
 }

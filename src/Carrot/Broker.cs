@@ -44,54 +44,64 @@ namespace Carrot
             return new Broker(configuration, connectionBuilder);
         }
 
-        public Queue DeclareQueue(String name)
+        public Queue DeclareQueue(String name,
+                                  IDictionary<String, Object> arguments = null)
         {
-            return DeclareQueue(name, false);
+            return DeclareQueue(name, false, arguments);
         }
 
-        public Queue DeclareDurableQueue(String name)
+        public Queue DeclareDurableQueue(String name,
+                                         IDictionary<String, Object> arguments = null)
         {
-            return DeclareQueue(name, true);
+            return DeclareQueue(name, true, arguments);
         }
 
-        public Exchange DeclareDirectExchange(String name)
+        public Exchange DeclareDirectExchange(String name,
+                                              IDictionary<String, Object> arguments = null)
         {
-            return DeclareExchange(name, "direct", false);
+            return DeclareExchange(name, "direct", false, arguments);
         }
 
-        public Exchange DeclareDurableDirectExchange(String name)
+        public Exchange DeclareDurableDirectExchange(String name,
+                                                     IDictionary<String, Object> arguments = null)
         {
-            return DeclareExchange(name, "direct", true);
+            return DeclareExchange(name, "direct", true, arguments);
         }
 
-        public Exchange DeclareFanoutExchange(String name)
+        public Exchange DeclareFanoutExchange(String name,
+                                              IDictionary<String, Object> arguments = null)
         {
-            return DeclareExchange(name, "fanout", false);
+            return DeclareExchange(name, "fanout", false, arguments);
         }
 
-        public Exchange DeclareDurableFanoutExchange(String name)
+        public Exchange DeclareDurableFanoutExchange(String name,
+                                                     IDictionary<String, Object> arguments = null)
         {
-            return DeclareExchange(name, "fanout", true);
+            return DeclareExchange(name, "fanout", true, arguments);
         }
 
-        public Exchange DeclareTopicExchange(String name)
+        public Exchange DeclareTopicExchange(String name,
+                                             IDictionary<String, Object> arguments = null)
         {
-            return DeclareExchange(name, "topic", false);
+            return DeclareExchange(name, "topic", false, arguments);
         }
 
-        public Exchange DeclareDurableTopicExchange(String name)
+        public Exchange DeclareDurableTopicExchange(String name,
+                                                    IDictionary<String, Object> arguments = null)
         {
-            return DeclareExchange(name, "topic", true);
+            return DeclareExchange(name, "topic", true, arguments);
         }
 
-        public Exchange DeclareHeadersExchange(String name)
+        public Exchange DeclareHeadersExchange(String name,
+                                               IDictionary<String, Object> arguments = null)
         {
-            return DeclareExchange(name, "headers", false);
+            return DeclareExchange(name, "headers", false, arguments);
         }
 
-        public Exchange DeclareDurableHeadersExchange(String name)
+        public Exchange DeclareDurableHeadersExchange(String name,
+                                                      IDictionary<String, Object> arguments = null)
         {
-            return DeclareExchange(name, "headers", true);
+            return DeclareExchange(name, "headers", true, arguments);
         }
 
         public void DeclareExchangeBinding(Exchange exchange,
@@ -175,16 +185,21 @@ namespace Carrot
             _promises.Add(f);
         }
 
-        private Queue DeclareQueue(String name, Boolean isDurable)
+        private Queue DeclareQueue(String name,
+                                   Boolean isDurable,
+                                   IDictionary<String, Object> arguments = null)
         {
-            var queue = new Queue(name, isDurable);
+            var queue = new Queue(name, isDurable, arguments);
             _queues.Add(queue);
             return queue;
         }
 
-        private Exchange DeclareExchange(String name, String type, Boolean isDurable)
+        private Exchange DeclareExchange(String name,
+                                         String type,
+                                         Boolean isDurable,
+                                         IDictionary<String, Object> arguments = null)
         {
-            var exchange = new Exchange(name, type, isDurable);
+            var exchange = new Exchange(name, type, isDurable, arguments);
             _exchanges.Add(exchange);
             return exchange;
         }

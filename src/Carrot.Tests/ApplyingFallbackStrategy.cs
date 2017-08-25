@@ -95,7 +95,9 @@ namespace Carrot.Tests
             var queue = new Queue("queue_name");
             Func<String, String> f = _ => $"{_}-DeadLetter";
             var dleName = f(queue.Name);
-            broker.Setup(_ => _.DeclareDurableDirectExchange(dleName)).Returns(new Exchange(dleName, "direct"));
+            broker.Setup(_ => _.DeclareDurableDirectExchange(It.Is<String>(__ => __ == dleName),
+                                                             It.IsAny<IDictionary<String, Object>>()))
+                  .Returns(new Exchange(dleName, "direct"));
             var strategy = DeadLetterStrategy.New(broker.Object,
                                                   queue,
                                                   _ => $"{_}-DeadLetter");

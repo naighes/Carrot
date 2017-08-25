@@ -146,6 +146,44 @@ namespace Carrot.Tests
                                               It.Is<IDictionary<String, Object>>(__ => __ == arguments)));
         }
 
+        [Fact]
+        public void QueueArguments()
+        {
+            var model = new Mock<IModel>();
+            var broker = FakeBroker(model.Object);
+            var arguments = new Dictionary<String, Object>
+                                {
+                                    { "key", "value" }
+                                };
+            broker.DeclareQueue("queue", arguments);
+
+            using (broker.Connect())
+                model.Verify(_ => _.QueueDeclare(It.Is<String>(__ => __ == "queue"),
+                                                 It.IsAny<Boolean>(),
+                                                 It.IsAny<Boolean>(),
+                                                 It.IsAny<Boolean>(),
+                                                 It.Is<IDictionary<String, Object>>(__ => __ == arguments)));
+        }
+
+        [Fact]
+        public void ExchangeArguments()
+        {
+            var model = new Mock<IModel>();
+            var broker = FakeBroker(model.Object);
+            var arguments = new Dictionary<String, Object>
+                                {
+                                    { "key", "value" }
+                                };
+            broker.DeclareDirectExchange("exchange", arguments);
+
+            using (broker.Connect())
+                model.Verify(_ => _.ExchangeDeclare(It.Is<String>(__ => __ == "exchange"),
+                                                    It.IsAny<String>(),
+                                                    It.IsAny<Boolean>(),
+                                                    It.IsAny<Boolean>(),
+                                                    It.Is<IDictionary<String, Object>>(__ => __ == arguments)));
+        }
+
         private static IBroker FakeBroker(IModel model)
         {
             var builder = new Mock<IConnectionBuilder>();

@@ -9,8 +9,12 @@ namespace Carrot
         public readonly String Name;
         internal readonly String Type;
         internal readonly Boolean IsDurable;
+        internal readonly IDictionary<String, Object> Arguments;
 
-        internal Exchange(String name, String type, Boolean isDurable = false)
+        internal Exchange(String name,
+                          String type,
+                          Boolean isDurable = false,
+                          IDictionary<String, Object> arguments = null)
         {
             if (name == null)
                 throw new ArgumentNullException(nameof(name));
@@ -21,6 +25,7 @@ namespace Carrot
             Type = type;
             IsDurable = isDurable;
             Name = name;
+            Arguments = arguments;
         }
 
         public static Boolean operator ==(Exchange left, Exchange right)
@@ -53,7 +58,11 @@ namespace Carrot
 
         internal void Declare(IModel model)
         {
-            model.ExchangeDeclare(Name, Type, IsDurable, false, new Dictionary<String, Object>());
+            model.ExchangeDeclare(Name,
+                                  Type,
+                                  IsDurable,
+                                  false,
+                                  Arguments);
         }
     }
 }
