@@ -7,6 +7,8 @@ using RabbitMQ.Client;
 
 namespace Carrot
 {
+    using RabbitMQ.Client.Framing;
+
     public class OutboundChannel : IOutboundChannel
     {
         protected readonly IModel Model;
@@ -47,8 +49,12 @@ namespace Carrot
                                                          Exchange exchange,
                                                          String routingKey)
         {
-            var properties = message.Args.BasicProperties.Clone() as IBasicProperties;
+            var properties = (IBasicProperties)(message.Args
+                                                       .BasicProperties as BasicProperties)?.Clone() ?? message.Args
+                                                                                                               .BasicProperties
+                                                                                                               .Clone();
             var body = message.Args.Body;
+
             return PublishInternalAsync(exchange, routingKey, properties, body);
         }
 

@@ -34,7 +34,7 @@ namespace Carrot
         {
             var factory = new RabbitMQ.Client.ConnectionFactory
                               {
-                                  Uri = endpointUri.ToString(),
+                                  Uri = endpointUri,
                                   AutomaticRecoveryEnabled = true,
                                   TopologyRecoveryEnabled = true
                               };

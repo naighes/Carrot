@@ -6,6 +6,11 @@ using RabbitMQ.Client;
 
 namespace Carrot.Extensions
 {
+    using System.Collections.Generic;
+    using System.Linq;
+
+    using RabbitMQ.Client.Framing;
+
     internal static class BasicPropertiesExtensions
     {
         internal static ISerializer CreateSerializer(this IBasicProperties source,
@@ -42,6 +47,27 @@ namespace Carrot.Extensions
                                                         String @default = "UTF-8")
         {
             return source.ContentEncoding ?? @default;
+        }
+
+        internal static IBasicProperties Clone(this IBasicProperties source)
+        {
+            return new BasicProperties
+                       {
+                           AppId = source.AppId,
+                           ClusterId = source.ClusterId,
+                           ContentEncoding = source.ContentEncoding,
+                           ContentType = source.ContentType,
+                           CorrelationId = source.CorrelationId,
+                           DeliveryMode = source.DeliveryMode,
+                           Expiration = source.Expiration,
+                           MessageId = source.MessageId,
+                           Priority = source.Priority,
+                           ReplyTo = source.ReplyTo,
+                           Timestamp = source.Timestamp,
+                           Type = source.Type,
+                           UserId = source.UserId,
+                           Headers = source.Headers.ToDictionary(_ => _.Key, _ => _.Value)
+                       };
         }
     }
 }
