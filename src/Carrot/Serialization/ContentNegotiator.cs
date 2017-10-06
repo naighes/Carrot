@@ -303,11 +303,9 @@ namespace Carrot.Serialization
                                     .Select(_ => _.Trim())
                                     .ToArray();
 
-                var type = strings[0];
-
-                return strings.Length <= 0 
-                    ? new MediaType(type) 
-                    : new MediaType(type, RegistrationTree.Parse(strings[1].Trim()));
+                return strings.Length <= 1
+                    ? new MediaType(source)
+                    : new MediaType(strings[0], RegistrationTree.Parse(strings[1].Trim()));
             }
         }
     }
