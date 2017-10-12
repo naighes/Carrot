@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using Carrot.Configuration;
 using Carrot.Serialization;
@@ -81,7 +82,9 @@ namespace Carrot.Tests
 
         internal class FakeSerializer : ISerializer
         {
-            public Object Deserialize(Byte[] body, Type type, Encoding encoding = null)
+            public Object Deserialize(Byte[] body,
+                                      TypeInfo type,
+                                      Encoding encoding = null)
             {
                 throw new NotImplementedException();
             }

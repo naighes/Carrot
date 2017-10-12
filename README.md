@@ -36,10 +36,10 @@ Define your message consumer:
 Create an instance of `Broker` providing the RabbitMQ host as input.
 
     var broker = Broker.New(_ =>
-    {
-        _.Endpoint(new Uri("amqp://guest:guest@localhost:5672/", UriKind.Absolute));
-        _.ResolveMessageTypeBy(new MessageBindingResolver(typeof(Foo).Assembly));
-    });
+                            {
+                                _.Endpoint(new Uri("amqp://guest:guest@localhost:5672/", UriKind.Absolute));
+                                _.ResolveMessageTypeBy(new MessageBindingResolver(typeof(Foo).GetTypeInfo().Assembly));
+                            });
 
 Declare your AMQP entities as the following:
 

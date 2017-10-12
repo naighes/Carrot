@@ -54,5 +54,11 @@ namespace Carrot.Benchmarks
             foreach (var writer in _writers)
                 writer.Dispose();
         }
+
+        public override void Write(Char value)
+        {
+            foreach (var writer in _writers)
+                writer.Write(value);
+        }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reflection;
 using Carrot.Configuration;
 using Carrot.Fallback;
 using Carrot.Messages;
@@ -11,27 +12,29 @@ namespace Carrot.BasicSample
         {
             const String routingKey = "routing_key";
             const String endpointUrl = "amqp://guest:guest@localhost:5672/";
-            IMessageTypeResolver resolver = new MessageBindingResolver(typeof(Foo).Assembly);
+            IMessageTypeResolver resolver = new MessageBindingResolver(typeof(Foo).GetTypeInfo().Assembly);
 
             var broker = Broker.New(_ =>
-            {
-                _.Endpoint(new Uri(endpointUrl, UriKind.Absolute));
-                _.ResolveMessageTypeBy(resolver);
-            });
+                                    {
+                                        _.Endpoint(new Uri(endpointUrl, UriKind.Absolute));
+                                        _.ResolveMessageTypeBy(resolver);
+                                    });
 
             var exchange = broker.DeclareDirectExchange("source_exchange");
             var queue = broker.DeclareQueue("my_test_queue");
             broker.DeclareExchangeBinding(exchange, queue, routingKey);
-            broker.SubscribeByAtLeastOnce(queue, _ =>
-            {
-                _.FallbackBy((c, a) => DeadLetterStrategy.New(c, a, x => $"{x}-Error"));
-                _.Consumes(new FooConsumer1());
-            });
-            broker.SubscribeByAtLeastOnce(queue, _ =>
-            {
-                _.FallbackBy((c, a) => DeadLetterStrategy.New(c, a, x => $"{x}-Error"));
-                _.Consumes(new FooConsumer2());
-            });
+            broker.SubscribeByAtLeastOnce(queue,
+                                          _ =>
+                                          {
+                                              _.FallbackBy((c, a) => DeadLetterStrategy.New(c, a, x => $"{x}-Error"));
+                                              _.Consumes(new FooConsumer1());
+                                          });
+            broker.SubscribeByAtLeastOnce(queue,
+                                          _ =>
+                                          {
+                                              _.FallbackBy((c, a) => DeadLetterStrategy.New(c, a, x => $"{x}-Error"));
+                                              _.Consumes(new FooConsumer2());
+                                          });
             var connection = broker.Connect();
 
             for (var i = 0; i < 5; i++)

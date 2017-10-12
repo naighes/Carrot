@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using Carrot.Benchmarks.Extensions;
 using Carrot.Benchmarks.Jobs;
@@ -65,7 +66,7 @@ namespace Carrot.Benchmarks
         private static BatchWriter BuildWriter()
         {
             const Int32 bufferSize = 4096;
-            var path = Path.Combine(Environment.CurrentDirectory,
+            var path = Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location),
                                     String.Concat(String.Format(DateTime.UtcNow.ToString("yyyymmddHHmm",
                                                                                          CultureInfo.InvariantCulture)),
                                                   ".log"));
@@ -107,20 +108,20 @@ namespace Carrot.Benchmarks
         private static IBroker BuildBroker()
         {
             return Broker.New(_ =>
-                               {
-                                   _.Endpoint(new Uri(EndpointUrl, UriKind.Absolute));
-                                   _.ResolveMessageTypeBy(new MessageBindingResolver(typeof(Foo).Assembly));
-                               });
+                              {
+                                  _.Endpoint(new Uri(EndpointUrl, UriKind.Absolute));
+                                  _.ResolveMessageTypeBy(new MessageBindingResolver(typeof(Foo).GetTypeInfo().Assembly));
+                              });
         }
 
         private static IBroker BuildReliableBroker()
         {
             return Broker.New(_ =>
-                               {
-                                   _.Endpoint(new Uri(EndpointUrl, UriKind.Absolute));
-                                   _.ResolveMessageTypeBy(new MessageBindingResolver(typeof(Foo).Assembly));
-                                   _.PublishBy(OutboundChannel.Reliable());
-                               });
+                              {
+                                  _.Endpoint(new Uri(EndpointUrl, UriKind.Absolute));
+                                  _.ResolveMessageTypeBy(new MessageBindingResolver(typeof(Foo).GetTypeInfo().Assembly));
+                                  _.PublishBy(OutboundChannel.Reliable());
+                              });
         }
     }
 }

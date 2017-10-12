@@ -1,5 +1,4 @@
 using System;
-using System.Linq;
 using Carrot.Extensions;
 using Carrot.Fallback;
 using RabbitMQ.Client;

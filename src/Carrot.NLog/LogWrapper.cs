@@ -10,10 +10,7 @@ namespace Carrot.NLog
 
         public LogWrapper(ILogger logger)
         {
-            if (logger == null)
-                throw new ArgumentNullException(nameof(logger));
-
-            _logger = logger;
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         public void Info(String message)

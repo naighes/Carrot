@@ -7,14 +7,10 @@ namespace Carrot.Configuration
 {
     public class DefaultMessageTypeResolver : IMessageTypeResolver
     {
+        internal static readonly IMessageTypeResolver Instance = new DefaultMessageTypeResolver(AppDomain.CurrentDomain.GetAssemblies());
         private readonly Assembly[] _assemblies;
 
-        public DefaultMessageTypeResolver()
-            : this(AppDomain.CurrentDomain.GetAssemblies())
-        {
-        }
-
-        public DefaultMessageTypeResolver(Assembly[] assemblies)
+        public DefaultMessageTypeResolver(params Assembly[] assemblies)
         {
             _assemblies = assemblies;
         }
@@ -26,12 +22,15 @@ namespace Carrot.Configuration
            _assemblies.Select(_ => _.GetType(messageType))
                       .FirstOrDefault(_ => _ != null);
 
-            return type == null ? EmptyMessageBinding.Instance : new MessageBinding(messageType, type);
+            return type == null
+                       ? EmptyMessageBinding.Instance
+                       : new MessageBinding(messageType, type.GetTypeInfo());
         }
 
         public MessageBinding Resolve<TMessage>() where TMessage : class
         {
-            var type = typeof(TMessage);
+            var type = typeof(TMessage).GetTypeInfo();
+
             return new MessageBinding(type.FullName, type);
         }
     }

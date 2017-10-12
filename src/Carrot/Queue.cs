@@ -11,10 +11,7 @@ namespace Carrot
 
         internal Queue(String name, Boolean isDurable = false)
         {
-            if (name == null)
-                throw new ArgumentNullException(nameof(name));
-
-            Name = name;
+            Name = name ?? throw new ArgumentNullException(nameof(name));
             IsDurable = isDurable;
         }
 
@@ -38,7 +35,7 @@ namespace Carrot
             if (ReferenceEquals(null, obj))
                 return false;
 
-            return obj is Queue && Equals((Queue)obj);
+            return obj is Queue queue && Equals(queue);
         }
 
         public override Int32 GetHashCode()

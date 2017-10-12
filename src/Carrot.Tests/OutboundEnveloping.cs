@@ -1,4 +1,5 @@
 using System;
+using System.Reflection;
 using Carrot.Configuration;
 using Carrot.Extensions;
 using Carrot.Messages;
@@ -22,6 +23,11 @@ namespace Carrot.Tests
             var model = new Mock<IModel>();
             model.Setup(_ => _.NextPublishSeqNo).Returns(deliveryTag);
             var configuration = new EnvironmentConfiguration();
+            var resolver = new Mock<IMessageTypeResolver>();
+            resolver.Setup(_ => _.Resolve<Foo>())
+                    .Returns(new MessageBinding(String.Empty,
+                                                typeof(Foo).GetTypeInfo()));
+            configuration.ResolveMessageTypeBy(resolver.Object);
             configuration.GeneratesMessageIdBy(StubNewId(messageId).Object);
             var channel = new OutboundChannelWrapper(model.Object,
                                                      configuration,
@@ -42,8 +48,14 @@ namespace Carrot.Tests
             const UInt64 deliveryTag = 0uL;
             var model = new Mock<IModel>();
             model.Setup(_ => _.NextPublishSeqNo).Returns(deliveryTag);
+            var configuration = new EnvironmentConfiguration();
+            var resolver = new Mock<IMessageTypeResolver>();
+            resolver.Setup(_ => _.Resolve<Foo>())
+                    .Returns(new MessageBinding(String.Empty,
+                                                typeof(Foo).GetTypeInfo()));
+            configuration.ResolveMessageTypeBy(resolver.Object);
             var channel = new OutboundChannelWrapper(model.Object,
-                                                     new EnvironmentConfiguration(),
+                                                     configuration,
                                                      StubDateTimeProvider().Object,
                                                      null);
             var task = channel.PublishAsync(message,
@@ -68,9 +80,15 @@ namespace Carrot.Tests
                                             It.IsAny<IBasicProperties>(),
                                             It.IsAny<Byte[]>()))
                  .Throws(exception);
-            
+
+            var configuration = new EnvironmentConfiguration();
+            var resolver = new Mock<IMessageTypeResolver>();
+            resolver.Setup(_ => _.Resolve<Foo>())
+                    .Returns(new MessageBinding(String.Empty,
+                                                typeof(Foo).GetTypeInfo()));
+            configuration.ResolveMessageTypeBy(resolver.Object);
             var channel = new ReliableOutboundChannel(model.Object,
-                                                      new EnvironmentConfiguration(),
+                                                      configuration,
                                                       StubDateTimeProvider().Object,
                                                       null);
             var result = Assert.IsType<FailurePublishing>(channel.PublishAsync(message,
@@ -87,8 +105,14 @@ namespace Carrot.Tests
             var model = new Mock<IModel>();
             model.Setup(_ => _.NextPublishSeqNo).Returns(deliveryTag);
             var fallbackHandled = false;
+            var configuration = new EnvironmentConfiguration();
+            var resolver = new Mock<IMessageTypeResolver>();
+            resolver.Setup(_ => _.Resolve<Foo>())
+                    .Returns(new MessageBinding(String.Empty,
+                                                typeof(Foo).GetTypeInfo()));
+            configuration.ResolveMessageTypeBy(resolver.Object);
             var channel = new OutboundChannelWrapper(model.Object,
-                                                     new EnvironmentConfiguration(),
+                                                     configuration,
                                                      StubDateTimeProvider().Object,
                                                      _ => { fallbackHandled = true; });
             var task = channel.PublishAsync(message,
@@ -114,7 +138,9 @@ namespace Carrot.Tests
             newId.Setup(_ => _.Next()).Returns(messageId);
 
             var resolver = new Mock<IMessageTypeResolver>();
-            resolver.Setup(_ => _.Resolve<Foo>()).Returns(new MessageBinding("urn:message:fake", typeof(Foo)));
+            resolver.Setup(_ => _.Resolve<Foo>())
+                    .Returns(new MessageBinding("urn:message:fake",
+                                                typeof(Foo).GetTypeInfo()));
 
             var properties = message.BuildBasicProperties(resolver.Object,
                                                           dateTimeProvider.Object,
@@ -284,7 +310,9 @@ namespace Carrot.Tests
         {
             var resolver = new Mock<IMessageTypeResolver>();
             resolver.Setup(_ => _.Resolve<TMessage>())
-                    .Returns(new MessageBinding("urn:message:fake", typeof(TMessage), expiresAfter));
+                    .Returns(new MessageBinding("urn:message:fake",
+                                                typeof(TMessage).GetTypeInfo(),
+                             expiresAfter));
             return resolver;
         }
 

@@ -38,12 +38,11 @@ namespace Carrot
                                   AutomaticRecoveryEnabled = true,
                                   TopologyRecoveryEnabled = true
                               };
-            var assembly = typeof(Broker).Assembly;
+             var assembly = typeof(Broker).GetTypeInfo().Assembly;
             var properties = new Dictionary<String, Object>
                                  {
                                      { "client_api", ProductName(assembly) },
                                      { "client_version", assembly.GetName().Version.ToString() },
-                                     { "net_version", Environment.Version.ToString() },
                                      { "hostname", Environment.MachineName },
                                      { "connected_on", _dateTimeProvider.UtcNow().ToString("R") },
                                      { "process_id", Process.GetCurrentProcess().Id.ToString() },

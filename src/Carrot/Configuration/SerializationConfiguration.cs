@@ -32,10 +32,7 @@ namespace Carrot.Configuration
 
         public void NegotiateBy(IContentNegotiator negotiator)
         {
-            if (negotiator == null)
-                throw new ArgumentNullException(nameof(negotiator));
-
-            _negotiator = negotiator;
+            _negotiator = negotiator ?? throw new ArgumentNullException(nameof(negotiator));
         }
 
         internal virtual ISerializer Create(String contentType)

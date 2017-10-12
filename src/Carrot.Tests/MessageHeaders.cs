@@ -131,7 +131,7 @@ namespace Carrot.Tests
         [Fact]
         public void Parsing()
         {
-            var messageType = typeof(Foo).GetCustomAttribute<MessageBindingAttribute>().MessageType;
+            var messageType = typeof(Foo).GetTypeInfo().GetCustomAttribute<MessageBindingAttribute>().MessageType;
             const String contentEncoding = "UTF-8";
             const String contentType = "application/json";
             const String correlationId = "some-id";

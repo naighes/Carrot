@@ -27,11 +27,11 @@ namespace Carrot.Tests
         {
             const String message = "boom";
             var exception = new Exception(message);
-            var consumer = new FakeConsumer(_ => { throw exception; });
+            var consumer = new FakeConsumer(_ => throw exception);
             var result = new ConsumedMessage(new Foo(),
                                              FakeBasicDeliverEventArgs()).ConsumeAsync(new[] { consumer }).Result;
             var actual = Assert.IsType<ConsumingFailure>(result);
-            Assert.Equal(1, actual.Exceptions.Length);
+            Assert.Single(actual.Exceptions);
             Assert.Equal(message, actual.Exceptions.First().Message);
             Assert.Equal(1, consumer.Errors.Count);
             Assert.Equal(message, consumer.Errors.First().Message);
@@ -42,7 +42,7 @@ namespace Carrot.Tests
         {
             const String message = "boom";
             var exception = new Exception(message);
-            var consumer = new FakeConsumer(_ => { throw exception; });
+            var consumer = new FakeConsumer(_ => throw exception);
             var result = new ConsumedMessage(new Foo(),
                                              new BasicDeliverEventArgs
                                                  {
@@ -50,7 +50,7 @@ namespace Carrot.Tests
                                                      BasicProperties = new BasicProperties()
                                                  }).ConsumeAsync(new[] { consumer }).Result;
             var actual = Assert.IsType<ReiteratedConsumingFailure>(result);
-            Assert.Equal(1, actual.Exceptions.Length);
+            Assert.Single(actual.Exceptions);
             Assert.Equal(message, actual.Exceptions.First().Message);
             Assert.Equal(1, consumer.Errors.Count);
             Assert.Equal(message, consumer.Errors.First().Message);
@@ -62,7 +62,7 @@ namespace Carrot.Tests
             var result = new CorruptedMessage(FakeBasicDeliverEventArgs()).ConsumeAsync(new IConsumer[] { })
                                                                           .Result;
             var actual = Assert.IsType<CorruptedMessageConsumingFailure>(result);
-            Assert.Equal(0, actual.Exceptions.Length);
+            Assert.Empty(actual.Exceptions);
         }
 
         [Fact]
@@ -71,7 +71,7 @@ namespace Carrot.Tests
             var result = new UnresolvedMessage(FakeBasicDeliverEventArgs()).ConsumeAsync(new IConsumer[] { })
                                                                            .Result;
             var actual = Assert.IsType<UnresolvedMessageConsumingFailure>(result);
-            Assert.Equal(0, actual.Exceptions.Length);
+            Assert.Empty(actual.Exceptions);
         }
 
         [Fact]
@@ -80,7 +80,7 @@ namespace Carrot.Tests
             var result = new UnsupportedMessage(FakeBasicDeliverEventArgs()).ConsumeAsync(new IConsumer[] { })
                                                                             .Result;
             var actual = Assert.IsType<UnsupportedMessageConsumingFailure>(result);
-            Assert.Equal(0, actual.Exceptions.Length);
+            Assert.Empty(actual.Exceptions);
         }
 
         private static BasicDeliverEventArgs FakeBasicDeliverEventArgs()

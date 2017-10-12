@@ -9,10 +9,7 @@ namespace Carrot.log4net
 
         public LogWrapper(ILog log)
         {
-            if (log == null)
-                throw new ArgumentNullException(nameof(log));
-
-            _log = log;
+            _log = log ?? throw new ArgumentNullException(nameof(log));
         }
 
         public void Info(String message)

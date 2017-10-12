@@ -1,16 +1,13 @@
 using System;
+using System.Linq;
 using System.Text;
 using Carrot.Configuration;
 using Carrot.Serialization;
 using RabbitMQ.Client;
+using RabbitMQ.Client.Framing;
 
 namespace Carrot.Extensions
 {
-    using System.Collections.Generic;
-    using System.Linq;
-
-    using RabbitMQ.Client.Framing;
-
     internal static class BasicPropertiesExtensions
     {
         internal static ISerializer CreateSerializer(this IBasicProperties source,

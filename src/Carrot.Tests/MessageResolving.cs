@@ -1,4 +1,5 @@
 using System;
+using System.Reflection;
 using Carrot.Configuration;
 using Carrot.Messages;
 using RabbitMQ.Client.Events;
@@ -16,7 +17,7 @@ namespace Carrot.Tests
             var args = new BasicDeliverEventArgs { BasicProperties = new BasicProperties { Type = source } };
             var context = ConsumedMessageContext.FromBasicDeliverEventArgs(args);
             var type = typeof(Foo);
-            var resolver = new MessageBindingResolver(type.Assembly);
+            var resolver = new MessageBindingResolver(type.GetTypeInfo().Assembly);
             var binding = resolver.Resolve(context);
             Assert.Equal(source, binding.RawName);
             Assert.Equal(type, binding.RuntimeType);
@@ -29,7 +30,7 @@ namespace Carrot.Tests
             var args = new BasicDeliverEventArgs { BasicProperties = new BasicProperties { Type = source } };
             var context = ConsumedMessageContext.FromBasicDeliverEventArgs(args);
             var type = typeof(Foo);
-            var resolver = new MessageBindingResolver(type.Assembly);
+            var resolver = new MessageBindingResolver(type.GetTypeInfo().Assembly);
             Assert.IsType<EmptyMessageBinding>(resolver.Resolve(context));
         }
 
@@ -37,7 +38,7 @@ namespace Carrot.Tests
         public void ResolveType()
         {
             var type = typeof(Foo);
-            var resolver = new MessageBindingResolver(type.Assembly);
+            var resolver = new MessageBindingResolver(type.GetTypeInfo().Assembly);
             var binding = resolver.Resolve<Foo>();
             Assert.Equal("urn:message:foo", binding.RawName);
             Assert.False(binding.ExpiresAfter.HasValue);
@@ -47,7 +48,7 @@ namespace Carrot.Tests
         public void FallbackResolveType()
         {
             var type = typeof(Bar);
-            var resolver = new MessageBindingResolver(type.Assembly);
+            var resolver = new MessageBindingResolver(type.GetTypeInfo().Assembly);
             var binding = resolver.Resolve<Bar>();
             Assert.Equal("urn:message:Carrot.Tests.Bar", binding.RawName);
         }
@@ -56,7 +57,7 @@ namespace Carrot.Tests
         public void SettingExpiration()
         {
             var type = typeof(Buzz);
-            var resolver = new MessageBindingResolver(type.Assembly);
+            var resolver = new MessageBindingResolver(type.GetTypeInfo().Assembly);
             var binding = resolver.Resolve<Buzz>();
             Assert.Equal("urn:message:buzz", binding.RawName);
             Assert.Equal(TimeSpan.FromSeconds(19), binding.ExpiresAfter);
@@ -68,7 +69,7 @@ namespace Carrot.Tests
             const String typeName = "Carrot.Tests.Foo";
             var args = new BasicDeliverEventArgs { BasicProperties = new BasicProperties { Type = typeName } };
             var context = ConsumedMessageContext.FromBasicDeliverEventArgs(args);
-            var resolver = new DefaultMessageTypeResolver();
+            var resolver = new DefaultMessageTypeResolver(typeof(Foo).Assembly);
             var binding = resolver.Resolve(context);
             Assert.Equal(typeName, binding.RawName);
             Assert.Equal(typeof(Foo), binding.RuntimeType);

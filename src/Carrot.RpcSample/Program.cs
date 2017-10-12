@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reflection;
 using System.Threading.Tasks;
 using Carrot.Configuration;
 using Carrot.Messages;
@@ -15,7 +16,7 @@ namespace Carrot.RpcSample
             const String replyQueueName = "reply_to_queue";
             const String replyExchangeName = "reply_exchange";
 
-            IMessageTypeResolver resolver = new MessageBindingResolver(typeof(Response).Assembly);
+            IMessageTypeResolver resolver = new MessageBindingResolver(typeof(Response).GetTypeInfo().Assembly);
 
             var broker = Broker.New(_ =>
                                     {
@@ -49,7 +50,7 @@ namespace Carrot.RpcSample
     {
         private readonly IConnection _connection;
         private readonly IBroker _broker;
-        private readonly IMessageTypeResolver _resolver = new MessageBindingResolver(typeof(Response).Assembly);
+        private readonly IMessageTypeResolver _resolver = new MessageBindingResolver(typeof(Response).GetTypeInfo().Assembly);
 
         public RequestConsumer(String endpointUrl)
         {

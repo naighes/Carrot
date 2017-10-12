@@ -1,4 +1,5 @@
 using System;
+using System.Reflection;
 using System.Text;
 using Carrot.Configuration;
 using Carrot.Messages;
@@ -74,7 +75,7 @@ namespace Carrot.Tests
                                }
                            };
             var context = ConsumedMessageContext.FromBasicDeliverEventArgs(args);
-            var runtimeType = typeof(Foo);
+            var runtimeType = typeof(Foo).GetTypeInfo();
             var serializer = new Mock<ISerializer>();
             serializer.Setup(_ => _.Deserialize(body, runtimeType, new UTF8Encoding(true)))
                       .Throws(new Exception("boom"));

@@ -25,7 +25,7 @@ namespace Carrot.Tests
             var args = FakeBasicDeliverEventArgs();
             var message = new FakeConsumedMessage(new Foo(), args);
             var subscriptions = _configuration.FindSubscriptions(message);
-            Assert.Equal(1, subscriptions.Count());
+            Assert.Single(subscriptions);
         }
 
         [Fact]
@@ -45,7 +45,7 @@ namespace Carrot.Tests
             var args = FakeBasicDeliverEventArgs();
             var message = new FakeConsumedMessage(new Foo(), args);
             var subscriptions = _configuration.FindSubscriptions(message);
-            Assert.Equal(0, subscriptions.Count());
+            Assert.Empty(subscriptions);
         }
 
         private static BasicDeliverEventArgs FakeBasicDeliverEventArgs()

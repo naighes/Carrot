@@ -13,7 +13,10 @@ namespace Carrot.Tests
 
         public AmqpEntities()
         {
-            _broker = new Broker(new EnvironmentConfiguration(), new Mock<IConnectionBuilder>().Object);
+            var configuration = new EnvironmentConfiguration();
+            configuration.ResolveMessageTypeBy(new Mock<IMessageTypeResolver>().Object);
+            _broker = new Broker(configuration,
+                                 new Mock<IConnectionBuilder>().Object);
         }
 
         [Fact]
@@ -49,7 +52,7 @@ namespace Carrot.Tests
             var exchange = _broker.DeclareDirectExchange(name);
             Assert.Equal(name, exchange.Name);
             Assert.Equal("direct", exchange.Type);
-            Assert.Equal(false, exchange.IsDurable);
+            Assert.False(exchange.IsDurable);
         }
 
         [Fact]
@@ -59,7 +62,7 @@ namespace Carrot.Tests
             var exchange = _broker.DeclareFanoutExchange(name);
             Assert.Equal(name, exchange.Name);
             Assert.Equal("fanout", exchange.Type);
-            Assert.Equal(false, exchange.IsDurable);
+            Assert.False(exchange.IsDurable);
         }
 
         [Fact]
@@ -69,7 +72,7 @@ namespace Carrot.Tests
             var exchange = _broker.DeclareTopicExchange(name);
             Assert.Equal(name, exchange.Name);
             Assert.Equal("topic", exchange.Type);
-            Assert.Equal(false, exchange.IsDurable);
+            Assert.False(exchange.IsDurable);
         }
 
         [Fact]
@@ -79,7 +82,7 @@ namespace Carrot.Tests
             var exchange = _broker.DeclareHeadersExchange(name);
             Assert.Equal(name, exchange.Name);
             Assert.Equal("headers", exchange.Type);
-            Assert.Equal(false, exchange.IsDurable);
+            Assert.False(exchange.IsDurable);
         }
 
         [Fact]

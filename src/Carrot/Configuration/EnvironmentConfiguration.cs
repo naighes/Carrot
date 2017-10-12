@@ -6,6 +6,8 @@ namespace Carrot.Configuration
 {
     public class EnvironmentConfiguration
     {
+        private IMessageTypeResolver resolver;
+
         internal EnvironmentConfiguration()
         {
             IdGenerator = new NewGuid();
@@ -14,7 +16,11 @@ namespace Carrot.Configuration
 
         internal Uri EndpointUri { get; private set; }
 
-        internal IMessageTypeResolver MessageTypeResolver { get; private set; } = new DefaultMessageTypeResolver();
+        internal IMessageTypeResolver MessageTypeResolver
+        {
+            get => resolver ?? DefaultMessageTypeResolver.Instance;
+            private set => resolver = value;
+        }
 
         internal UInt32 PrefetchSize { get; private set; }
 
@@ -30,18 +36,12 @@ namespace Carrot.Configuration
 
         public void Endpoint(Uri uri)
         {
-            if (uri == null)
-                throw new ArgumentNullException(nameof(uri));
-
-            EndpointUri = uri;
+            EndpointUri = uri ?? throw new ArgumentNullException(nameof(uri));
         }
 
-        public void ResolveMessageTypeBy(IMessageTypeResolver resolver)
+        public void ResolveMessageTypeBy(IMessageTypeResolver messageTypeResolver)
         {
-            if (resolver == null)
-                throw new ArgumentNullException(nameof(resolver));
-
-            MessageTypeResolver = resolver;
+            MessageTypeResolver = messageTypeResolver ?? throw new ArgumentNullException(nameof(messageTypeResolver));
         }
 
         public void SetPrefetchSize(UInt32 value)
@@ -62,18 +62,12 @@ namespace Carrot.Configuration
 
         public void GeneratesMessageIdBy(INewId instance)
         {
-            if (instance == null)
-                throw new ArgumentNullException(nameof(instance));
-
-            IdGenerator = instance;
+            IdGenerator = instance ?? throw new ArgumentNullException(nameof(instance));
         }
 
         public void LogBy(ILog log)
         {
-            if (log == null)
-                throw new ArgumentNullException(nameof(log));
-
-            Log = log;
+            Log = log ?? throw new ArgumentNullException(nameof(log));
         }
 
         public void ConfigureSerialization(Action<SerializationConfiguration> configure)
@@ -86,10 +80,7 @@ namespace Carrot.Configuration
 
         public void PublishBy(Func<IModel, EnvironmentConfiguration, IOutboundChannel> builder)
         {
-            if (builder == null)
-                throw new ArgumentNullException(nameof(builder));
-
-            OutboundChannelBuilder = builder;
+            OutboundChannelBuilder = builder ?? throw new ArgumentNullException(nameof(builder));
         }
     }
 }

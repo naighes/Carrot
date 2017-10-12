@@ -18,7 +18,8 @@ namespace Carrot
 
         private readonly IConnectionBuilder _connectionBuilder;
 
-        protected internal Broker(EnvironmentConfiguration configuration, IConnectionBuilder connectionBuilder)
+        protected internal Broker(EnvironmentConfiguration configuration,
+                                  IConnectionBuilder connectionBuilder)
         {
             _configuration = configuration;
             _connectionBuilder = connectionBuilder;
@@ -158,8 +159,8 @@ namespace Carrot
         {
             var configuration = new ConsumingConfiguration(this, queue);
             configure(configuration);
-            Func<IConsumedMessageBuilder, ConsumingPromise> f = _ => func(_, configuration);
-            _promises.Add(f);
+            ConsumingPromise Func(IConsumedMessageBuilder _) => func(_, configuration);
+            _promises.Add(Func);
         }
 
         private Queue DeclareQueue(String name, Boolean isDurable)

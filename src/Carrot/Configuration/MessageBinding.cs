@@ -1,19 +1,20 @@
 using System;
+using System.Reflection;
 
 namespace Carrot.Configuration
 {
     public class MessageBinding : IEquatable<MessageBinding>
     {
         public readonly String RawName;
-        public readonly Type RuntimeType;
+        public readonly TypeInfo RuntimeType;
         public readonly TimeSpan? ExpiresAfter;
 
-        public MessageBinding(String rawName, Type runtimeType)
+        public MessageBinding(String rawName, TypeInfo runtimeType)
             : this(rawName, runtimeType, null)
         {
         }
 
-        public MessageBinding(String rawName, Type runtimeType, TimeSpan? expiresAfter)
+        public MessageBinding(String rawName, TypeInfo runtimeType, TimeSpan? expiresAfter)
         {
             RawName = rawName;
             RuntimeType = runtimeType;

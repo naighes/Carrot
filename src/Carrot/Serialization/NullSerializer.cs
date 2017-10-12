@@ -1,4 +1,5 @@
 using System;
+using System.Reflection;
 using System.Text;
 
 namespace Carrot.Serialization
@@ -9,7 +10,9 @@ namespace Carrot.Serialization
 
         private NullSerializer() { }
 
-        public Object Deserialize(Byte[] body, Type type, Encoding encoding = null)
+        public Object Deserialize(Byte[] body,
+                                  TypeInfo type,
+                                  Encoding encoding = null)
         {
             return null;
         }

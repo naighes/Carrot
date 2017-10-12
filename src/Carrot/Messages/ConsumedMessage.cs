@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using Carrot.Extensions;
 using RabbitMQ.Client.Events;
@@ -20,7 +21,7 @@ namespace Carrot.Messages
 
         internal override Boolean Match(Type type)
         {
-            return Content != null && type.IsInstanceOfType(Content);
+            return Content != null && type.GetTypeInfo().IsInstanceOfType(Content);
         }
 
         internal override Task<AggregateConsumingResult> ConsumeAsync(IEnumerable<IConsumer> subscriptions)
@@ -45,8 +46,8 @@ namespace Carrot.Messages
         private AggregateConsumingResult AggregateResult(Task<ConsumingResult[]> task)
         {
             return task.Result.OfType<Failure>().Any()
-                    ? BuildErrorResult(task.Result)
-                    : new Messages.Success(this, task.Result);
+                       ? BuildErrorResult(task.Result)
+                       : new Messages.Success(this, task.Result);
         }
 
         public abstract class ConsumingResult

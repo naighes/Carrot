@@ -20,9 +20,7 @@ namespace Carrot.Messages
 
         internal ConsumedMessage<TMessage> To<TMessage>() where TMessage : class
         {
-            var content = Content as TMessage;
-
-            if (content == null)
+            if (!(Content is TMessage content))
                 throw new InvalidCastException($"cannot cast '{Content.GetType()}' to '{typeof(TMessage)}'");
 
             return new ConsumedMessage<TMessage>(content,

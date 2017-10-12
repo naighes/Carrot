@@ -8,7 +8,8 @@ namespace Carrot.Benchmarks.Extensions
     {
         public static String Name(this IJob job)
         {
-            var attribute = job.GetType().GetCustomAttribute<JobNameAttribute>();
+            var attribute = job.GetType().GetTypeInfo().GetCustomAttribute<JobNameAttribute>();
+
             return attribute == null ? "untitled" : attribute.Name;
         }
     }

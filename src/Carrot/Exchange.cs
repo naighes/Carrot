@@ -12,15 +12,9 @@ namespace Carrot
 
         internal Exchange(String name, String type, Boolean isDurable = false)
         {
-            if (name == null)
-                throw new ArgumentNullException(nameof(name));
-
-            if (type == null)
-                throw new ArgumentNullException(nameof(type));
-
-            Type = type;
+            Type = type ?? throw new ArgumentNullException(nameof(type));
             IsDurable = isDurable;
-            Name = name;
+            Name = name ?? throw new ArgumentNullException(nameof(name));
         }
 
         public static Boolean operator ==(Exchange left, Exchange right)
@@ -43,7 +37,7 @@ namespace Carrot
             if (ReferenceEquals(null, obj))
                 return false;
 
-            return obj is Exchange && Equals((Exchange)obj);
+            return obj is Exchange exchange && Equals(exchange);
         }
 
         public override Int32 GetHashCode()
