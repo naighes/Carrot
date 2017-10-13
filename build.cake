@@ -56,4 +56,10 @@ Task("Default").IsDependentOn("Test");
 
 Task("Release").IsDependentOn("Version").IsDependentOn("Pack");
 
+Task("Publish").IsDependentOn("Release").Does(() => {
+    foreach (var folder in folders.Where(_ => _.Key != "Carrot.Tests.csproj")) {
+        DotNetCorePublish(folder.Value);
+    }
+});
+
 RunTarget(target);
