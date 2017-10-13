@@ -5,6 +5,13 @@ Param([string]$script = "build.cake",
       [ValidateSet("Quiet", "Minimal", "Normal", "Verbose", "Diagnostic")][string]$verbosity = "Verbose",
       [Parameter(Position=0, Mandatory=$false, ValueFromRemainingArguments=$true)][string[]]$arguments)
 
+function Get-BuildNumber {
+    $revision = git rev-list HEAD --count
+    $revision = $revision.trimEnd('\n')
+
+    return $revision
+}
+
 Write-Host "preparing to run build script..."
 
 if (!$PSScriptRoot) {
@@ -23,20 +30,22 @@ if ((Test-Path $PSScriptRoot) -and !(Test-Path $TOOLS_DIR)) {
 
 if (!(Test-Path $CAKE_DLL)) {
     if (!(Test-Path "$TOOLS_DIR\project.csproj")) {
-	    Write-Verbose -Message "creating project.csproj..."
-		echo '<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup><TargetFramework>netstandard1.5</TargetFramework></PropertyGroup><ItemGroup><PackageReference Include="Cake.CoreCLR" Version="'$CAKE_VERSION'" /></ItemGroup></Project>' > "$TOOLS_DIR\project.csproj"
+        Write-Verbose -Message "creating project.csproj..."
+        echo '<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup><TargetFramework>netstandard1.5</TargetFramework></PropertyGroup><ItemGroup><PackageReference Include="Cake.CoreCLR" Version="'$CAKE_VERSION'" /></ItemGroup></Project>' > "$TOOLS_DIR\project.csproj"
     }
-	
-	$Exp = "dotnet restore `"$TOOLS_DIR\project.csproj`" --packages `"$TOOLS_DIR`" --source `"$CAKE_FEED`""
-	$NuGetOutput = Invoke-Expression "& $Exp" | Out-String
-	Write-Verbose -Message $NuGetOutput
-	
-	if (!(Test-Path $CAKE_DLL)) {
-	    Throw "could not find cake.dll at $CAKE_DLL."
-		exit 1
-	}
+
+    $Exp = "dotnet restore `"$TOOLS_DIR\project.csproj`" --packages `"$TOOLS_DIR`" --source `"$CAKE_FEED`""
+    $NuGetOutput = Invoke-Expression "& $Exp" | Out-String
+    Write-Verbose -Message $NuGetOutput
+
+    if (!(Test-Path $CAKE_DLL)) {
+        Throw "could not find cake.dll at $CAKE_DLL."
+        exit 1
+    }
 }
 
+$buildnumber = Get-BuildNumber
+
 Write-Host "running build script..."
-Invoke-Expression "& dotnet `"$CAKE_DLL`" `"$script`" -target=`"$target`" -configuration=`"$configuration`" -verbosity=`"$verbosity`" $arguments"
+Invoke-Expression "& dotnet `"$CAKE_DLL`" `"$script`" -target=`"$target`" -configuration=`"$configuration`" -buildnumber=`"$buildnumber`" -verbosity=`"$verbosity`" $arguments"
 exit $LASTEXITCODE
