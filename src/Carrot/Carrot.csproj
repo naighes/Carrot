@@ -13,7 +13,9 @@
     <Copyright>copyright © Nicola Baldi (naighes) 2017</Copyright>
     <RepositoryUrl>https://github.com/naighes/Carrot.git</RepositoryUrl>
     <PackageTags>rabbitmq</PackageTags>
-    <PackageReleaseNotes></PackageReleaseNotes>
+    <PackageReleaseNotes>
+      porting to .net standard 1.5
+    </PackageReleaseNotes>
     <PackageLicenseUrl>https://raw.githubusercontent.com/naighes/Carrot/master/LICENSE.txt</PackageLicenseUrl>
   </PropertyGroup>
   <ItemGroup>
