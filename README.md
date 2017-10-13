@@ -78,7 +78,7 @@ Clone the source down to your machine.
 
     git clone https://github.com/naighes/Carrot.git
 
-Run `build.bat`
+Run `.\build.ps1`
 
 ## Resources ##
 
