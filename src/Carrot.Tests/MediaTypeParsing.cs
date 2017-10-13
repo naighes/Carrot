@@ -76,5 +76,11 @@ namespace Carrot.Tests
             Assert.NotEqual(a, c);
             Assert.NotEqual(a.GetHashCode(), c.GetHashCode());
         }
+
+        [Fact]
+        public void MediaTypeWithoutSubtype()
+        {
+            Assert.Equal("application", ContentNegotiator.MediaType.Parse("application").Type);
+        }
     }
 }

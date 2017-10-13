@@ -9,21 +9,11 @@ namespace Carrot.Tests
 {
     public class AmqpEntities
     {
-        private readonly Broker _broker;
-
-        public AmqpEntities()
-        {
-            var configuration = new EnvironmentConfiguration();
-            configuration.ResolveMessageTypeBy(new Mock<IMessageTypeResolver>().Object);
-            _broker = new Broker(configuration,
-                                 new Mock<IConnectionBuilder>().Object);
-        }
-
         [Fact]
         public void ExchangeDeclarationWithDefaultDurability()
         {
             var model = new Mock<IModel>();
-            var exchange = _broker.DeclareDirectExchange("e");
+            var exchange = FakeBroker(model.Object).DeclareDirectExchange("e");
             exchange.Declare(model.Object);
             model.Verify(_ => _.ExchangeDeclare(exchange.Name,
                                                 exchange.Type,
@@ -36,7 +26,7 @@ namespace Carrot.Tests
         public void ExchangeDeclarationWithExplicitDurability()
         {
             var model = new Mock<IModel>();
-            var exchange = _broker.DeclareDurableTopicExchange("e");
+            var exchange = FakeBroker(model.Object).DeclareDurableTopicExchange("e");
             exchange.Declare(model.Object);
             model.Verify(_ => _.ExchangeDeclare(exchange.Name,
                                                 exchange.Type,
@@ -49,7 +39,7 @@ namespace Carrot.Tests
         public void BuildingDirectExchange()
         {
             const String name = "one_exchange";
-            var exchange = _broker.DeclareDirectExchange(name);
+            var exchange = FakeBroker(new Mock<IModel>().Object).DeclareDirectExchange(name);
             Assert.Equal(name, exchange.Name);
             Assert.Equal("direct", exchange.Type);
             Assert.False(exchange.IsDurable);
@@ -59,7 +49,7 @@ namespace Carrot.Tests
         public void BuildingFanoutExchange()
         {
             const String name = "one_exchange";
-            var exchange = _broker.DeclareFanoutExchange(name);
+            var exchange = FakeBroker(new Mock<IModel>().Object).DeclareFanoutExchange(name);
             Assert.Equal(name, exchange.Name);
             Assert.Equal("fanout", exchange.Type);
             Assert.False(exchange.IsDurable);
@@ -69,7 +59,7 @@ namespace Carrot.Tests
         public void BuildingTopicExchange()
         {
             const String name = "one_exchange";
-            var exchange = _broker.DeclareTopicExchange(name);
+            var exchange = FakeBroker(new Mock<IModel>().Object).DeclareTopicExchange(name);
             Assert.Equal(name, exchange.Name);
             Assert.Equal("topic", exchange.Type);
             Assert.False(exchange.IsDurable);
@@ -79,7 +69,7 @@ namespace Carrot.Tests
         public void BuildingHeadersExchange()
         {
             const String name = "one_exchange";
-            var exchange = _broker.DeclareHeadersExchange(name);
+            var exchange = FakeBroker(new Mock<IModel>().Object).DeclareHeadersExchange(name);
             Assert.Equal(name, exchange.Name);
             Assert.Equal("headers", exchange.Type);
             Assert.False(exchange.IsDurable);
@@ -99,17 +89,20 @@ namespace Carrot.Tests
         [Fact]
         public void MultipleBinding()
         {
-            var exchange = _broker.DeclareDirectExchange("exchange");
-            var queue = _broker.DeclareQueue("queue");
-            _broker.DeclareExchangeBinding(exchange, queue, "key");
-            Assert.Throws<ArgumentException>(() => _broker.DeclareExchangeBinding(exchange, queue, "key"));
+            var broker = FakeBroker(new Mock<IModel>().Object);
+            var exchange = broker.DeclareDirectExchange("exchange");
+            var queue = broker.DeclareQueue("queue");
+            broker.DeclareExchangeBinding(exchange, queue, "key");
+            Assert.Throws<ArgumentException>(() => broker.DeclareExchangeBinding(exchange,
+                                                                                 queue,
+                                                                                 "key"));
         }
 
         [Fact]
         public void QueueDeclarationWithDefaultDurability()
         {
             var model = new Mock<IModel>();
-            var queue = _broker.DeclareQueue("q");
+            var queue = FakeBroker(model.Object).DeclareQueue("q");
             queue.Declare(model.Object);
             model.Verify(_ => _.QueueDeclare(queue.Name,
                                              false,
@@ -127,6 +120,84 @@ namespace Carrot.Tests
             Assert.Equal(a, b);
             var c = new Queue("another_name");
             Assert.NotEqual(a, c);
+        }
+
+        [Fact]
+        public void ExchangeBindingArguments()
+        {
+            var model = new Mock<IModel>();
+            var broker = FakeBroker(model.Object);
+            var exchange = broker.DeclareDirectExchange("exchange");
+            var queue = broker.DeclareQueue("queue");
+            var arguments = new Dictionary<String, Object>
+                                {
+                                    { "key", "value" }
+                                };
+            broker.DeclareExchangeBinding(exchange,
+                                          queue,
+                                          "key",
+                                          arguments);
+            
+            exchange.Declare(model.Object);
+
+            using (broker.Connect())
+                model.Verify(_ => _.QueueBind(It.IsAny<String>(),
+                                              It.IsAny<String>(),
+                                              It.IsAny<String>(),
+                                              It.Is<IDictionary<String, Object>>(__ => __ == arguments)));
+        }
+
+        [Fact]
+        public void QueueArguments()
+        {
+            var model = new Mock<IModel>();
+            var broker = FakeBroker(model.Object);
+            var arguments = new Dictionary<String, Object>
+                                {
+                                    { "key", "value" }
+                                };
+            broker.DeclareQueue("queue", arguments);
+
+            using (broker.Connect())
+                model.Verify(_ => _.QueueDeclare(It.Is<String>(__ => __ == "queue"),
+                                                 It.IsAny<Boolean>(),
+                                                 It.IsAny<Boolean>(),
+                                                 It.IsAny<Boolean>(),
+                                                 It.Is<IDictionary<String, Object>>(__ => __ == arguments)));
+        }
+
+        [Fact]
+        public void ExchangeArguments()
+        {
+            var model = new Mock<IModel>();
+            var broker = FakeBroker(model.Object);
+            var arguments = new Dictionary<String, Object>
+                                {
+                                    { "key", "value" }
+                                };
+            broker.DeclareDirectExchange("exchange", arguments);
+
+            using (broker.Connect())
+                model.Verify(_ => _.ExchangeDeclare(It.Is<String>(__ => __ == "exchange"),
+                                                    It.IsAny<String>(),
+                                                    It.IsAny<Boolean>(),
+                                                    It.IsAny<Boolean>(),
+                                                    It.Is<IDictionary<String, Object>>(__ => __ == arguments)));
+        }
+
+        private static IBroker FakeBroker(IModel model)
+        {
+            var builder = new Mock<IConnectionBuilder>();
+            var connection = new Mock<RabbitMQ.Client.IConnection>();
+            connection.Setup(_ => _.CreateModel()).Returns(model);
+            builder.Setup(_ => _.CreateConnection(It.IsAny<Uri>()))
+                   .Returns(connection.Object);
+
+            return Broker.New(_ =>
+                              {
+                                  _.ResolveMessageTypeBy(new Mock<IMessageTypeResolver>().Object);
+                              },
+                              builder.Object);
         }
     }
 }
