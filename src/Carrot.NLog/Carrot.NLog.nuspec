@@ -7,7 +7,7 @@
 	  <authors>Nicola Baldi (naighes)</authors>
 	  <owners>Nicola Baldi (naighes)</owners>  
 	  <requireLicenseAcceptance>false</requireLicenseAcceptance>
-	  <description>Carrot.log4net provides NLog facilities over Carrot.</description>
+	  <description>Carrot.NLog provides NLog facilities over Carrot.</description>
 	  <copyright>copyright © Nicola Baldi (naighes) 2015</copyright>
   </metadata>
 </package>
