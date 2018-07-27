@@ -10,7 +10,7 @@ folders.Add("Carrot.Tests.csproj", Directory("./src/Carrot.Tests"));
 
 Task("Clean").Does(() => {
     foreach (var folder in folders) {
-	    DotNetCoreClean(folder.Value);
+        DotNetCoreClean(folder.Value);
     }
 });
 
@@ -28,12 +28,12 @@ Task("Version").Does(() => {
         document.LoadXml(content);
         var element = document.DocumentElement["PropertyGroup"]["VersionPrefix"];
         var segments = element.InnerText.Split('.');
-	    var version = String.Format("{0}.{1}.{2}", segments[0], segments[1], buildnumber);
+        var version = String.Format("{0}.{1}.{2}", segments[0], segments[1], buildnumber);
         element.InnerText = version;
-	    document.DocumentElement["PropertyGroup"]["AssemblyVersion"].InnerText = version;
-	    document.DocumentElement["PropertyGroup"]["FileVersion"].InnerText = version;
+        document.DocumentElement["PropertyGroup"]["AssemblyVersion"].InnerText = version;
+        document.DocumentElement["PropertyGroup"]["FileVersion"].InnerText = version;
         System.IO.File.WriteAllText(path, document.InnerXml);
-	}
+    }
 });
 
 Task("Build").IsDependentOn("Restore").Does(() => {
