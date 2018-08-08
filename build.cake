@@ -38,7 +38,10 @@ Task("Version").Does(() => {
 
 Task("Build").IsDependentOn("Restore").Does(() => {
     foreach (var folder in folders) {
-        DotNetCoreBuild(folder.Value);
+        var settings = new DotNetCoreBuildSettings {
+            Configuration = configuration
+        };
+        DotNetCoreBuild(folder.Value, settings);
     }
 });
 
@@ -48,7 +51,10 @@ Task("Test").IsDependentOn("Build").Does(() => {
 
 Task("Pack").IsDependentOn("Test").Does(() => {
     foreach (var folder in folders.Where(_ => _.Key != "Carrot.Tests.csproj")) {
-        DotNetCorePack(folder.Value);
+        var settings = new DotNetCorePackSettings {
+            Configuration = configuration
+        };
+        DotNetCorePack(folder.Value, settings);
     }
 });
 
@@ -58,7 +64,10 @@ Task("Release").IsDependentOn("Version").IsDependentOn("Pack");
 
 Task("Publish").IsDependentOn("Release").Does(() => {
     foreach (var folder in folders.Where(_ => _.Key != "Carrot.Tests.csproj")) {
-        DotNetCorePublish(folder.Value);
+        var fileName = new DirectoryInfo(String.Format("{0}\\bin\\{1}", folder.Value, configuration)).GetFiles("*.nupkg").FirstOrDefault();
+        if (fileName != null) {
+            DotNetCoreNuGetPush(folder.Value);
+        }
     }
 });
 
