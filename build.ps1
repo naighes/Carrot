@@ -2,6 +2,7 @@
 Param([string]$script = "build.cake",
       [string]$target = "Default",
       [ValidateSet("Release", "Debug")][string]$configuration = "Release",
+      [string]$nugetapikey = "",
       [ValidateSet("Quiet", "Minimal", "Normal", "Verbose", "Diagnostic")][string]$verbosity = "Verbose",
       [Parameter(Position=0, Mandatory=$false, ValueFromRemainingArguments=$true)][string[]]$arguments)
 
@@ -47,5 +48,5 @@ if (!(Test-Path $CAKE_DLL)) {
 $buildnumber = Get-BuildNumber
 
 Write-Host "running build script..."
-Invoke-Expression "& dotnet `"$CAKE_DLL`" `"$script`" -target=`"$target`" -configuration=`"$configuration`" -buildnumber=`"$buildnumber`" -verbosity=`"$verbosity`" $arguments"
+Invoke-Expression "& dotnet `"$CAKE_DLL`" `"$script`" -target=`"$target`" -configuration=`"$configuration`" -nugetapikey=`"$nugetapikey`" -buildnumber=`"$buildnumber`" -verbosity=`"$verbosity`" $arguments"
 exit $LASTEXITCODE

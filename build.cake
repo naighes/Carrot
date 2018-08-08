@@ -1,6 +1,7 @@
 var target = Argument("target", "Default");
 var buildnumber = Argument("buildnumber", "0");
 var configuration = Argument("configuration", "Release");
+var nugetapikey = Argument("nugetapikey", "");
 
 var folders = new System.Collections.Generic.Dictionary<String, Cake.Common.IO.Paths.ConvertableDirectoryPath>();
 folders.Add("Carrot.csproj", Directory("./src/Carrot"));
@@ -62,11 +63,16 @@ Task("Default").IsDependentOn("Test");
 
 Task("Release").IsDependentOn("Version").IsDependentOn("Pack");
 
-Task("Publish").IsDependentOn("Release").Does(() => {
+//Task("Publish").IsDependentOn("Release").Does(() => {
+Task("Publish").Does(() => {
     foreach (var folder in folders.Where(_ => _.Key != "Carrot.Tests.csproj")) {
-        var fileName = new DirectoryInfo(String.Format("{0}\\bin\\{1}", folder.Value, configuration)).GetFiles("*.nupkg").FirstOrDefault();
-        if (fileName != null) {
-            DotNetCoreNuGetPush(folder.Value);
+        var file= new DirectoryInfo(String.Format("{0}\\bin\\{1}", folder.Value, configuration)).GetFiles("*.nupkg").FirstOrDefault();
+        if (file!= null) {
+            var settings = new DotNetCoreNuGetPushSettings {
+                Source = "https://www.nuget.org/api/v2/package",
+                ApiKey = nugetapikey
+            };
+            DotNetCoreNuGetPush(file.FullName, settings);
         }
     }
 });
