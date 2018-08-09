@@ -63,8 +63,7 @@ Task("Default").IsDependentOn("Test");
 
 Task("Release").IsDependentOn("Version").IsDependentOn("Pack");
 
-//Task("Publish").IsDependentOn("Release").Does(() => {
-Task("Publish").Does(() => {
+Task("Publish").IsDependentOn("Release").Does(() => {
     foreach (var folder in folders.Where(_ => _.Key != "Carrot.Tests.csproj")) {
         var file= new DirectoryInfo(String.Format("{0}\\bin\\{1}", folder.Value, configuration)).GetFiles("*.nupkg").FirstOrDefault();
         if (file!= null) {
