@@ -137,5 +137,16 @@ namespace Carrot.Messages
             else
                 InternalDictionary[key] = value;
         }
+
+        public bool ContainsHeader(String key)
+        {
+            if (key == null)
+                throw new ArgumentNullException(nameof(key));
+
+            if (ReservedKeys.Contains(key))
+                throw new InvalidOperationException($"key '{key}' is reserved");
+
+            return InternalDictionary.ContainsKey(key);
+        }
     }
 }
