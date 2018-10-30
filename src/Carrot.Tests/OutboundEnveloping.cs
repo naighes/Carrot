@@ -24,7 +24,7 @@ namespace Carrot.Tests
             model.Setup(_ => _.NextPublishSeqNo).Returns(deliveryTag);
             var configuration = new EnvironmentConfiguration();
             var resolver = new Mock<IMessageTypeResolver>();
-            resolver.Setup(_ => _.Resolve<Foo>())
+            resolver.Setup(_ => _.Resolve(message.Content))
                     .Returns(new MessageBinding(String.Empty,
                                                 typeof(Foo).GetTypeInfo()));
             configuration.ResolveMessageTypeBy(resolver.Object);
@@ -50,7 +50,7 @@ namespace Carrot.Tests
             model.Setup(_ => _.NextPublishSeqNo).Returns(deliveryTag);
             var configuration = new EnvironmentConfiguration();
             var resolver = new Mock<IMessageTypeResolver>();
-            resolver.Setup(_ => _.Resolve<Foo>())
+            resolver.Setup(_ => _.Resolve(message.Content))
                     .Returns(new MessageBinding(String.Empty,
                                                 typeof(Foo).GetTypeInfo()));
             configuration.ResolveMessageTypeBy(resolver.Object);
@@ -83,7 +83,7 @@ namespace Carrot.Tests
 
             var configuration = new EnvironmentConfiguration();
             var resolver = new Mock<IMessageTypeResolver>();
-            resolver.Setup(_ => _.Resolve<Foo>())
+            resolver.Setup(_ => _.Resolve(message.Content))
                     .Returns(new MessageBinding(String.Empty,
                                                 typeof(Foo).GetTypeInfo()));
             configuration.ResolveMessageTypeBy(resolver.Object);
@@ -107,7 +107,7 @@ namespace Carrot.Tests
             var fallbackHandled = false;
             var configuration = new EnvironmentConfiguration();
             var resolver = new Mock<IMessageTypeResolver>();
-            resolver.Setup(_ => _.Resolve<Foo>())
+            resolver.Setup(_ => _.Resolve(message.Content))
                     .Returns(new MessageBinding(String.Empty,
                                                 typeof(Foo).GetTypeInfo()));
             configuration.ResolveMessageTypeBy(resolver.Object);
@@ -138,7 +138,7 @@ namespace Carrot.Tests
             newId.Setup(_ => _.Next()).Returns(messageId);
 
             var resolver = new Mock<IMessageTypeResolver>();
-            resolver.Setup(_ => _.Resolve<Foo>())
+            resolver.Setup(_ => _.Resolve(message.Content))
                     .Returns(new MessageBinding("urn:message:fake",
                                                 typeof(Foo).GetTypeInfo()));
 
@@ -153,7 +153,7 @@ namespace Carrot.Tests
         public void MessageType()
         {
             var message = new OutboundMessage<Bar>(new Bar());
-            var properties = message.BuildBasicProperties(StubResolver<Bar>(null).Object,
+            var properties = message.BuildBasicProperties(StubResolver(message, null).Object,
                                                           StubDateTimeProvider().Object,
                                                           new Mock<INewId>().Object);
             Assert.Equal("urn:message:fake", properties.Type);
@@ -165,7 +165,7 @@ namespace Carrot.Tests
             const String contentEncoding = "UTF-16";
             var message = new OutboundMessage<Bar>(new Bar());
             message.SetContentEncoding(contentEncoding);
-            var properties = message.BuildBasicProperties(StubResolver<Bar>(null).Object,
+            var properties = message.BuildBasicProperties(StubResolver(message, null).Object,
                                                           StubDateTimeProvider().Object,
                                                           new Mock<INewId>().Object);
             Assert.Equal(contentEncoding, properties.ContentEncoding);
@@ -175,7 +175,7 @@ namespace Carrot.Tests
         public void DefaultContentEncoding()
         {
             var message = new OutboundMessage<Bar>(new Bar());
-            var properties = message.BuildBasicProperties(StubResolver<Bar>(null).Object,
+            var properties = message.BuildBasicProperties(StubResolver(message, null).Object,
                                                           StubDateTimeProvider().Object,
                                                           new Mock<INewId>().Object);
             Assert.Equal("UTF-8", properties.ContentEncoding);
@@ -187,7 +187,7 @@ namespace Carrot.Tests
             const String contentType = "application/xml";
             var message = new OutboundMessage<Bar>(new Bar());
             message.SetContentType(contentType);
-            var properties = message.BuildBasicProperties(StubResolver<Bar>(null).Object,
+            var properties = message.BuildBasicProperties(StubResolver(message, null).Object,
                                                           StubDateTimeProvider().Object,
                                                           new Mock<INewId>().Object);
             Assert.Equal(contentType, properties.ContentType);
@@ -197,7 +197,7 @@ namespace Carrot.Tests
         public void DefaultContentType()
         {
             var message = new OutboundMessage<Bar>(new Bar());
-            var properties = message.BuildBasicProperties(StubResolver<Bar>(null).Object,
+            var properties = message.BuildBasicProperties(StubResolver(message, null).Object,
                                                           StubDateTimeProvider().Object,
                                                           new Mock<INewId>().Object);
             Assert.Equal("application/json", properties.ContentType);
@@ -209,7 +209,7 @@ namespace Carrot.Tests
             String correlationId = Guid.NewGuid().ToString();
             var message = new OutboundMessage<Bar>(new Bar());
             message.SetCorrelationId(correlationId);
-            var properties = message.BuildBasicProperties(StubResolver<Bar>(null).Object,
+            var properties = message.BuildBasicProperties(StubResolver(message, null).Object,
                                                           StubDateTimeProvider().Object,
                                                           new Mock<INewId>().Object);
             Assert.Equal(correlationId, properties.CorrelationId);
@@ -222,7 +222,7 @@ namespace Carrot.Tests
             const String replyRoutingKey = "replyRoutingKey";
             var message = new OutboundMessage<Bar>(new Bar());
             message.SetReply(new DirectReplyConfiguration(replyExchangeName, replyRoutingKey));
-            var properties = message.BuildBasicProperties(StubResolver<Bar>(null).Object,
+            var properties = message.BuildBasicProperties(StubResolver(message, null).Object,
                                                           StubDateTimeProvider().Object,
                                                           new Mock<INewId>().Object);
             Assert.Equal("direct", properties.ReplyToAddress.ExchangeType);
@@ -237,7 +237,7 @@ namespace Carrot.Tests
             const String replyRoutingKey = "replyRoutingKey";
             var message = new OutboundMessage<Bar>(new Bar());
             message.SetReply(new DirectReplyConfiguration(replyRoutingKey));
-            var properties = message.BuildBasicProperties(StubResolver<Bar>(null).Object,
+            var properties = message.BuildBasicProperties(StubResolver(message, null).Object,
                                                           StubDateTimeProvider().Object,
                                                           new Mock<INewId>().Object);
             Assert.Equal("direct:///replyRoutingKey", properties.ReplyTo);
@@ -250,7 +250,7 @@ namespace Carrot.Tests
             const String replyRoutingKey = "replyRoutingKey";
             var message = new OutboundMessage<Bar>(new Bar());
             message.SetReply(new TopicReplyConfiguration(replyExchangeName, replyRoutingKey));
-            var properties = message.BuildBasicProperties(StubResolver<Bar>(null).Object,
+            var properties = message.BuildBasicProperties(StubResolver(message, null).Object,
                                                           StubDateTimeProvider().Object,
                                                           new Mock<INewId>().Object);
             Assert.Equal("topic", properties.ReplyToAddress.ExchangeType);
@@ -265,7 +265,7 @@ namespace Carrot.Tests
             const String replyExchangeName = "replyExchangeName";
             var message = new OutboundMessage<Bar>(new Bar());
             message.SetReply(new FanoutReplyConfiguration(replyExchangeName));
-            var properties = message.BuildBasicProperties(StubResolver<Bar>(null).Object,
+            var properties = message.BuildBasicProperties(StubResolver(message, null).Object,
                                                           StubDateTimeProvider().Object,
                                                           new Mock<INewId>().Object);
             Assert.Equal("fanout", properties.ReplyToAddress.ExchangeType);
@@ -278,7 +278,7 @@ namespace Carrot.Tests
         public void NonDurableMessage()
         {
             var message = new OutboundMessage<Bar>(new Bar());
-            var properties = message.BuildBasicProperties(StubResolver<Bar>(null).Object,
+            var properties = message.BuildBasicProperties(StubResolver(message, null).Object,
                                                           StubDateTimeProvider().Object,
                                                           new Mock<INewId>().Object);
             Assert.False(properties.Persistent);
@@ -288,7 +288,7 @@ namespace Carrot.Tests
         public void DurableMessage()
         {
             var message = new DurableOutboundMessage<Bar>(new Bar());
-            var properties = message.BuildBasicProperties(StubResolver<Bar>(null).Object,
+            var properties = message.BuildBasicProperties(StubResolver(message, null).Object,
                                                           StubDateTimeProvider().Object,
                                                           new Mock<INewId>().Object);
             Assert.True(properties.Persistent);
@@ -299,17 +299,17 @@ namespace Carrot.Tests
         {
             var expiresAfter = new TimeSpan?(TimeSpan.FromSeconds(18));
             var message = new DurableOutboundMessage<Bar>(new Bar());
-            var properties = message.BuildBasicProperties(StubResolver<Bar>(expiresAfter).Object,
+            var properties = message.BuildBasicProperties(StubResolver(message, expiresAfter).Object,
                                                           StubDateTimeProvider().Object,
                                                           new Mock<INewId>().Object);
             Assert.Equal("18000", properties.Expiration);
         }
 
-        private static Mock<IMessageTypeResolver> StubResolver<TMessage>(TimeSpan? expiresAfter)
+        private static Mock<IMessageTypeResolver> StubResolver<TMessage>(OutboundMessage<TMessage> message, TimeSpan? expiresAfter)
             where TMessage : class
         {
             var resolver = new Mock<IMessageTypeResolver>();
-            resolver.Setup(_ => _.Resolve<TMessage>())
+            resolver.Setup(_ => _.Resolve(message.Content))
                     .Returns(new MessageBinding("urn:message:fake",
                                                 typeof(TMessage).GetTypeInfo(),
                              expiresAfter));

@@ -30,9 +30,9 @@ namespace Carrot.Configuration
                        : EmptyMessageBinding.Instance;
         }
 
-        public MessageBinding Resolve<TMessage>() where TMessage : class
+        public MessageBinding Resolve<TMessage>(TMessage message) where TMessage : class
         {
-            var type = typeof(TMessage).GetTypeInfo();
+            var type = message.GetType().GetTypeInfo();
             var attribute = type.GetCustomAttribute<MessageBindingAttribute>();
 
             return BuildMessageBinding(attribute != null
