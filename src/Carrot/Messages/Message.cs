@@ -9,6 +9,8 @@ namespace Carrot.Messages
 
         public abstract HeaderCollection Headers { get; }
 
+        public Boolean ContainsHeader(String key) => Headers.ContainsHeader(key);
+
         Object IMessage.Content => Content;
     }
 }
