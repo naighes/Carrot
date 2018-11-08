@@ -16,7 +16,7 @@
     <PackageLicenseUrl>https://raw.githubusercontent.com/naighes/Carrot/master/LICENSE.txt</PackageLicenseUrl>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="NLog" Version="5.0.0-beta11" />
+    <PackageReference Include="NLog" Version="4.5.10" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Carrot\Carrot.csproj" />
