@@ -221,6 +221,7 @@ namespace Carrot
         {
             var builder = new ConsumedMessageBuilder(_configuration.SerializationConfiguration,
                                                      _configuration.MessageTypeResolver);
+            var outboundChannelPool = new OutboundChannelPool(connection, _configuration);
             var outboundChannel = _configuration.OutboundChannelBuilder(outboundModel,
                                                                         _configuration);
             var consumers = _promises.Select(_ =>
@@ -239,6 +240,7 @@ namespace Carrot
 
             return new Connection(connection,
                                   consumers.Select(_ => _.Consumer),
+                                  outboundChannelPool,
                                   outboundChannel,
                                   _configuration);
         }

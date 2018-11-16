@@ -29,12 +29,15 @@ namespace Carrot.Tests
                                                  null);
             var outboundModel = new Mock<IModel>();
             var connection = new Mock<RabbitMQ.Client.IConnection>();
+            var outboundChannelPool = new Mock<IOutboundChannelPool>();
             var amqpConnection = new Connection(connection.Object,
                                                 new List<ConsumerBase> { consumer1, consumer2 },
+                                                outboundChannelPool.Object,
                                                 new ReliableOutboundChannel(outboundModel.Object, null, null, null),
                                                 null);
             amqpConnection.Dispose();
 
+            outboundChannelPool.Verify(_ => _.Dispose(), Times.Once);
             connection.Verify(_ => _.Dispose(), Times.Once);
             outboundModel.Verify(_ => _.Dispose(), Times.Once);
             consumerChannel1.Verify(_ => _.Dispose(), Times.Once);

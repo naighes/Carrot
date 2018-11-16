@@ -11,17 +11,17 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "contrib", "contrib", "{E87A
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "logging", "logging", "{0D082319-44EC-4AB5-8BD5-B97C8BFDCCB0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Carrot.NLog", "Carrot.NLog\Carrot.NLog.csproj", "{B7F17E24-8A22-43B2-8E1A-0BAB13CDEC22}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Carrot.NLog", "Carrot.NLog\Carrot.NLog.csproj", "{B7F17E24-8A22-43B2-8E1A-0BAB13CDEC22}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Carrot.log4net", "Carrot.log4net\Carrot.log4net.csproj", "{C4ED0D57-6EB7-4498-9FBA-E7FFD6FC9B9F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Carrot.log4net", "Carrot.log4net\Carrot.log4net.csproj", "{C4ED0D57-6EB7-4498-9FBA-E7FFD6FC9B9F}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{6D68D9FB-A6F8-461A-84A7-F44D05BD7F84}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Carrot.BasicSample", "Carrot.BasicSample\Carrot.BasicSample.csproj", "{A3E72B2E-77D9-4C18-824B-B9A4C52EDD05}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Carrot.BasicSample", "Carrot.BasicSample\Carrot.BasicSample.csproj", "{A3E72B2E-77D9-4C18-824B-B9A4C52EDD05}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Carrot.Benchmarks", "Carrot.Benchmarks\Carrot.Benchmarks.csproj", "{4464D238-2B01-49F3-AE1F-31043B71D2C9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Carrot.Benchmarks", "Carrot.Benchmarks\Carrot.Benchmarks.csproj", "{4464D238-2B01-49F3-AE1F-31043B71D2C9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Carrot.RpcSample", "Carrot.RpcSample\Carrot.RpcSample.csproj", "{48B1014F-E8FE-40EC-91ED-B9F8AC960DBC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Carrot.RpcSample", "Carrot.RpcSample\Carrot.RpcSample.csproj", "{48B1014F-E8FE-40EC-91ED-B9F8AC960DBC}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution items", "Solution items", "{5B1FF2EE-B620-481A-B5D6-1698C57D8B52}"
 	ProjectSection(SolutionItems) = preProject
@@ -29,6 +29,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution items", "Solution 
 		..\LICENSE.txt = ..\LICENSE.txt
 		..\README.md = ..\README.md
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Carrot.ChannelPoolSample", "Carrot.ChannelPoolSample\Carrot.ChannelPoolSample.csproj", "{175A7402-DD18-4250-9F14-6BCF8364DBA1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -64,6 +66,10 @@ Global
 		{48B1014F-E8FE-40EC-91ED-B9F8AC960DBC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{48B1014F-E8FE-40EC-91ED-B9F8AC960DBC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{48B1014F-E8FE-40EC-91ED-B9F8AC960DBC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{175A7402-DD18-4250-9F14-6BCF8364DBA1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{175A7402-DD18-4250-9F14-6BCF8364DBA1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{175A7402-DD18-4250-9F14-6BCF8364DBA1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{175A7402-DD18-4250-9F14-6BCF8364DBA1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -75,6 +81,7 @@ Global
 		{A3E72B2E-77D9-4C18-824B-B9A4C52EDD05} = {6D68D9FB-A6F8-461A-84A7-F44D05BD7F84}
 		{4464D238-2B01-49F3-AE1F-31043B71D2C9} = {6D68D9FB-A6F8-461A-84A7-F44D05BD7F84}
 		{48B1014F-E8FE-40EC-91ED-B9F8AC960DBC} = {6D68D9FB-A6F8-461A-84A7-F44D05BD7F84}
+		{175A7402-DD18-4250-9F14-6BCF8364DBA1} = {6D68D9FB-A6F8-461A-84A7-F44D05BD7F84}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {12239951-1ADC-404C-BB3A-BDD8922AB082}
