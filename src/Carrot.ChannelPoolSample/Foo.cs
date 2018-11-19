@@ -7,5 +7,6 @@ namespace Carrot.BasicSample
     public class Foo
     {
         public Int32 Bar { get; set; }
+        public string Buzz { get; set; }
     }
 }

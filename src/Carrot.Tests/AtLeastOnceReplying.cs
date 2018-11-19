@@ -93,7 +93,7 @@ namespace Carrot.Tests
             builder.Setup(_ => _.Build(args)).Returns(message);
             var channel = new Mock<IInboundChannel>();
             var consumer = new AtLeastOnceConsumerWrapper(channel.Object,
-                                                          new Mock<IOutboundChannel>().Object,
+                                                          new Mock<IOutboundChannelPool>().Object,
                                                           default(Queue),
                                                           builder.Object,
                                                           configuration);
@@ -131,11 +131,11 @@ namespace Carrot.Tests
         internal class AtLeastOnceConsumerWrapper : AtLeastOnceConsumer
         {
             internal AtLeastOnceConsumerWrapper(IInboundChannel inboundChannel,
-                                                IOutboundChannel outboundChannel,
+                                                IOutboundChannelPool outboundChannelPool,
                                                 Queue queue,
                                                 IConsumedMessageBuilder builder,
                                                 ConsumingConfiguration configuration)
-                : base(inboundChannel, outboundChannel, queue, builder, configuration)
+                : base(inboundChannel, outboundChannelPool, queue, builder, configuration)
             {
             }
 

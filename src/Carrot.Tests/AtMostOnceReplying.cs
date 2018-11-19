@@ -26,7 +26,7 @@ namespace Carrot.Tests
             inboundChannel.Setup(_ => _.Acknowledge(deliveryTag)).Throws(new Exception());
             var builder = new Mock<IConsumedMessageBuilder>();
             var consumer = new AtMostOnceConsumerWrapper(inboundChannel.Object,
-                                                         new Mock<IOutboundChannel>().Object,
+                                                         new Mock<IOutboundChannelPool>().Object,
                                                          default(Queue),
                                                          builder.Object,
                                                          _configuration);
@@ -42,11 +42,11 @@ namespace Carrot.Tests
         internal class AtMostOnceConsumerWrapper : AtMostOnceConsumer
         {
             internal AtMostOnceConsumerWrapper(IInboundChannel inboundChannel,
-                                               IOutboundChannel outboundChannel,
+                                               IOutboundChannelPool outboundChannelPool,
                                                Queue queue,
                                                IConsumedMessageBuilder builder,
                                                ConsumingConfiguration configuration)
-                : base(inboundChannel, outboundChannel, queue, builder, configuration)
+                : base(inboundChannel, outboundChannelPool, queue, builder, configuration)
             {
             }
 

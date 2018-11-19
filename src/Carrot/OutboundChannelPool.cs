@@ -4,7 +4,7 @@ using Carrot.Configuration;
 
 namespace Carrot
 {
-    public class OutboundChannelPool : IOutboundChannelPool
+    internal class OutboundChannelPool : IOutboundChannelPool
     {
         private readonly RabbitMQ.Client.IConnection _connection;
         private readonly EnvironmentConfiguration _configuration;

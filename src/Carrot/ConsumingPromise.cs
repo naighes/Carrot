@@ -23,7 +23,7 @@ namespace Carrot
             LogBuilder = logBuilder;
         }
 
-        internal abstract ConsumerBase BuildConsumer(IInboundChannel inboundChannel, IOutboundChannel outboundChannel);
+        internal abstract ConsumerBase BuildConsumer(IInboundChannel inboundChannel, IOutboundChannelPool outboundChannelPool);
     }
 
     internal class AtMostOnceConsumingPromise : ConsumingPromise
@@ -36,10 +36,10 @@ namespace Carrot
         {
         }
 
-        internal override ConsumerBase BuildConsumer(IInboundChannel inboundChannel, IOutboundChannel outboundChannel)
+        internal override ConsumerBase BuildConsumer(IInboundChannel inboundChannel, IOutboundChannelPool outboundChannelPool)
         {
             return new LoggedAtMostOnceConsumer(inboundChannel,
-                                                outboundChannel,
+                                                outboundChannelPool,
                                                 Queue,
                                                 Builder,
                                                 Configuration,
@@ -57,10 +57,10 @@ namespace Carrot
         {
         }
 
-        internal override ConsumerBase BuildConsumer(IInboundChannel inboundChannel, IOutboundChannel outboundChannel)
+        internal override ConsumerBase BuildConsumer(IInboundChannel inboundChannel, IOutboundChannelPool outboundChannelPool)
         {
             return new LoggedAtLeastOnceConsumer(inboundChannel,
-                                                 outboundChannel,
+                                                 outboundChannelPool,
                                                  Queue,
                                                  Builder,
                                                  Configuration,

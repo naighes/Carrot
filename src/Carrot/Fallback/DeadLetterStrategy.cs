@@ -24,9 +24,17 @@ namespace Carrot.Fallback
             return new DeadLetterStrategy(broker.DeclareDurableDirectExchange(exchangeNameBuilder(queue.Name)));
         }
 
-        public void Apply(IOutboundChannel channel, ConsumedMessageBase message)
+        public void Apply(IOutboundChannelPool channelPool, ConsumedMessageBase message)
         {
-            channel.ForwardAsync(message, _exchange, String.Empty);
+            var channel = channelPool.Take();
+            try
+            {
+                channel.ForwardAsync(message, _exchange, String.Empty);
+            }
+            finally
+            {
+                channelPool.Add(channel);
+            }
         }
     }
 }

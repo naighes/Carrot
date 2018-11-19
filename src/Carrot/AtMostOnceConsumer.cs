@@ -8,11 +8,11 @@ namespace Carrot
     public class AtMostOnceConsumer : ConsumerBase
     {
         internal AtMostOnceConsumer(IInboundChannel inboundChannel,
-                                    IOutboundChannel outboundChannel,
+                                    IOutboundChannelPool outboundChannelPool,
                                     Queue queue,
                                     IConsumedMessageBuilder builder,
                                     ConsumingConfiguration configuration)
-            : base(inboundChannel, outboundChannel, queue, builder, configuration)
+            : base(inboundChannel, outboundChannelPool, queue, builder, configuration)
         {
         }
 

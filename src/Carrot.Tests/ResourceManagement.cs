@@ -17,29 +17,25 @@ namespace Carrot.Tests
         {
             var consumerChannel1 = new Mock<IInboundChannel>();
             var consumer1 = new FakeConsumerBase(consumerChannel1.Object,
-                                                 new Mock<IOutboundChannel>().Object,
+                                                 new Mock<IOutboundChannelPool>().Object,
                                                  default(Queue),
                                                  null,
                                                  null);
             var consumerChannel2 = new Mock<IInboundChannel>();
             var consumer2 = new FakeConsumerBase(consumerChannel2.Object,
-                                                 new Mock<IOutboundChannel>().Object,
+                                                 new Mock<IOutboundChannelPool>().Object,
                                                  default(Queue),
                                                  null,
                                                  null);
-            var outboundModel = new Mock<IModel>();
-            var connection = new Mock<RabbitMQ.Client.IConnection>();
             var outboundChannelPool = new Mock<IOutboundChannelPool>();
+            var connection = new Mock<RabbitMQ.Client.IConnection>();
             var amqpConnection = new Connection(connection.Object,
                                                 new List<ConsumerBase> { consumer1, consumer2 },
-                                                outboundChannelPool.Object,
-                                                new ReliableOutboundChannel(outboundModel.Object, null, null, null),
-                                                null);
+                                                outboundChannelPool.Object);
             amqpConnection.Dispose();
 
-            outboundChannelPool.Verify(_ => _.Dispose(), Times.Once);
             connection.Verify(_ => _.Dispose(), Times.Once);
-            outboundModel.Verify(_ => _.Dispose(), Times.Once);
+            outboundChannelPool.Verify(_ => _.Dispose(), Times.Once);
             consumerChannel1.Verify(_ => _.Dispose(), Times.Once);
             consumerChannel2.Verify(_ => _.Dispose(), Times.Once);
         }
@@ -47,11 +43,11 @@ namespace Carrot.Tests
         internal class FakeConsumerBase : ConsumerBase
         {
             public FakeConsumerBase(IInboundChannel inboundChannel,
-                                    IOutboundChannel outboundChannel,
+                                    IOutboundChannelPool outboundChannelPool,
                                     Queue queue,
                                     IConsumedMessageBuilder builder,
                                     ConsumingConfiguration configuration)
-                : base(inboundChannel, outboundChannel, queue, builder, configuration)
+                : base(inboundChannel, outboundChannelPool, queue, builder, configuration)
             {
             }
 

@@ -50,7 +50,7 @@ namespace Carrot.Messages
         }
 
         internal virtual AggregateConsumingResult Reply(IInboundChannel inboundChannel,
-                                                        IOutboundChannel outboundChannel,
+                                                        IOutboundChannelPool outboundChannelPool,
                                                         IFallbackStrategy fallbackStrategy)
         {
             Message.Acknowledge(inboundChannel);
@@ -105,11 +105,11 @@ namespace Carrot.Messages
         }
 
         internal override AggregateConsumingResult Reply(IInboundChannel inboundChannel,
-                                                         IOutboundChannel outboundChannel,
+                                                         IOutboundChannelPool outboundChannelPool,
                                                          IFallbackStrategy fallbackStrategy)
         {
-            fallbackStrategy.Apply(outboundChannel, Message);
-            return base.Reply(inboundChannel, outboundChannel, fallbackStrategy);
+            fallbackStrategy.Apply(outboundChannelPool, Message);
+            return base.Reply(inboundChannel, outboundChannelPool, fallbackStrategy);
         }
     }
 
@@ -123,7 +123,7 @@ namespace Carrot.Messages
         }
 
         internal override AggregateConsumingResult Reply(IInboundChannel inboundChannel,
-                                                         IOutboundChannel outboundChannel,
+                                                         IOutboundChannelPool outboundChannelPool,
                                                          IFallbackStrategy fallbackStrategy)
         {
             Message.Requeue(inboundChannel);

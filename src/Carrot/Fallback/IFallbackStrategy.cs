@@ -4,6 +4,6 @@ namespace Carrot.Fallback
 {
     public interface IFallbackStrategy
     {
-        void Apply(IOutboundChannel channel, ConsumedMessageBase message);
+        void Apply(IOutboundChannelPool channelPool, ConsumedMessageBase message);
     }
 }
