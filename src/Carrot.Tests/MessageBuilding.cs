@@ -74,6 +74,8 @@ namespace Carrot.Tests
         [Fact]
         public void CustomHeader()
         {
+            var key = "a";
+            var value = "b";
             var content = new Foo();
             var args = new BasicDeliverEventArgs
                            {
@@ -81,13 +83,16 @@ namespace Carrot.Tests
                                                      {
                                                          Headers = new Dictionary<String, Object>
                                                                        {
-                                                                           { "a", "b" }
+                                                                           { key, value }
                                                                        }
                                                      }
                            };
             var message = new FakeConsumedMessage(content, args);
+
             var actual = message.To<Foo>();
-            Assert.Equal("b", actual.Headers["a"]);
+
+            Assert.True(actual.ContainsHeader(key));
+            Assert.Equal(value, actual.Headers[key]);
         }
 
         private static BasicDeliverEventArgs FakeBasicDeliverEventArgs()

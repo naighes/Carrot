@@ -305,6 +305,19 @@ namespace Carrot.Tests
             Assert.Equal("18000", properties.Expiration);
         }
 
+        [Fact]
+        public void CustomHeader()
+        {
+            var message = new OutboundMessage<Bar>(new Bar());
+            const String key = "a";
+            const String value = "b";
+
+            message.AddHeader(key, value);
+
+            Assert.True(message.ContainsHeader(key));
+            Assert.Equal(value, message.Headers[key]);
+        }
+
         private static Mock<IMessageTypeResolver> StubResolver<TMessage>(OutboundMessage<TMessage> message, TimeSpan? expiresAfter)
             where TMessage : class
         {

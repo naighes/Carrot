@@ -151,5 +151,16 @@ namespace Carrot.Tests
             Assert.Equal(correlationId, headers.CorrelationId);
             Assert.Equal(messageId, headers.MessageId);
         }
+
+        [Fact]
+        public void ContainsHeader()
+        {
+            const String key = "foo";
+            var collection = new HeaderCollection();
+
+            collection.AddHeader(key, null);
+
+            Assert.True(collection.ContainsHeader(key));
+        }
     }
 }
