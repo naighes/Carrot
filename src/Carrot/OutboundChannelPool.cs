@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Concurrent;
 using Carrot.Configuration;
 
@@ -26,10 +25,10 @@ namespace Carrot
                 channel = _configuration.OutboundChannelBuilder(model, _configuration);
             }
 
-            return channel;
+            return new PooledOutboundChannel(channel, Add);
         }
 
-        public void Add(IOutboundChannel channel)
+        private void Add(IOutboundChannel channel)
         {
             _channels.Add(channel);
         }

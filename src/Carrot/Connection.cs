@@ -1,7 +1,5 @@
-using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Carrot.Configuration;
 using Carrot.Messages;
 
 namespace Carrot
@@ -23,17 +21,12 @@ namespace Carrot
 
         public Task<IPublishResult> PublishAsync<TMessage>(OutboundMessage<TMessage> message,
                                                            Exchange exchange,
-                                                           String routingKey = "")
+                                                           string routingKey = "")
             where TMessage : class
         {
-            var outboundChannel = _outboundChannelPool.Take();
-            try
+            using (var outboundChannel = _outboundChannelPool.Take())
             {
                 return outboundChannel.PublishAsync(message, exchange, routingKey);
-            }
-            finally
-            {
-                _outboundChannelPool.Add(outboundChannel);
             }
         }
 

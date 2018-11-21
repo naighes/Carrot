@@ -26,14 +26,9 @@ namespace Carrot.Fallback
 
         public void Apply(IOutboundChannelPool channelPool, ConsumedMessageBase message)
         {
-            var channel = channelPool.Take();
-            try
+            using (var outboundChannel = channelPool.Take())
             {
-                channel.ForwardAsync(message, _exchange, String.Empty);
-            }
-            finally
-            {
-                channelPool.Add(channel);
+                outboundChannel.ForwardAsync(message, _exchange, String.Empty);
             }
         }
     }
