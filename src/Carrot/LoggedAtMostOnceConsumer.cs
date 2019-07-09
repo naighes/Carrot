@@ -35,11 +35,10 @@ namespace Carrot
             _log.Error($"an exception was thrown during consuming message (exception message: {exception.GetBaseException().Message})");
         }
 
-        protected override void OnConsumerCancelled(Object sender, ConsumerEventArgs args)
+        protected override Task OnConsumerCancelled(Object sender, ConsumerEventArgs args)
         {
-            base.OnConsumerCancelled(sender, args);
-
             _log.Info($"consumer-model basic.cancel received (consumer-tag: '{args.ConsumerTag}')");
+            return base.OnConsumerCancelled(sender, args);
         }
     }
 }

@@ -7,7 +7,7 @@ using RabbitMQ.Client.Events;
 
 namespace Carrot
 {
-    public abstract class ConsumerBase : DefaultBasicConsumer, IDisposable
+    public abstract class ConsumerBase : AsyncDefaultBasicConsumer, IDisposable
     {
         protected readonly ConsumingConfiguration Configuration;
         protected readonly IInboundChannel InboundChannel;
@@ -31,7 +31,7 @@ namespace Carrot
             ConsumerCancelled += OnConsumerCancelled;
         }
 
-        public override void HandleBasicDeliver(String consumerTag,
+        public override Task HandleBasicDeliver(String consumerTag,
                                                 UInt64 deliveryTag,
                                                 Boolean redelivered,
                                                 String exchange,
@@ -39,13 +39,7 @@ namespace Carrot
                                                 IBasicProperties properties,
                                                 Byte[] body)
         {
-            base.HandleBasicDeliver(consumerTag,
-                                    deliveryTag,
-                                    redelivered,
-                                    exchange,
-                                    routingKey,
-                                    properties,
-                                    body);
+            
 
             var args = new BasicDeliverEventArgs
                            {
@@ -58,11 +52,18 @@ namespace Carrot
                                Body = body
                            };
 
-            ConsumeInternalAsync(args).ContinueWith(_ =>
+            return ConsumeInternalAsync(args).ContinueWith(_ =>
             {
                 if (_.IsFaulted)
                     OnUnhandledException(_.Exception);
-            });
+            }).ContinueWith(_ => base.HandleBasicDeliver(consumerTag,
+                deliveryTag,
+                redelivered,
+                exchange,
+                routingKey,
+                properties,
+                body));
+            
         }
 
         public void Dispose()
@@ -90,6 +91,6 @@ namespace Carrot
 
         protected virtual void OnUnhandledException(AggregateException exception) { }
 
-        protected virtual void OnConsumerCancelled(Object sender, ConsumerEventArgs args) { }
+        protected virtual Task OnConsumerCancelled(object sender, ConsumerEventArgs @event) => Task.FromResult(0);
     }
 }
