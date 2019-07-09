@@ -65,6 +65,11 @@ namespace Carrot.Messages
             {
                 Consumer.OnConsumeCompletion();
             }
+
+            internal void NotifyConsumingFault(Exception e)
+            {
+                Consumer.OnError(e);
+            }
         }
 
         internal class Failure : ConsumingResult

@@ -79,6 +79,33 @@ namespace Carrot.Tests
             model.Verify(_ => _.Acknowledge(deliveryTag));
         }
 
+        [Fact]
+        public async Task NotifyFault()
+        {
+            var expectedException = new Exception("Unhandled exception");
+
+            var args = new BasicDeliverEventArgs
+            {
+                DeliveryTag = 1234L,
+                BasicProperties = new BasicProperties()
+            };
+
+            var realConsumer = new Mock<Consumer<FakeConsumedMessage>>();
+            var message = new FakeConsumedMessage(args, _ => new Success(_, new ConsumedMessage.ConsumingResult[] { new ConsumingResultStub(_, realConsumer.Object) }));
+            var builder = new Mock<IConsumedMessageBuilder>();
+            builder.Setup(_ => _.Build(It.IsAny<BasicDeliverEventArgs>())).Returns(message);
+
+            var configuration = new ConsumingConfiguration(new Mock<IBroker>().Object, default(Queue));
+            configuration.Consumes(realConsumer.Object);
+
+            var failingInboundChannel = new FailingInboundChannel(expectedException);
+
+            var consumer = new AtLeastOnceConsumerWrapper(failingInboundChannel, new Mock<IOutboundChannel>().Object, default(Queue), builder.Object, configuration);
+            await consumer.CallConsumeInternal(args);
+
+            realConsumer.Verify(_ => _.OnError(expectedException));
+        }
+
         private static Mock<IInboundChannel> BuildInboundChannel(UInt64 deliveryTag,
                                                                  Func<ConsumedMessageBase, AggregateConsumingResult> func,
                                                                  ConsumingConfiguration configuration)
@@ -101,7 +128,7 @@ namespace Carrot.Tests
             return channel;
         }
 
-        internal class FakeConsumedMessage : ConsumedMessageBase
+        public class FakeConsumedMessage : ConsumedMessageBase
         {
             private readonly Func<ConsumedMessageBase, AggregateConsumingResult> _result;
 
@@ -142,6 +169,38 @@ namespace Carrot.Tests
             internal Task CallConsumeInternal(BasicDeliverEventArgs args)
             {
                 return ConsumeInternalAsync(args);
+            }
+        }
+
+        private class FailingInboundChannel : IInboundChannel
+        {
+            private readonly Exception _exception;
+
+            public FailingInboundChannel(Exception exception)
+            {
+                _exception = exception;
+            }
+
+            public void Dispose()
+            {
+                
+            }
+
+            public void Acknowledge(ulong deliveryTag)
+            {
+                throw _exception;
+            }
+
+            public void NegativeAcknowledge(ulong deliveryTag, bool requeue)
+            {
+                throw _exception;
+            }
+        }
+
+        private class ConsumingResultStub : ConsumedMessage.ConsumingResult
+        {
+            public ConsumingResultStub(ConsumedMessageBase message, IConsumer consumer) : base(message, consumer)
+            {
             }
         }
     }

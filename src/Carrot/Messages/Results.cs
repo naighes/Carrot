@@ -61,6 +61,11 @@ namespace Carrot.Messages
         {
             Results.ForEach(_ => _.NotifyConsumingCompletion());
         }
+
+        internal void NotifyConsumingFault(Exception e)
+        {
+            Results.ForEach(_ => _.NotifyConsumingFault(e));
+        }
     }
 
     public class Success : AggregateConsumingResult
