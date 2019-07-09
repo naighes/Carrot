@@ -30,15 +30,15 @@ namespace Carrot.Tests
             _configuration.FallbackBy((c, q) => strategy.Object);
             var builder = new Mock<IConsumedMessageBuilder>();
             builder.Setup(_ => _.Build(args)).Returns(message);
-            var outboundChannel = new Mock<IOutboundChannel>().Object;
+            var outboundChannelPool = new Mock<IOutboundChannelPool>().Object;
             var consumer = new AtLeastOnceConsumer(inboundChannel.Object,
-                                                   outboundChannel,
+                                                   outboundChannelPool,
                                                    default(Queue),
                                                    builder.Object,
                                                    _configuration);
             var result = consumer.ConsumeAsync(args).Result;
             Assert.IsType<Success>(result);
-            strategy.Verify(_ => _.Apply(outboundChannel, message), Times.Never);
+            strategy.Verify(_ => _.Apply(outboundChannelPool, message), Times.Never);
         }
 
         [Fact]
@@ -52,15 +52,15 @@ namespace Carrot.Tests
             _configuration.Consumes(new FakeConsumer(consumedMessage => { throw new Exception(); }));
             var builder = new Mock<IConsumedMessageBuilder>();
             builder.Setup(_ => _.Build(args)).Returns(message);
-            var outboundChannel = new Mock<IOutboundChannel>().Object;
+            var outboundChannelPool = new Mock<IOutboundChannelPool>().Object;
             var consumer = new AtLeastOnceConsumer(inboundChannel.Object,
-                                                   outboundChannel,
+                                                   outboundChannelPool,
                                                    default(Queue),
                                                    builder.Object,
                                                    _configuration);
             var result = consumer.ConsumeAsync(args).Result;
             Assert.IsType<ConsumingFailure>(result);
-            strategy.Verify(_ => _.Apply(outboundChannel, message), Times.Never);
+            strategy.Verify(_ => _.Apply(outboundChannelPool, message), Times.Never);
         }
 
         [Fact]
@@ -75,15 +75,15 @@ namespace Carrot.Tests
             _configuration.Consumes(new FakeConsumer(consumedMessage => { throw new Exception(); }));
             var builder = new Mock<IConsumedMessageBuilder>();
             builder.Setup(_ => _.Build(args)).Returns(message);
-            var outboundChannel = new Mock<IOutboundChannel>().Object;
+            var outboundChannelPool = new Mock<IOutboundChannelPool>().Object;
             var consumer = new AtLeastOnceConsumerWrapper(inboundChannel.Object,
-                                                          outboundChannel,
+                                                          outboundChannelPool,
                                                           default(Queue),
                                                           builder.Object,
                                                           _configuration);
             var result = consumer.CallConsumeInternalAsync(args).Result;
             Assert.IsType<ReiteratedConsumingFailure>(result);
-            strategy.Verify(_ => _.Apply(outboundChannel, message), Times.Once);
+            strategy.Verify(_ => _.Apply(outboundChannelPool, message), Times.Once);
         }
 
         [Fact]
@@ -102,7 +102,9 @@ namespace Carrot.Tests
                                                   queue,
                                                   _ => $"{_}-DeadLetter");
             var outboundChannel = new Mock<IOutboundChannel>();
-            strategy.Apply(outboundChannel.Object, message);
+            var outboundChannelPool = new Mock<IOutboundChannelPool>();
+            outboundChannelPool.Setup(pool => pool.Take()).Returns(outboundChannel.Object);
+            strategy.Apply(outboundChannelPool.Object, message);
             outboundChannel.Verify(_ => _.ForwardAsync(message,
                                                        It.Is<Exchange>(__ => __.Name == dleName),
                                                        String.Empty),
@@ -123,11 +125,11 @@ namespace Carrot.Tests
         internal class AtLeastOnceConsumerWrapper : AtLeastOnceConsumer
         {
             public AtLeastOnceConsumerWrapper(IInboundChannel inboundChannel,
-                                              IOutboundChannel outboundChannel,
+                                              IOutboundChannelPool outboundChannelPool,
                                               Queue queue,
                                               IConsumedMessageBuilder builder,
                                               ConsumingConfiguration configuration)
-                : base(inboundChannel, outboundChannel, queue, builder, configuration)
+                : base(inboundChannel, outboundChannelPool, queue, builder, configuration)
             {
             }
 

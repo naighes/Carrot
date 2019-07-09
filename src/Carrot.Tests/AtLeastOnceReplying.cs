@@ -100,7 +100,7 @@ namespace Carrot.Tests
 
             var failingInboundChannel = new FailingInboundChannel(expectedException);
 
-            var consumer = new AtLeastOnceConsumerWrapper(failingInboundChannel, new Mock<IOutboundChannel>().Object, default(Queue), builder.Object, configuration);
+            var consumer = new AtLeastOnceConsumerWrapper(failingInboundChannel, new Mock<IOutboundChannelPool>().Object, default(Queue), builder.Object, configuration);
             await consumer.CallConsumeInternal(args);
 
             realConsumer.Verify(_ => _.OnError(expectedException));
@@ -120,7 +120,7 @@ namespace Carrot.Tests
             builder.Setup(_ => _.Build(args)).Returns(message);
             var channel = new Mock<IInboundChannel>();
             var consumer = new AtLeastOnceConsumerWrapper(channel.Object,
-                                                          new Mock<IOutboundChannel>().Object,
+                                                          new Mock<IOutboundChannelPool>().Object,
                                                           default(Queue),
                                                           builder.Object,
                                                           configuration);
@@ -158,11 +158,11 @@ namespace Carrot.Tests
         internal class AtLeastOnceConsumerWrapper : AtLeastOnceConsumer
         {
             internal AtLeastOnceConsumerWrapper(IInboundChannel inboundChannel,
-                                                IOutboundChannel outboundChannel,
+                                                IOutboundChannelPool outboundChannelPool,
                                                 Queue queue,
                                                 IConsumedMessageBuilder builder,
                                                 ConsumingConfiguration configuration)
-                : base(inboundChannel, outboundChannel, queue, builder, configuration)
+                : base(inboundChannel, outboundChannelPool, queue, builder, configuration)
             {
             }
 

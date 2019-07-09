@@ -11,19 +11,19 @@ namespace Carrot
     {
         protected readonly ConsumingConfiguration Configuration;
         protected readonly IInboundChannel InboundChannel;
-        protected readonly IOutboundChannel OutboundChannel;
+        protected readonly IOutboundChannelPool OutboundChannelPool;
 
         private readonly Queue _queue;
         private readonly IConsumedMessageBuilder _builder;
 
         protected internal ConsumerBase(IInboundChannel inboundChannel,
-                                        IOutboundChannel outboundChannel,
+                                        IOutboundChannelPool outboundChannelPool,
                                         Queue queue,
                                         IConsumedMessageBuilder builder,
                                         ConsumingConfiguration configuration)
         {
             InboundChannel = inboundChannel;
-            OutboundChannel = outboundChannel;
+            OutboundChannelPool = outboundChannelPool;
             _queue = queue;
             _builder = builder;
             Configuration = configuration;

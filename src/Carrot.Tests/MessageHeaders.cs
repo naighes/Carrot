@@ -50,8 +50,8 @@ namespace Carrot.Tests
             const String value = "bar";
             collection.AddHeader(key, value);
             var resolver = new Mock<IMessageTypeResolver>();
-            resolver.Setup(_ => _.Resolve<Foo>()).Returns(EmptyMessageBinding.Instance);
             var message = new OutboundMessage<Foo>(new Foo(), collection);
+            resolver.Setup(_ => _.Resolve(message.Content)).Returns(EmptyMessageBinding.Instance);
             var properties = message.BuildBasicProperties(resolver.Object, null, null);
 
             Assert.Equal(messageId, properties.MessageId);
@@ -78,13 +78,13 @@ namespace Carrot.Tests
             const String key = "foo";
             const String value = "bar";
             collection.AddHeader(key, value);
+            var message = new OutboundMessage<Foo>(new Foo(), collection);
             var resolver = new Mock<IMessageTypeResolver>();
-            resolver.Setup(_ => _.Resolve<Foo>()).Returns(EmptyMessageBinding.Instance);
+            resolver.Setup(_ => _.Resolve(message.Content)).Returns(EmptyMessageBinding.Instance);
             var newId = new Mock<INewId>();
             newId.Setup(_ => _.Next()).Returns(messageId);
             var dateTimeProvider = new Mock<IDateTimeProvider>();
             dateTimeProvider.Setup(_ => _.UtcNow()).Returns(timestamp.ToDateTimeOffset());
-            var message = new OutboundMessage<Foo>(new Foo(), collection);
             var properties = message.BuildBasicProperties(resolver.Object, dateTimeProvider.Object, newId.Object);
 
             Assert.Equal(messageId, properties.MessageId);

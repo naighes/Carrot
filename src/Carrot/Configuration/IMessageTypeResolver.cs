@@ -6,6 +6,6 @@ namespace Carrot.Configuration
     {
         MessageBinding Resolve(ConsumedMessageContext context);
 
-        MessageBinding Resolve<TMessage>() where TMessage : class;
+        MessageBinding Resolve<TMessage>(TMessage message) where TMessage : class;
     }
 }

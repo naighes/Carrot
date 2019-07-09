@@ -9,11 +9,11 @@ namespace Carrot
     public class AtLeastOnceConsumer : ConsumerBase
     {
         internal AtLeastOnceConsumer(IInboundChannel inboundChannel,
-                                     IOutboundChannel outboundChannel,
+                                     IOutboundChannelPool outboundChannelPool,
                                      Queue queue,
                                      IConsumedMessageBuilder builder,
                                      ConsumingConfiguration configuration)
-            : base(inboundChannel, outboundChannel, queue, builder, configuration)
+            : base(inboundChannel, outboundChannelPool, queue, builder, configuration)
         {
         }
 
@@ -25,7 +25,7 @@ namespace Carrot
                 try
                 {
                     result.Reply(InboundChannel,
-                        OutboundChannel,
+                        OutboundChannelPool,
                         Configuration.FallbackStrategy);
                     result.NotifyConsumingCompletion();
                 }

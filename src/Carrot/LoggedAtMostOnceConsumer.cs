@@ -13,12 +13,12 @@ namespace Carrot
         private readonly ILog _log;
 
         internal LoggedAtMostOnceConsumer(IInboundChannel inboundChannel,
-                                          IOutboundChannel outboundChannel,
+                                          IOutboundChannelPool outboundChannelPool,
                                           Queue queue,
                                           IConsumedMessageBuilder builder,
                                           ConsumingConfiguration configuration,
                                           ILog log)
-            : base(inboundChannel, outboundChannel, queue, builder, configuration)
+            : base(inboundChannel, outboundChannelPool, queue, builder, configuration)
         {
             _log = log;
         }
