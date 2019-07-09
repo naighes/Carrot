@@ -79,7 +79,7 @@ namespace Carrot.Messages
             if (Headers.ReplyConfiguration != null)
                 properties.ReplyTo = Headers.ReplyConfiguration.ToString();
 
-            var binding = resolver.Resolve<TMessage>();
+            var binding = resolver.Resolve(Content);
             properties.Type = binding.RawName;
 
             if (binding.ExpiresAfter.HasValue)

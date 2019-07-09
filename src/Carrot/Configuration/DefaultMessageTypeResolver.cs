@@ -27,9 +27,9 @@ namespace Carrot.Configuration
                        : new MessageBinding(messageType, type.GetTypeInfo());
         }
 
-        public MessageBinding Resolve<TMessage>() where TMessage : class
+        public MessageBinding Resolve<TMessage>(TMessage message) where TMessage : class
         {
-            var type = typeof(TMessage).GetTypeInfo();
+            var type = message.GetType().GetTypeInfo();
 
             return new MessageBinding(type.FullName, type);
         }

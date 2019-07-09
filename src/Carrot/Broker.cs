@@ -145,11 +145,12 @@ namespace Carrot
         public IConnection Connect()
         {
             var connection = _connectionBuilder.CreateConnection(_configuration.EndpointUri);
-            var outboundModel = connection.CreateModel();
+            using (var channel = connection.CreateModel())
+            {
+                ApplyEntitiesDeclarations(channel);
+            }
 
-            ApplyEntitiesDeclarations(outboundModel);
-
-            return CreateConnection(connection, outboundModel);
+            return CreateConnection(connection);
         }
 
         public void SubscribeByAtMostOnce(Queue queue, Action<ConsumingConfiguration> configure)
@@ -216,20 +217,18 @@ namespace Carrot
                 binding.Declare(outboundModel);
         }
 
-        private IConnection CreateConnection(RabbitMQ.Client.IConnection connection,
-                                             IModel outboundModel)
+        private IConnection CreateConnection(RabbitMQ.Client.IConnection connection)
         {
             var builder = new ConsumedMessageBuilder(_configuration.SerializationConfiguration,
                                                      _configuration.MessageTypeResolver);
-            var outboundChannel = _configuration.OutboundChannelBuilder(outboundModel,
-                                                                        _configuration);
+            var outboundChannelPool = new OutboundChannelPool(connection, _configuration);
             var consumers = _promises.Select(_ =>
                                                 {
                                                     var model = CreateInboundModel(connection,
                                                                                    _configuration.PrefetchSize,
                                                                                    _configuration.PrefetchCount);
                                                     var consumer = _(builder).BuildConsumer(new InboundChannel(model),
-                                                                                            outboundChannel);
+                                                                                            outboundChannelPool);
                                                     return new { Model = model, Consumer = consumer };
                                                 })
                                      .ToList();
@@ -239,8 +238,7 @@ namespace Carrot
 
             return new Connection(connection,
                                   consumers.Select(_ => _.Consumer),
-                                  outboundChannel,
-                                  _configuration);
+                                  outboundChannelPool);
         }
     }
 }

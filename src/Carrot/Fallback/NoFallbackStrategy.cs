@@ -8,6 +8,6 @@ namespace Carrot.Fallback
 
         private NoFallbackStrategy() { }
 
-        public void Apply(IOutboundChannel channel, ConsumedMessageBase message) { }
+        public void Apply(IOutboundChannelPool channelPool, ConsumedMessageBase message) { }
     }
 }

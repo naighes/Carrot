@@ -30,6 +30,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution items", "Solution 
 		..\README.md = ..\README.md
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Carrot.ChannelPoolSample", "Carrot.ChannelPoolSample\Carrot.ChannelPoolSample.csproj", "{175A7402-DD18-4250-9F14-6BCF8364DBA1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -64,6 +66,10 @@ Global
 		{48B1014F-E8FE-40EC-91ED-B9F8AC960DBC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{48B1014F-E8FE-40EC-91ED-B9F8AC960DBC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{48B1014F-E8FE-40EC-91ED-B9F8AC960DBC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{175A7402-DD18-4250-9F14-6BCF8364DBA1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{175A7402-DD18-4250-9F14-6BCF8364DBA1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{175A7402-DD18-4250-9F14-6BCF8364DBA1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{175A7402-DD18-4250-9F14-6BCF8364DBA1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -76,6 +82,7 @@ Global
 		{A3E72B2E-77D9-4C18-824B-B9A4C52EDD05} = {6D68D9FB-A6F8-461A-84A7-F44D05BD7F84}
 		{4464D238-2B01-49F3-AE1F-31043B71D2C9} = {6D68D9FB-A6F8-461A-84A7-F44D05BD7F84}
 		{48B1014F-E8FE-40EC-91ED-B9F8AC960DBC} = {6D68D9FB-A6F8-461A-84A7-F44D05BD7F84}
+		{175A7402-DD18-4250-9F14-6BCF8364DBA1} = {6D68D9FB-A6F8-461A-84A7-F44D05BD7F84}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {12239951-1ADC-404C-BB3A-BDD8922AB082}

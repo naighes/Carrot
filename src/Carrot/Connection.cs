@@ -1,36 +1,33 @@
-using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Carrot.Configuration;
 using Carrot.Messages;
 
 namespace Carrot
 {
     public class Connection : IConnection
     {
-        protected readonly EnvironmentConfiguration Configuration;
-
         private readonly RabbitMQ.Client.IConnection _connection;
         private readonly IEnumerable<ConsumerBase> _consumers;
-        private readonly IOutboundChannel _outboundChannel;
+        private readonly IOutboundChannelPool _outboundChannelPool;
 
         internal Connection(RabbitMQ.Client.IConnection connection,
                             IEnumerable<ConsumerBase> consumers,
-                            IOutboundChannel outboundChannel,
-                            EnvironmentConfiguration configuration)
+                            IOutboundChannelPool outboundChannelPool)
         {
             _connection = connection;
             _consumers = consumers;
-            _outboundChannel = outboundChannel;
-            Configuration = configuration;
+            _outboundChannelPool = outboundChannelPool;
         }
-        
+
         public Task<IPublishResult> PublishAsync<TMessage>(OutboundMessage<TMessage> message,
                                                            Exchange exchange,
-                                                           String routingKey = "")
+                                                           string routingKey = "")
             where TMessage : class
         {
-            return _outboundChannel.PublishAsync(message, exchange, routingKey);
+            using (var outboundChannel = _outboundChannelPool.Take())
+            {
+                return outboundChannel.PublishAsync(message, exchange, routingKey);
+            }
         }
 
         public void Dispose()
@@ -38,7 +35,7 @@ namespace Carrot
             foreach (var consumer in _consumers)
                 consumer.Dispose();
 
-            _outboundChannel?.Dispose();
+            _outboundChannelPool?.Dispose();
             _connection?.Dispose();
         }
     }
