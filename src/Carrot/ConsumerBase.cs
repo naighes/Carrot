@@ -58,7 +58,11 @@ namespace Carrot
                                Body = body
                            };
 
-            ConsumeInternalAsync(args);
+            ConsumeInternalAsync(args).ContinueWith(_ =>
+            {
+                if (_.IsFaulted)
+                    OnUnhandledException(_.Exception);
+            });
         }
 
         public void Dispose()
@@ -83,6 +87,8 @@ namespace Carrot
         }
 
         protected abstract Task<AggregateConsumingResult> ConsumeInternalAsync(BasicDeliverEventArgs args);
+
+        protected virtual void OnUnhandledException(AggregateException exception) { }
 
         protected virtual void OnConsumerCancelled(Object sender, ConsumerEventArgs args) { }
     }

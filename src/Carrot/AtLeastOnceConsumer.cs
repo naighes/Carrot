@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 using Carrot.Configuration;
 using Carrot.Messages;
@@ -18,16 +19,22 @@ namespace Carrot
 
         protected override Task<AggregateConsumingResult> ConsumeInternalAsync(BasicDeliverEventArgs args)
         {
-            return ConsumeAsync(args).ContinueWith(_ => _.Result
-                                                         .Reply(InboundChannel,
-                                                                OutboundChannel,
-                                                                Configuration.FallbackStrategy))
-                                     .ContinueWith(_ =>
-                                                   {
-                                                       var result = _.Result;
-                                                       result.NotifyConsumingCompletion();
-                                                       return result;
-                                                   });
+            return ConsumeAsync(args).ContinueWith(_ =>
+            {
+                var result = _.Result;
+                try
+                {
+                    result.Reply(InboundChannel,
+                        OutboundChannel,
+                        Configuration.FallbackStrategy);
+                    result.NotifyConsumingCompletion();
+                }
+                catch (Exception e)
+                {
+                    result.NotifyConsumingFault(e);
+                }
+                return result;
+            });
         }
     }
 }

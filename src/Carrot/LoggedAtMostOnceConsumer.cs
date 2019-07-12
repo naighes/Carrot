@@ -28,6 +28,13 @@ namespace Carrot
             return base.ConsumeAsync(args).ContinueWith(_ => _.HandleErrorResult(_log));
         }
 
+        protected override void OnUnhandledException(AggregateException exception)
+        {
+            base.OnUnhandledException(exception);
+
+            _log.Error($"an exception was thrown during consuming message (exception message: {exception.GetBaseException().Message})");
+        }
+
         protected override void OnConsumerCancelled(Object sender, ConsumerEventArgs args)
         {
             base.OnConsumerCancelled(sender, args);
