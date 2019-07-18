@@ -1,11 +1,11 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFrameworks>netstandard1.5;net452</TargetFrameworks>
     <Description>Carrot is a .NET lightweight library that provides a couple of facilities over RabbitMQ.</Description>
     <PackageTargetFallback>$(PackageTargetFallback);dotnet</PackageTargetFallback>
     <Title>Carrot</Title>
     <PackageId>Carrot</PackageId>
-    <VersionPrefix>1.0.0</VersionPrefix>
+    <VersionPrefix>1.0.1</VersionPrefix>
     <VersionSuffix></VersionSuffix>
     <AssemblyVersion>1.0.0</AssemblyVersion>
     <FileVersion>1.0.0</FileVersion>
@@ -14,7 +14,7 @@
     <RepositoryUrl>https://github.com/naighes/Carrot.git</RepositoryUrl>
     <PackageTags>rabbitmq</PackageTags>
     <PackageReleaseNotes>
-      porting to .net standard 1.5
+      bug fixes
     </PackageReleaseNotes>
     <PackageLicenseUrl>https://raw.githubusercontent.com/naighes/Carrot/master/LICENSE.txt</PackageLicenseUrl>
   </PropertyGroup>
