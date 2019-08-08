@@ -4,31 +4,60 @@ using Carrot.Messages;
 
 namespace Carrot.BasicSample
 {
-    internal class FooConsumer1 : Consumer<Foo>
+    internal class PublishingFooConsumer : Consumer<Foo>
     {
-        public override Task ConsumeAsync(ConsumedMessage<Foo> message)
+        private readonly Exchange _exchange;
+        private readonly String _routingKey;
+
+        public PublishingFooConsumer(Exchange exchange, String routingKey)
+        {
+            _exchange = exchange;
+            _routingKey = routingKey;
+        }
+
+        public override Task ConsumeAsync(ConsumingContext<Foo> context)
         {
             return Task.Factory
                        .StartNew(() =>
                                  {
                                      Console.WriteLine("[{0}]received '{1}' by '{2}'",
-                                                       message.ConsumerTag,
-                                                       message.Headers.MessageId,
+                                                       context.Message.ConsumerTag,
+                                                       context.Message.Headers.MessageId,
                                                        GetType().Name);
-                                 });
+                                     return context.OutboundChannel
+                                                   .PublishAsync<Foo>(new OutboundMessage<Foo>(context.Message
+                                                                                                      .Content),
+                                                                      _exchange,
+                                                                      _routingKey);
+                                 })
+                       .Unwrap()
+                       .ContinueWith(_ =>
+                                     {
+                                         var result = _.Result;
+
+                                         if (result is SuccessfulPublishing)
+                                             Console.WriteLine("published message '{0}'",
+                                                               ((SuccessfulPublishing)result).MessageId);
+                                         else
+                                         {
+                                             Console.WriteLine("an error has occurred while publishing message: {0}",
+                                                               ((FailurePublishing)result).Exception.Message);
+                                             throw ((FailurePublishing)result).Exception;
+                                         }
+                                     });
         }
     }
 
-    internal class FooConsumer2 : Consumer<Foo>
+    internal class FooConsumer : Consumer<Foo>
     {
-        public override Task ConsumeAsync(ConsumedMessage<Foo> message)
+        public override Task ConsumeAsync(ConsumingContext<Foo> context)
         {
             return Task.Factory
                        .StartNew(() =>
                                  {
                                      Console.WriteLine("[{0}]received '{1}' by '{2}'",
-                                                       message.ConsumerTag,
-                                                       message.Headers.MessageId,
+                                                       context.Message.ConsumerTag,
+                                                       context.Message.Headers.MessageId,
                                                        GetType().Name);
                                  });
         }

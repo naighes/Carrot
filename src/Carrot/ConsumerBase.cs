@@ -59,10 +59,10 @@ namespace Carrot
                            };
 
             ConsumeInternalAsync(args).ContinueWith(_ =>
-            {
-                if (_.IsFaulted)
-                    OnUnhandledException(_.Exception);
-            });
+                                                    {
+                                                        if (_.IsFaulted)
+                                                            OnUnhandledException(_.Exception);
+                                                    });
         }
 
         public void Dispose()
@@ -80,10 +80,12 @@ namespace Carrot
             model.BasicConsume(_queue.Name, false, this);
         }
 
-        protected internal virtual Task<AggregateConsumingResult> ConsumeAsync(BasicDeliverEventArgs args)
+        protected internal virtual Task<AggregateConsumingResult> ConsumeAsync(BasicDeliverEventArgs args,
+                                                                               IOutboundChannel outboundChannel)
         {
             var message = _builder.Build(args);
-            return message.ConsumeAsync(Configuration.FindSubscriptions(message));
+            return message.ConsumeAsync(Configuration.FindSubscriptions(message),
+                                        outboundChannel);
         }
 
         protected abstract Task<AggregateConsumingResult> ConsumeInternalAsync(BasicDeliverEventArgs args);

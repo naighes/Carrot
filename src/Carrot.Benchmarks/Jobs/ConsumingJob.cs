@@ -48,7 +48,7 @@ namespace Carrot.Benchmarks.Jobs
                 _event = @event;
             }
 
-            public override Task ConsumeAsync(ConsumedMessage<Foo> message)
+            public override Task ConsumeAsync(ConsumingContext<Foo> context)
             {
                 return Task.FromResult(0);
             }

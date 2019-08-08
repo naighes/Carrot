@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Carrot.Configuration;
 using Carrot.Messages;
+using Moq;
 using RabbitMQ.Client.Events;
 using RabbitMQ.Client.Framing;
 using Xunit;
@@ -16,8 +17,10 @@ namespace Carrot.Tests
         public void ConsumingSuccesfully()
         {
             var consumer = new FakeConsumer(_ => Task.Factory.StartNew(() => { }));
+            var outboundChannel = new Mock<IOutboundChannel>().Object;
             var result = new ConsumedMessage(new Foo(),
-                                             FakeBasicDeliverEventArgs()).ConsumeAsync(new[] { consumer })
+                                             FakeBasicDeliverEventArgs()).ConsumeAsync(new[] { consumer },
+                                                                                       outboundChannel)
                                                                          .Result;
             Assert.IsType<Success>(result);
         }
@@ -28,8 +31,11 @@ namespace Carrot.Tests
             const String message = "boom";
             var exception = new Exception(message);
             var consumer = new FakeConsumer(_ => throw exception);
+            var outboundChannel = new Mock<IOutboundChannel>().Object;
             var result = new ConsumedMessage(new Foo(),
-                                             FakeBasicDeliverEventArgs()).ConsumeAsync(new[] { consumer }).Result;
+                                             FakeBasicDeliverEventArgs()).ConsumeAsync(new[] { consumer },
+                                                                                       outboundChannel)
+                                                                         .Result;
             var actual = Assert.IsType<ConsumingFailure>(result);
             Assert.Single(actual.Exceptions);
             Assert.Equal(message, actual.Exceptions.First().Message);
@@ -43,12 +49,15 @@ namespace Carrot.Tests
             const String message = "boom";
             var exception = new Exception(message);
             var consumer = new FakeConsumer(_ => throw exception);
+            var outboundChannel = new Mock<IOutboundChannel>().Object;
             var result = new ConsumedMessage(new Foo(),
                                              new BasicDeliverEventArgs
                                                  {
                                                      Redelivered = true,
                                                      BasicProperties = new BasicProperties()
-                                                 }).ConsumeAsync(new[] { consumer }).Result;
+                                                 }).ConsumeAsync(new[] { consumer },
+                                                                 outboundChannel)
+                                                   .Result;
             var actual = Assert.IsType<ReiteratedConsumingFailure>(result);
             Assert.Single(actual.Exceptions);
             Assert.Equal(message, actual.Exceptions.First().Message);
@@ -59,7 +68,9 @@ namespace Carrot.Tests
         [Fact]
         public void OnCorruptedMessage()
         {
-            var result = new CorruptedMessage(FakeBasicDeliverEventArgs()).ConsumeAsync(new IConsumer[] { })
+            var outboundChannel = new Mock<IOutboundChannel>().Object;
+            var result = new CorruptedMessage(FakeBasicDeliverEventArgs()).ConsumeAsync(new IConsumer[] { },
+                                                                                        outboundChannel)
                                                                           .Result;
             var actual = Assert.IsType<CorruptedMessageConsumingFailure>(result);
             Assert.Empty(actual.Exceptions);
@@ -68,7 +79,9 @@ namespace Carrot.Tests
         [Fact]
         public void OnUnresolvedMessage()
         {
-            var result = new UnresolvedMessage(FakeBasicDeliverEventArgs()).ConsumeAsync(new IConsumer[] { })
+            var outboundChannel = new Mock<IOutboundChannel>().Object;
+            var result = new UnresolvedMessage(FakeBasicDeliverEventArgs()).ConsumeAsync(new IConsumer[] { },
+                                                                                         outboundChannel)
                                                                            .Result;
             var actual = Assert.IsType<UnresolvedMessageConsumingFailure>(result);
             Assert.Empty(actual.Exceptions);
@@ -77,7 +90,9 @@ namespace Carrot.Tests
         [Fact]
         public void OnUnsupportedMessage()
         {
-            var result = new UnsupportedMessage(FakeBasicDeliverEventArgs()).ConsumeAsync(new IConsumer[] { })
+            var outboundChannel = new Mock<IOutboundChannel>().Object;
+            var result = new UnsupportedMessage(FakeBasicDeliverEventArgs()).ConsumeAsync(new IConsumer[] { },
+                                                                                          outboundChannel)
                                                                             .Result;
             var actual = Assert.IsType<UnsupportedMessageConsumingFailure>(result);
             Assert.Empty(actual.Exceptions);
@@ -117,9 +132,9 @@ namespace Carrot.Tests
     {
         internal readonly IList<Exception> Errors = new List<Exception>();
 
-        private readonly Func<ConsumedMessage<Foo>, Task> _func;
+        private readonly Func<ConsumingContext<Foo>, Task> _func;
 
-        public FakeConsumer(Func<ConsumedMessage<Foo>, Task> func)
+        public FakeConsumer(Func<ConsumingContext<Foo>, Task> func)
         {
             _func = func;
         }
@@ -131,9 +146,9 @@ namespace Carrot.Tests
             Errors.Add(exception);
         }
 
-        public override Task ConsumeAsync(ConsumedMessage<Foo> message)
+        public override Task ConsumeAsync(ConsumingContext<Foo> context)
         {
-            return _func(message);
+            return _func(context);
         }
     }
 }

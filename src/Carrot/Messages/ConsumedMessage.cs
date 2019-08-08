@@ -24,9 +24,11 @@ namespace Carrot.Messages
             return Content != null && type.GetTypeInfo().IsInstanceOfType(Content);
         }
 
-        internal override Task<AggregateConsumingResult> ConsumeAsync(IEnumerable<IConsumer> subscriptions)
+        internal override Task<AggregateConsumingResult> ConsumeAsync(IEnumerable<IConsumer> subscriptions,
+                                                                      IOutboundChannel outboundChannel)
         {
-            return Task.WhenAll(subscriptions.Select(_ => _.SafeConsumeAsync(this)))
+            return Task.WhenAll(subscriptions.Select(_ => _.SafeConsumeAsync(this,
+                                                                             outboundChannel)))
                        .ContinueWith(AggregateResult);
         }
 
@@ -34,8 +36,8 @@ namespace Carrot.Messages
         {
             var consumingResults = results.ToArray();
             var exceptions = consumingResults.OfType<Failure>()
-                                    .Select(_ => _.Exception)
-                                    .ToArray();
+                                             .Select(_ => _.Exception)
+                                             .ToArray();
 
             if (Args.Redelivered)
                 return new ReiteratedConsumingFailure(this, consumingResults, exceptions);

@@ -19,22 +19,20 @@ namespace Carrot
 
         protected override Task<AggregateConsumingResult> ConsumeInternalAsync(BasicDeliverEventArgs args)
         {
-            return ConsumeAsync(args).ContinueWith(_ =>
-            {
-                var result = _.Result;
-                try
-                {
-                    result.Reply(InboundChannel,
-                        OutboundChannel,
-                        Configuration.FallbackStrategy);
-                    result.NotifyConsumingCompletion();
-                }
-                catch (Exception e)
-                {
-                    result.NotifyConsumingFault(e);
-                }
-                return result;
-            });
+            return ConsumeAsync(args,
+                                OutboundChannel).ContinueWith(_ =>
+                                                              {
+                                                                  var result = _.Result;
+                                                                  try
+                                                                  {
+                                                                      result.Reply(InboundChannel,
+                                                                                   OutboundChannel,
+                                                                                   Configuration.FallbackStrategy);
+                                                                      result.NotifyConsumingCompletion();
+                                                                  }
+                                                                  catch (Exception e) { result.NotifyConsumingFault(e); }
+                                                                  return result;
+                                                              });
         }
     }
 }

@@ -18,14 +18,20 @@ namespace Carrot
                                           IConsumedMessageBuilder builder,
                                           ConsumingConfiguration configuration,
                                           ILog log)
-            : base(inboundChannel, outboundChannel, queue, builder, configuration)
+            : base(inboundChannel,
+                   outboundChannel,
+                   queue,
+                   builder,
+                   configuration)
         {
             _log = log;
         }
 
-        protected internal override Task<AggregateConsumingResult> ConsumeAsync(BasicDeliverEventArgs args)
+        protected internal override Task<AggregateConsumingResult> ConsumeAsync(BasicDeliverEventArgs args,
+                                                                                IOutboundChannel outboundChannel)
         {
-            return base.ConsumeAsync(args).ContinueWith(_ => _.HandleErrorResult(_log));
+            return base.ConsumeAsync(args, outboundChannel)
+                       .ContinueWith(_ => _.HandleErrorResult(_log));
         }
 
         protected override void OnUnhandledException(AggregateException exception)

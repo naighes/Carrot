@@ -29,11 +29,13 @@ namespace Carrot.Extensions
         }
 
         internal static Task<ConsumedMessage.ConsumingResult> SafeConsumeAsync(this IConsumer consumer,
-                                                                               ConsumedMessageBase message)
+                                                                               ConsumedMessageBase message,
+                                                                               IOutboundChannel outboundChannel)
         {
             try
             {
-                return consumer.ConsumeAsync(message)
+                var context = new ConsumingContext(message, outboundChannel);
+                return consumer.ConsumeAsync(context)
                                .ContinueWith(_ =>
                                              {
                                                  if (_.Exception == null)
