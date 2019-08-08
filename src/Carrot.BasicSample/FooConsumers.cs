@@ -27,7 +27,7 @@ namespace Carrot.BasicSample
                                      return context.OutboundChannel
                                                    .PublishAsync<Foo>(new OutboundMessage<Foo>(context.Message
                                                                                                       .Content),
-                                                                      _exchange,
+                                                                      _exchange.Name,
                                                                       _routingKey);
                                  })
                        .Unwrap()
