@@ -36,7 +36,9 @@ namespace Carrot.Tests
                                                    default(Queue),
                                                    builder.Object,
                                                    _configuration);
-            var result = consumer.ConsumeAsync(args).Result;
+            var result = consumer.ConsumeAsync(args,
+                                               outboundChannel)
+                                 .Result;
             Assert.IsType<Success>(result);
             strategy.Verify(_ => _.Apply(outboundChannel, message), Times.Never);
         }
@@ -58,7 +60,9 @@ namespace Carrot.Tests
                                                    default(Queue),
                                                    builder.Object,
                                                    _configuration);
-            var result = consumer.ConsumeAsync(args).Result;
+            var result = consumer.ConsumeAsync(args,
+                                               outboundChannel)
+                                 .Result;
             Assert.IsType<ConsumingFailure>(result);
             strategy.Verify(_ => _.Apply(outboundChannel, message), Times.Never);
         }

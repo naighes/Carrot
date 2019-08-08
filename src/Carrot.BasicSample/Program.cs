@@ -23,17 +23,22 @@ namespace Carrot.BasicSample
             var exchange = broker.DeclareDirectExchange("source_exchange");
             var queue = broker.DeclareQueue("my_test_queue");
             broker.DeclareExchangeBinding(exchange, queue, routingKey);
+            var fooExchange = broker.DeclareDirectExchange("foo_exchange");
+            var fooQueue = broker.DeclareQueue("foo_queue");
+            broker.DeclareExchangeBinding(fooExchange, fooQueue, routingKey);
+
+            // competing consumer scenario
             broker.SubscribeByAtLeastOnce(queue,
                                           _ =>
                                           {
                                               _.FallbackBy((c, a) => DeadLetterStrategy.New(c, a, x => $"{x}-Error"));
-                                              _.Consumes(new FooConsumer1());
+                                              _.Consumes(new PublishingFooConsumer(fooExchange, routingKey));
                                           });
             broker.SubscribeByAtLeastOnce(queue,
                                           _ =>
                                           {
                                               _.FallbackBy((c, a) => DeadLetterStrategy.New(c, a, x => $"{x}-Error"));
-                                              _.Consumes(new FooConsumer2());
+                                              _.Consumes(new FooConsumer());
                                           });
             var connection = broker.Connect();
 

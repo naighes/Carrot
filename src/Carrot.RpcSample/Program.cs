@@ -63,35 +63,45 @@ namespace Carrot.RpcSample
             _connection = _broker.Connect();
         }
 
-        public override Task ConsumeAsync(ConsumedMessage<Request> message)
+        public override Task ConsumeAsync(ConsumingContext<Request> context)
         {
             return Task.Factory
                        .StartNew(() =>
                                  {
                                      Console.WriteLine("[{0}]received '{1}' by '{2}' with correlation id {3}",
-                                                       message.ConsumerTag,
-                                                       message.Headers.MessageId,
+                                                       context.Message.ConsumerTag,
+                                                       context.Message.Headers.MessageId,
                                                        GetType().Name,
-                                                       message.Headers.CorrelationId);
+                                                       context.Message.Headers.CorrelationId);
 
-                                     var exchange = _broker.DeclareDirectExchange(message.Headers
+                                     var exchange = _broker.DeclareDirectExchange(context.Message
+                                                                                         .Headers
                                                                                          .ReplyConfiguration
                                                                                          .ExchangeName);
-                                     var queue = _broker.DeclareQueue(message.Headers
+                                     var queue = _broker.DeclareQueue(context.Message
+                                                                             .Headers
                                                                              .ReplyConfiguration
                                                                              .RoutingKey);
                                      _broker.DeclareExchangeBinding(exchange,
                                                                     queue,
-                                                                    message.Headers.ReplyConfiguration.RoutingKey);
+                                                                    context.Message
+                                                                           .Headers
+                                                                           .ReplyConfiguration.RoutingKey);
 
                                      var outboundMessage = new OutboundMessage<Response>(new Response
                                                                                              {
-                                                                                                 BarBar = message.Content.Bar * 2
+                                                                                                 BarBar = context.Message
+                                                                                                                 .Content
+                                                                                                                 .Bar * 2
                                                                                              });
-                                     outboundMessage.SetCorrelationId(message.Headers.CorrelationId);
+                                     outboundMessage.SetCorrelationId(context.Message
+                                                                             .Headers
+                                                                             .CorrelationId);
                                      _connection.PublishAsync(outboundMessage,
                                                               exchange,
-                                                              message.Headers.ReplyConfiguration.RoutingKey);
+                                                              context.Message
+                                                                     .Headers
+                                                                     .ReplyConfiguration.RoutingKey);
                                  });
         }
 
@@ -103,16 +113,16 @@ namespace Carrot.RpcSample
 
     internal class ResponseConsumer : Consumer<Response>
     {
-        public override Task ConsumeAsync(ConsumedMessage<Response> message)
+        public override Task ConsumeAsync(ConsumingContext<Response> context)
         {
             return Task.Factory
                        .StartNew(() =>
                                  {
                                      Console.WriteLine("[{0}]received '{1}' by '{2}' with correlation id {3}",
-                                                       message.ConsumerTag,
-                                                       message.Headers.MessageId,
+                                                       context.Message.ConsumerTag,
+                                                       context.Message.Headers.MessageId,
                                                        GetType().Name,
-                                                       message.Headers.CorrelationId);
+                                                       context.Message.Headers.CorrelationId);
                                  });
         }
     }

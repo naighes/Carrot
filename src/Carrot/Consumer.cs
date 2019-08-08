@@ -4,13 +4,14 @@ using Carrot.Messages;
 
 namespace Carrot
 {
-    public abstract class Consumer<TMessage> : IConsumer where TMessage : class
+    public abstract class Consumer<TMessage> : IConsumer
+        where TMessage : class
     {
-        public abstract Task ConsumeAsync(ConsumedMessage<TMessage> message);
+        public abstract Task ConsumeAsync(ConsumingContext<TMessage> context);
 
-        Task IConsumer.ConsumeAsync(ConsumedMessageBase message)
+        Task IConsumer.ConsumeAsync(ConsumingContext context)
         {
-            return ConsumeAsync(message.To<TMessage>());
+            return ConsumeAsync(context.To<TMessage>());
         }
 
         public virtual void OnError(Exception exception) { }

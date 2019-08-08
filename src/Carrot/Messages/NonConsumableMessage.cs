@@ -14,7 +14,8 @@ namespace Carrot.Messages
 
         internal override Object Content => null;
 
-        internal override Task<AggregateConsumingResult> ConsumeAsync(IEnumerable<IConsumer> subscriptions)
+        internal override Task<AggregateConsumingResult> ConsumeAsync(IEnumerable<IConsumer> subscriptions,
+                                                                      IOutboundChannel outboundChannel)
         {
             return Task.FromResult<AggregateConsumingResult>(Result(new ConsumedMessage.ConsumingResult[] { }));
         }

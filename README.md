@@ -26,12 +26,12 @@ Define your message consumer:
 ```csharp
 class FooConsumer : Consumer<Foo>
 {
-    public override Task ConsumeAsync(ConsumedMessage<Foo> message)
+    public override Task ConsumeAsync(ConsumingContext<Foo> context)
     {
         return Task.Factory.StartNew(() =>
                                      {
                                          Console.WriteLine("received '{0}'",
-                                                           message.Headers.MessageId);
+                                                           context.Message.Headers.MessageId);
                                      });
     }
 }

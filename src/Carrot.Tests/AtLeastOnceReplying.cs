@@ -144,7 +144,8 @@ namespace Carrot.Tests
                 get { throw new NotImplementedException(); }
             }
 
-            internal override Task<AggregateConsumingResult> ConsumeAsync(IEnumerable<IConsumer> subscriptions)
+            internal override Task<AggregateConsumingResult> ConsumeAsync(IEnumerable<IConsumer> subscriptions,
+                                                                          IOutboundChannel outboundChannel)
             {
                 return Task.FromResult(_result(this));
             }

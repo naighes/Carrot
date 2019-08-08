@@ -12,7 +12,11 @@ namespace Carrot
                                     Queue queue,
                                     IConsumedMessageBuilder builder,
                                     ConsumingConfiguration configuration)
-            : base(inboundChannel, outboundChannel, queue, builder, configuration)
+            : base(inboundChannel,
+                   outboundChannel,
+                   queue,
+                   builder,
+                   configuration)
         {
         }
 
@@ -20,12 +24,13 @@ namespace Carrot
         {
             InboundChannel.Acknowledge(args.DeliveryTag);
 
-            return ConsumeAsync(args).ContinueWith(_ =>
-                                                   {
-                                                       var result = _.Result;
-                                                       result.NotifyConsumingCompletion();
-                                                       return result;
-                                                   });
+            return ConsumeAsync(args,
+                                OutboundChannel).ContinueWith(_ =>
+                                                              {
+                                                                  var result = _.Result;
+                                                                  result.NotifyConsumingCompletion();
+                                                                  return result;
+                                                              });
         }
     }
 }

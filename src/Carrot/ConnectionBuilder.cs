@@ -38,7 +38,7 @@ namespace Carrot
                                   AutomaticRecoveryEnabled = true,
                                   TopologyRecoveryEnabled = true
                               };
-             var assembly = typeof(Broker).GetTypeInfo().Assembly;
+            var assembly = typeof(Broker).GetTypeInfo().Assembly;
             var properties = new Dictionary<String, Object>
                                  {
                                      { "client_api", ProductName(assembly) },
