@@ -32,6 +32,13 @@ namespace Carrot
                                                                     Exchange exchange,
                                                                     String routingKey)
         {
+            return PublishAsync(source, exchange.Name, routingKey);
+        }
+
+        public override Task<IPublishResult> PublishAsync<TMessage>(OutboundMessage<TMessage> source,
+                                                                    String exchange,
+                                                                    String routingKey)
+        {
             var properties = BuildBasicProperties(source);
             var body = BuildBody(source, properties);
             var tcs = new TaskCompletionSource<Boolean>(properties);
@@ -40,7 +47,7 @@ namespace Carrot
 
             try
             {
-                Model.BasicPublish(exchange.Name,
+                Model.BasicPublish(exchange,
                                    routingKey,
                                    false,
                                    properties,

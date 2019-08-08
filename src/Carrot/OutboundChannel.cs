@@ -45,8 +45,17 @@ namespace Carrot
             Model.Dispose();
         }
 
+
+
         public virtual Task<IPublishResult> ForwardAsync(ConsumedMessageBase message,
                                                          Exchange exchange,
+                                                         String routingKey)
+        {
+            return ForwardAsync(message, exchange.Name, routingKey);
+        }
+
+        public virtual Task<IPublishResult> ForwardAsync(ConsumedMessageBase message,
+                                                         String exchange,
                                                          String routingKey)
         {
             var properties = (IBasicProperties)(message.Args
@@ -60,6 +69,14 @@ namespace Carrot
 
         public virtual Task<IPublishResult> PublishAsync<TMessage>(OutboundMessage<TMessage> source,
                                                                    Exchange exchange,
+                                                                   String routingKey)
+            where TMessage : class
+        {
+            return PublishAsync(source, exchange.Name, routingKey);
+        }
+
+        public virtual Task<IPublishResult> PublishAsync<TMessage>(OutboundMessage<TMessage> source,
+                                                                   String exchange,
                                                                    String routingKey)
             where TMessage : class
         {
@@ -95,7 +112,7 @@ namespace Carrot
 
         protected virtual void OnModelDisposing() { }
 
-        private Task<IPublishResult> PublishInternalAsync(Exchange exchange,
+        private Task<IPublishResult> PublishInternalAsync(String exchange,
                                                           String routingKey,
                                                           IBasicProperties properties,
                                                           Byte[] body)
@@ -104,7 +121,7 @@ namespace Carrot
 
             try
             {
-                Model.BasicPublish(exchange.Name, routingKey, false, properties, body);
+                Model.BasicPublish(exchange, routingKey, false, properties, body);
                 tcs.TrySetResult(true);
             }
             catch (Exception exception) { tcs.TrySetException(exception); }
