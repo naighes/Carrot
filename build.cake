@@ -27,10 +27,9 @@ Task("Version").Does(() => {
         var content = System.IO.File.ReadAllText(path);
         var document = new System.Xml.XmlDocument();
         document.LoadXml(content);
-        var suffix = document.DocumentElement["PropertyGroup"]["VersionSuffix"].InnerText;
         var element = document.DocumentElement["PropertyGroup"]["VersionPrefix"];
         var segments = element.InnerText.Split('.');
-        var version = String.Format("{0}.{1}.{2}", segments[0], segments[1], String.IsNullOrEmpty(suffix) ? "0" : buildnumber);
+        var version = String.Format("{0}.{1}.{2}", segments[0], segments[1], segments[2]);
         element.InnerText = version;
         document.DocumentElement["PropertyGroup"]["AssemblyVersion"].InnerText = version;
         document.DocumentElement["PropertyGroup"]["FileVersion"].InnerText = version;
