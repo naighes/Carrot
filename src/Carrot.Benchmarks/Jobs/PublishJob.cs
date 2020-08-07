@@ -44,7 +44,7 @@ namespace Carrot.Benchmarks.Jobs
                                          _stopwatch.Reset();
                                          connection.Dispose();
                                          return JobResult.New(elapsed, this, count);
-                                     });
+                                     }, TaskContinuationOptions.RunContinuationsAsynchronously);
         }
 
         protected abstract OutboundMessage<Foo> BuildMessage(Int32 i);

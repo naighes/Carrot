@@ -62,7 +62,7 @@ namespace Carrot
                                                     {
                                                         if (_.IsFaulted)
                                                             OnUnhandledException(_.Exception);
-                                                    });
+                                                    }, TaskContinuationOptions.RunContinuationsAsynchronously);
         }
 
         public void Dispose()

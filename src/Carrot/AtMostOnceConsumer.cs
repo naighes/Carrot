@@ -30,7 +30,7 @@ namespace Carrot
                                                                   var result = _.Result;
                                                                   result.NotifyConsumingCompletion();
                                                                   return result;
-                                                              });
+                                                              }, TaskContinuationOptions.RunContinuationsAsynchronously);
         }
     }
 }

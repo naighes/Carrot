@@ -44,7 +44,7 @@ namespace Carrot.Extensions
                                                  return BuildFailure(consumer,
                                                                      message,
                                                                      _.Exception.GetBaseException());
-                                             });
+                                             }, TaskContinuationOptions.RunContinuationsAsynchronously);
             }
             catch (Exception exception) { return Task.FromResult(BuildFailure(consumer, message, exception)); }
         }

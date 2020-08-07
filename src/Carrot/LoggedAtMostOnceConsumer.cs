@@ -31,7 +31,7 @@ namespace Carrot
                                                                                 IOutboundChannel outboundChannel)
         {
             return base.ConsumeAsync(args, outboundChannel)
-                       .ContinueWith(_ => _.HandleErrorResult(_log));
+                       .ContinueWith(_ => _.HandleErrorResult(_log), TaskContinuationOptions.RunContinuationsAsynchronously);
         }
 
         protected override void OnUnhandledException(AggregateException exception)
