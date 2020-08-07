@@ -124,7 +124,7 @@ namespace Carrot
             }
             catch (Exception exception) { tcs.TrySetException(exception); }
 
-            return tcs.Task.ContinueWith(Result);
+            return tcs.Task.ContinueWith(Result, TaskContinuationOptions.RunContinuationsAsynchronously);
         }
     }
 }

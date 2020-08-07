@@ -41,7 +41,7 @@ namespace Carrot
         {
             var properties = BuildBasicProperties(source);
             var body = BuildBody(source, properties);
-            var tcs = new TaskCompletionSource<Boolean>(properties);
+            var tcs = new TaskCompletionSource<Boolean>(properties, TaskCreationOptions.RunContinuationsAsynchronously);
             var tag = Model.NextPublishSeqNo;
             _confirms.TryAdd(tag, new Tuple<TaskCompletionSource<Boolean>, IMessage>(tcs, source));
 
@@ -60,7 +60,7 @@ namespace Carrot
                 tcs.TrySetException(exception);
             }
 
-            return tcs.Task.ContinueWith(Result);
+            return tcs.Task.ContinueWith(Result, TaskContinuationOptions.RunContinuationsAsynchronously);
         }
 
         protected override void OnModelDisposing()
