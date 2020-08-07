@@ -19,7 +19,7 @@ namespace Carrot.Tests
             Assert.Equal("Carrot", factory.ClientProperties["client_api"].ToString());
         }
 
-        internal class ConnectionBuilderWrapper : ConnectionBuilder
+        private class ConnectionBuilderWrapper : ConnectionBuilder
         {
             public ConnectionBuilderWrapper(IDateTimeProvider dateTimeProvider)
                 : base(dateTimeProvider)

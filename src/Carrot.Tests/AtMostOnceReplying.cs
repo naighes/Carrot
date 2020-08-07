@@ -4,7 +4,6 @@ using Carrot.Configuration;
 using Carrot.Messages;
 using Moq;
 using RabbitMQ.Client.Events;
-using RabbitMQ.Client.Framing;
 using Xunit;
 
 namespace Carrot.Tests
@@ -33,13 +32,13 @@ namespace Carrot.Tests
             var args = new BasicDeliverEventArgs
                            {
                                DeliveryTag = deliveryTag,
-                               BasicProperties = new BasicProperties()
+                               BasicProperties = BasicPropertiesStubber.Stub()
                            };
             Assert.Throws<Exception>(() => consumer.CallConsumeInternal(args).Wait());
             builder.Verify(_ => _.Build(args), Times.Never);
         }
 
-        internal class AtMostOnceConsumerWrapper : AtMostOnceConsumer
+        private class AtMostOnceConsumerWrapper : AtMostOnceConsumer
         {
             internal AtMostOnceConsumerWrapper(IInboundChannel inboundChannel,
                                                IOutboundChannel outboundChannel,

@@ -9,10 +9,10 @@ namespace Carrot.Serialization
     {
         public JsonSerializerSettings Settings { get; } = new JsonSerializerSettings();
 
-        public Object Deserialize(Byte[] body, TypeInfo type, Encoding encoding = null)
+        public object Deserialize(ReadOnlyMemory<Byte> body, TypeInfo type, Encoding encoding = null)
         {
             var e = encoding ?? new UTF8Encoding(true);
-            return JsonConvert.DeserializeObject(e.GetString(body),
+            return JsonConvert.DeserializeObject(e.GetString(body.Span.ToArray()),
                                                  type.AsType(),
                                                  Settings);
         }

@@ -82,7 +82,7 @@ namespace Carrot.Tests
 
         internal class FakeSerializer : ISerializer
         {
-            public Object Deserialize(Byte[] body,
+            public Object Deserialize(ReadOnlyMemory<Byte> body,
                                       TypeInfo type,
                                       Encoding encoding = null)
             {

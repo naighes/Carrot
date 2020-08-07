@@ -6,7 +6,7 @@ namespace Carrot.Serialization
 {
     public interface ISerializer
     {
-        Object Deserialize(Byte[] body, TypeInfo type, Encoding encoding = null);
+        Object Deserialize(ReadOnlyMemory<Byte> body, TypeInfo type, Encoding encoding = null);
 
         String Serialize(Object obj);
     }

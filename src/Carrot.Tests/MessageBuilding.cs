@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
-using RabbitMQ.Client.Framing;
 using Xunit;
 
 namespace Carrot.Tests
@@ -38,17 +37,17 @@ namespace Carrot.Tests
             const String correlationId = "one-correlation-id";
             var replyTo = $"{replyExchangeType}://{replyExchangeName}/{replyRoutingKey}";
 
-            var args = new BasicDeliverEventArgs
-                           {
-                               BasicProperties = new BasicProperties
-                                                     {
-                                                         MessageId = messageId,
-                                                         Timestamp = new AmqpTimestamp(timestamp),
-                                                         CorrelationId = correlationId,
-                                                         ReplyTo = replyTo
-                                                     }
-                           };
-            var message = new FakeConsumedMessage(content, args);
+
+            var message = new FakeConsumedMessage(content, new BasicDeliverEventArgs
+            {
+                BasicProperties = BasicPropertiesStubber.Stub(_ =>
+                {
+                    _.MessageId = messageId;
+                    _.Timestamp = new AmqpTimestamp(timestamp);
+                    _.CorrelationId = correlationId;
+                    _.ReplyTo = replyTo;
+                })
+            });
             var actual = message.To<Foo>();
             Assert.Equal(messageId, actual.Headers.MessageId);
             Assert.Equal(timestamp, actual.Headers.Timestamp);
@@ -61,12 +60,11 @@ namespace Carrot.Tests
         {
             var content = new Foo();
             const String consumerTag = "one-tag";
-            var args = new BasicDeliverEventArgs
-                           {
-                               ConsumerTag = consumerTag,
-                               BasicProperties = new BasicProperties()
-                           };
-            var message = new FakeConsumedMessage(content, args);
+            var message = new FakeConsumedMessage(content, new BasicDeliverEventArgs
+            {
+                ConsumerTag = consumerTag,
+                BasicProperties = BasicPropertiesStubber.Stub()
+            });
             var actual = message.To<Foo>();
             Assert.Equal(consumerTag, actual.ConsumerTag);
         }
@@ -77,17 +75,17 @@ namespace Carrot.Tests
             var key = "a";
             var value = "b";
             var content = new Foo();
-            var args = new BasicDeliverEventArgs
-                           {
-                               BasicProperties = new BasicProperties
-                                                     {
-                                                         Headers = new Dictionary<String, Object>
-                                                                       {
-                                                                           { key, value }
-                                                                       }
-                                                     }
-                           };
-            var message = new FakeConsumedMessage(content, args);
+
+            var message = new FakeConsumedMessage(content, new BasicDeliverEventArgs
+            {
+                BasicProperties = BasicPropertiesStubber.Stub(_ =>
+                {
+                    _.Headers = new Dictionary<String, Object>
+                    {
+                        {key, value}
+                    };
+                })
+            });
 
             var actual = message.To<Foo>();
 
@@ -99,7 +97,7 @@ namespace Carrot.Tests
         {
             return new BasicDeliverEventArgs
             {
-                BasicProperties = new BasicProperties()
+                BasicProperties = BasicPropertiesStubber.Stub()
             };
         }
     }

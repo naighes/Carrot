@@ -27,7 +27,7 @@ namespace Carrot
             Model.BasicAcks += OnModelBasicAcks;
             Model.BasicNacks += OnModelBasicNacks;
         }
-
+        
         public override Task<IPublishResult> PublishAsync<TMessage>(OutboundMessage<TMessage> source,
                                                                     Exchange exchange,
                                                                     String routingKey)

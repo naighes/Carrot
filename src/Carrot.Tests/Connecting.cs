@@ -55,7 +55,7 @@ namespace Carrot.Tests
             return connectionBuilder;
         }
 
-        internal class BrokerWrapper : Broker
+        private class BrokerWrapper : Broker
         {
             private readonly IModel _model;
 

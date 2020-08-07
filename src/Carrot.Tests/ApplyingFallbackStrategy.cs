@@ -6,7 +6,6 @@ using Carrot.Fallback;
 using Carrot.Messages;
 using Moq;
 using RabbitMQ.Client.Events;
-using RabbitMQ.Client.Framing;
 using Xunit;
 
 namespace Carrot.Tests
@@ -51,7 +50,7 @@ namespace Carrot.Tests
             var args = FakeBasicDeliverEventArgs();
             var message = new FakeConsumedMessage(new Object(), args);
             _configuration.FallbackBy((c, q) => strategy.Object);
-            _configuration.Consumes(new FakeConsumer(consumedMessage => { throw new Exception(); }));
+            _configuration.Consumes(new FakeConsumer(consumedMessage => throw new Exception()));
             var builder = new Mock<IConsumedMessageBuilder>();
             builder.Setup(_ => _.Build(args)).Returns(message);
             var outboundChannel = new Mock<IOutboundChannel>().Object;
@@ -116,15 +115,12 @@ namespace Carrot.Tests
         private static BasicDeliverEventArgs FakeBasicDeliverEventArgs()
         {
             return new BasicDeliverEventArgs
-                       {
-                           BasicProperties = new BasicProperties
-                                                 {
-                                                     Headers = new Dictionary<String, Object>()
-                                                 }
-                       };
+            {
+                BasicProperties = BasicPropertiesStubber.Stub(_ => _.Headers = new Dictionary<String, Object>())
+            };
         }
 
-        internal class AtLeastOnceConsumerWrapper : AtLeastOnceConsumer
+        private class AtLeastOnceConsumerWrapper : AtLeastOnceConsumer
         {
             public AtLeastOnceConsumerWrapper(IInboundChannel inboundChannel,
                                               IOutboundChannel outboundChannel,
