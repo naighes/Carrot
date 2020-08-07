@@ -11,11 +11,12 @@ namespace Carrot.Messages
         {
         }
 
-        internal override IBasicProperties BuildBasicProperties(IMessageTypeResolver resolver,
+        internal override IBasicProperties BuildBasicProperties(IBasicProperties basicProperties,
+                                                                IMessageTypeResolver resolver,
                                                                 IDateTimeProvider dateTimeProvider,
                                                                 INewId idGenerator)
         {
-            var properties = base.BuildBasicProperties(resolver, dateTimeProvider, idGenerator);
+            var properties = base.BuildBasicProperties(basicProperties, resolver, dateTimeProvider, idGenerator);
             properties.Persistent = true;
             return properties;
         }

@@ -37,7 +37,7 @@ namespace Carrot
                                                 String exchange,
                                                 String routingKey,
                                                 IBasicProperties properties,
-                                                Byte[] body)
+                                                ReadOnlyMemory<Byte> body)
         {
             base.HandleBasicDeliver(consumerTag,
                                     deliveryTag,

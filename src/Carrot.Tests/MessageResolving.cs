@@ -2,6 +2,7 @@ using System;
 using System.Reflection;
 using Carrot.Configuration;
 using Carrot.Messages;
+using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using RabbitMQ.Client.Framing;
 using Xunit;
@@ -13,21 +14,25 @@ namespace Carrot.Tests
         [Fact]
         public void Resolve()
         {
-            const String source = "urn:message:foo";
-            var args = new BasicDeliverEventArgs { BasicProperties = new BasicProperties { Type = source } };
+            const String typeName = "urn:message:foo";
+            var properties = BasicPropertiesStubber.Stub();
+            properties.Type = typeName;
+            var args = new BasicDeliverEventArgs { BasicProperties = properties };
             var context = ConsumedMessageContext.FromBasicDeliverEventArgs(args);
             var type = typeof(Foo);
             var resolver = new MessageBindingResolver(type.GetTypeInfo().Assembly);
             var binding = resolver.Resolve(context);
-            Assert.Equal(source, binding.RawName);
+            Assert.Equal(typeName, binding.RawName);
             Assert.Equal(type, binding.RuntimeType);
         }
 
         [Fact]
         public void CannotResolve()
         {
-            const String source = "urn:message:no-resolve";
-            var args = new BasicDeliverEventArgs { BasicProperties = new BasicProperties { Type = source } };
+            const String typeName = "urn:message:no-resolve";
+            var properties = BasicPropertiesStubber.Stub();
+            properties.Type = typeName;
+            var args = new BasicDeliverEventArgs { BasicProperties = properties };
             var context = ConsumedMessageContext.FromBasicDeliverEventArgs(args);
             var type = typeof(Foo);
             var resolver = new MessageBindingResolver(type.GetTypeInfo().Assembly);
@@ -67,7 +72,9 @@ namespace Carrot.Tests
         public void Default()
         {
             const String typeName = "Carrot.Tests.Foo";
-            var args = new BasicDeliverEventArgs { BasicProperties = new BasicProperties { Type = typeName } };
+            var properties = BasicPropertiesStubber.Stub();
+            properties.Type = typeName;
+            var args = new BasicDeliverEventArgs { BasicProperties = properties };
             var context = ConsumedMessageContext.FromBasicDeliverEventArgs(args);
             var resolver = new DefaultMessageTypeResolver(typeof(Foo).Assembly);
             var binding = resolver.Resolve(context);

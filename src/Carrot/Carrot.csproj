@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>netstandard1.5;net452</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;net461</TargetFrameworks>
     <Description>Carrot is a .NET lightweight library that provides a couple of facilities over RabbitMQ.</Description>
     <PackageTargetFallback>$(PackageTargetFallback);dotnet</PackageTargetFallback>
     <Title>Carrot</Title>
@@ -18,12 +18,8 @@
     </PackageReleaseNotes>
     <PackageLicenseUrl>https://raw.githubusercontent.com/naighes/Carrot/master/LICENSE.txt</PackageLicenseUrl>
   </PropertyGroup>
-  <ItemGroup Condition="'$(TargetFramework)'=='netstandard1.5'">
-    <PackageReference Include="System.AppDomain" Version="2.0.11" />
-    <PackageReference Include="System.Diagnostics.Process" Version="4.3.0" />
-  </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
-    <PackageReference Include="RabbitMQ.Client" Version="5.0.1" />
+    <PackageReference Include="RabbitMQ.Client" Version="6.1.0" />
   </ItemGroup>
 </Project>

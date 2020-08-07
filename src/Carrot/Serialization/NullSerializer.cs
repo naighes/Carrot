@@ -10,9 +10,9 @@ namespace Carrot.Serialization
 
         private NullSerializer() { }
 
-        public Object Deserialize(Byte[] body,
-                                  TypeInfo type,
-                                  Encoding encoding = null)
+        public object Deserialize(ReadOnlyMemory<Byte> body,
+            TypeInfo type,
+            Encoding encoding = null)
         {
             return null;
         }

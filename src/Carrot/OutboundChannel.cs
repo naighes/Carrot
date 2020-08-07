@@ -7,8 +7,6 @@ using RabbitMQ.Client;
 
 namespace Carrot
 {
-    using RabbitMQ.Client.Framing;
-
     public class OutboundChannel : IOutboundChannel
     {
         protected readonly IModel Model;
@@ -58,10 +56,9 @@ namespace Carrot
                                                          String exchange,
                                                          String routingKey)
         {
-            var properties = (IBasicProperties)(message.Args
-                                                       .BasicProperties as BasicProperties)?.Clone() ?? message.Args
-                                                                                                               .BasicProperties
-                                                                                                               .Clone();
+            var properties = message.Args
+                    .BasicProperties ?? message.Args.BasicProperties
+                                                                            ;
             var body = message.Args.Body;
 
             return PublishInternalAsync(exchange, routingKey, properties, body);
@@ -96,7 +93,8 @@ namespace Carrot
         protected IBasicProperties BuildBasicProperties<TMessage>(OutboundMessage<TMessage> source)
             where TMessage : class
         {
-            return source.BuildBasicProperties(Configuration.MessageTypeResolver,
+            return source.BuildBasicProperties(Model.CreateBasicProperties(),
+                                               Configuration.MessageTypeResolver,
                                                DateTimeProvider,
                                                Configuration.IdGenerator);
         }
@@ -115,7 +113,7 @@ namespace Carrot
         private Task<IPublishResult> PublishInternalAsync(String exchange,
                                                           String routingKey,
                                                           IBasicProperties properties,
-                                                          Byte[] body)
+                                                          ReadOnlyMemory<Byte> body)
         {
             var tcs = new TaskCompletionSource<Boolean>(properties);
 

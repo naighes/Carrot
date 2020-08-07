@@ -52,7 +52,7 @@ namespace Carrot.Tests
             var resolver = new Mock<IMessageTypeResolver>();
             resolver.Setup(_ => _.Resolve<Foo>()).Returns(EmptyMessageBinding.Instance);
             var message = new OutboundMessage<Foo>(new Foo(), collection);
-            var properties = message.BuildBasicProperties(resolver.Object, null, null);
+            var properties = message.BuildBasicProperties(BasicPropertiesStubber.Stub(), resolver.Object, null, null);
 
             Assert.Equal(messageId, properties.MessageId);
             Assert.Equal(new AmqpTimestamp(timestamp), properties.Timestamp);
@@ -85,7 +85,7 @@ namespace Carrot.Tests
             var dateTimeProvider = new Mock<IDateTimeProvider>();
             dateTimeProvider.Setup(_ => _.UtcNow()).Returns(timestamp.ToDateTimeOffset());
             var message = new OutboundMessage<Foo>(new Foo(), collection);
-            var properties = message.BuildBasicProperties(resolver.Object, dateTimeProvider.Object, newId.Object);
+            var properties = message.BuildBasicProperties(BasicPropertiesStubber.Stub(), resolver.Object, dateTimeProvider.Object, newId.Object);
 
             Assert.Equal(messageId, properties.MessageId);
             Assert.Equal(new AmqpTimestamp(timestamp), properties.Timestamp);
@@ -136,14 +136,12 @@ namespace Carrot.Tests
             const String contentType = "application/json";
             const String correlationId = "some-id";
             const String messageId = "some-message-id";
-            var properties = new BasicProperties
-                                 {
-                                     Type = messageType,
-                                     ContentEncoding = contentEncoding,
-                                     ContentType = contentType,
-                                     CorrelationId = correlationId,
-                                     MessageId = messageId
-                                 };
+            var properties = BasicPropertiesStubber.Stub();
+            properties.Type = messageType;
+            properties.ContentEncoding = contentEncoding;
+            properties.ContentType = contentType;
+            properties.CorrelationId = correlationId;
+            properties.MessageId = messageId;
             var headers = HeaderCollection.Parse(properties);
             Assert.Equal(messageType, headers.Type);
             Assert.Equal(contentEncoding, headers.ContentEncoding);

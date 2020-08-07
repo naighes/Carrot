@@ -5,8 +5,8 @@ using Carrot.Configuration;
 using Carrot.Fallback;
 using Carrot.Messages;
 using Moq;
+using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
-using RabbitMQ.Client.Framing;
 using Xunit;
 
 namespace Carrot.Tests
@@ -115,13 +115,17 @@ namespace Carrot.Tests
 
         private static BasicDeliverEventArgs FakeBasicDeliverEventArgs()
         {
-            return new BasicDeliverEventArgs
-                       {
-                           BasicProperties = new BasicProperties
-                                                 {
-                                                     Headers = new Dictionary<String, Object>()
-                                                 }
-                       };
+            var cf = new ConnectionFactory { DispatchConsumersAsync = true };
+            using (var c = cf.CreateConnection())
+            using (IModel m = c.CreateModel())
+            {
+                IBasicProperties bp = m.CreateBasicProperties();
+                bp.Headers = new Dictionary<String, Object>();
+                return new BasicDeliverEventArgs
+                {
+                    BasicProperties = bp
+                };
+            }
         }
 
         internal class AtLeastOnceConsumerWrapper : AtLeastOnceConsumer

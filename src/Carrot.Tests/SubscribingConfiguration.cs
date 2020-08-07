@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Carrot.Configuration;
 using Moq;
+using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using RabbitMQ.Client.Framing;
 using Xunit;
@@ -50,12 +51,11 @@ namespace Carrot.Tests
 
         private static BasicDeliverEventArgs FakeBasicDeliverEventArgs()
         {
+            var properties = BasicPropertiesStubber.Stub();
+            properties.Headers = new Dictionary<String, Object>();
             return new BasicDeliverEventArgs
                        {
-                           BasicProperties = new BasicProperties
-                                                 {
-                                                     Headers = new Dictionary<String, Object>()
-                                                 }
+                           BasicProperties = properties
                        };
         }
     }

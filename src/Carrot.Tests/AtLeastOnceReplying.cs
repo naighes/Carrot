@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Carrot.Configuration;
 using Carrot.Messages;
 using Moq;
+using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using RabbitMQ.Client.Framing;
 using Xunit;
@@ -87,7 +88,7 @@ namespace Carrot.Tests
             var args = new BasicDeliverEventArgs
             {
                 DeliveryTag = 1234L,
-                BasicProperties = new BasicProperties()
+                BasicProperties = BasicPropertiesStubber.Stub()
             };
 
             var realConsumer = new Mock<Consumer<FakeConsumedMessage>>();
@@ -113,7 +114,7 @@ namespace Carrot.Tests
             var args = new BasicDeliverEventArgs
                            {
                                DeliveryTag = deliveryTag,
-                               BasicProperties = new BasicProperties()
+                               BasicProperties = BasicPropertiesStubber.Stub()
                            };
             var builder = new Mock<IConsumedMessageBuilder>();
             var message = new FakeConsumedMessage(args, func);

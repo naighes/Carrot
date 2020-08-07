@@ -45,7 +45,7 @@ namespace Carrot
         {
             base.OnConsumerCancelled(sender, args);
 
-            _log.Info($"consumer-model basic.cancel received (consumer-tag: '{args.ConsumerTag}')");
+            _log.Info($"consumer-model basic.cancel received (consumer-tags: '{String.Join(",",args.ConsumerTags)}')");
         }
     }
 }

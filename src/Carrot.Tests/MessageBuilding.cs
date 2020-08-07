@@ -37,17 +37,17 @@ namespace Carrot.Tests
             const String replyRoutingKey = "routing-key";
             const String correlationId = "one-correlation-id";
             var replyTo = $"{replyExchangeType}://{replyExchangeName}/{replyRoutingKey}";
+            
+            var properties = BasicPropertiesStubber.Stub();
+            properties.MessageId = messageId;
+            properties.Timestamp = new AmqpTimestamp(timestamp);
+            properties.CorrelationId = correlationId;
+            properties.ReplyTo = replyTo;
 
             var args = new BasicDeliverEventArgs
-                           {
-                               BasicProperties = new BasicProperties
-                                                     {
-                                                         MessageId = messageId,
-                                                         Timestamp = new AmqpTimestamp(timestamp),
-                                                         CorrelationId = correlationId,
-                                                         ReplyTo = replyTo
-                                                     }
-                           };
+            {
+                BasicProperties = properties
+            };
             var message = new FakeConsumedMessage(content, args);
             var actual = message.To<Foo>();
             Assert.Equal(messageId, actual.Headers.MessageId);
@@ -64,7 +64,7 @@ namespace Carrot.Tests
             var args = new BasicDeliverEventArgs
                            {
                                ConsumerTag = consumerTag,
-                               BasicProperties = new BasicProperties()
+                               BasicProperties = BasicPropertiesStubber.Stub()
                            };
             var message = new FakeConsumedMessage(content, args);
             var actual = message.To<Foo>();
@@ -77,15 +77,14 @@ namespace Carrot.Tests
             var key = "a";
             var value = "b";
             var content = new Foo();
+            var properties = BasicPropertiesStubber.Stub();
+            properties.Headers = new Dictionary<String, Object>
+            {
+                {key, value}
+            };
             var args = new BasicDeliverEventArgs
                            {
-                               BasicProperties = new BasicProperties
-                                                     {
-                                                         Headers = new Dictionary<String, Object>
-                                                                       {
-                                                                           { key, value }
-                                                                       }
-                                                     }
+                               BasicProperties = properties
                            };
             var message = new FakeConsumedMessage(content, args);
 
@@ -99,7 +98,7 @@ namespace Carrot.Tests
         {
             return new BasicDeliverEventArgs
             {
-                BasicProperties = new BasicProperties()
+                BasicProperties = BasicPropertiesStubber.Stub()
             };
         }
     }

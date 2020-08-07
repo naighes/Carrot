@@ -57,40 +57,39 @@ namespace Carrot.Messages
             Headers.Set(HeaderCollection.ReplyConfigurationKey, replyConfiguration);
         }
 
-        internal virtual IBasicProperties BuildBasicProperties(IMessageTypeResolver resolver,
+        internal virtual IBasicProperties BuildBasicProperties(IBasicProperties basicProperties,
+                                                               IMessageTypeResolver resolver,
                                                                IDateTimeProvider dateTimeProvider,
                                                                INewId idGenerator)
         {
-            var properties = new BasicProperties
-                                 {
-                                     Headers = new Dictionary<String, Object>(),
-                                     Persistent = false,
-                                     ContentType = Headers.ContentType ?? SerializationConfiguration.DefaultContentType,
-                                     ContentEncoding = Headers.ContentEncoding ?? SerializationConfiguration.DefaultContentEncoding,
-                                     MessageId = Headers.MessageId ?? idGenerator.Next(),
-                                     Timestamp = new AmqpTimestamp(Headers.Timestamp <= 0L
-                                                                  ? dateTimeProvider.UtcNow().ToUnixTimestamp()
-                                                                  : Headers.Timestamp)
-                                 };
+            basicProperties.Headers = new Dictionary<String, Object>();
+            basicProperties.Persistent = false;
+            basicProperties.ContentType = Headers.ContentType ?? SerializationConfiguration.DefaultContentType;
+            basicProperties.ContentEncoding = Headers.ContentEncoding ?? SerializationConfiguration.DefaultContentEncoding;
+            basicProperties.MessageId = Headers.MessageId ?? idGenerator.Next();
+            basicProperties.Timestamp = new AmqpTimestamp(Headers.Timestamp <= 0L
+                ? dateTimeProvider.UtcNow().ToUnixTimestamp()
+                : Headers.Timestamp);
+        
 
             if (!String.IsNullOrWhiteSpace(Headers.CorrelationId))
-                properties.CorrelationId = Headers.CorrelationId;
+                basicProperties.CorrelationId = Headers.CorrelationId;
 
             if (Headers.ReplyConfiguration != null)
-                properties.ReplyTo = Headers.ReplyConfiguration.ToString();
+                basicProperties.ReplyTo = Headers.ReplyConfiguration.ToString();
 
             var binding = resolver.Resolve<TMessage>();
-            properties.Type = binding.RawName;
+            basicProperties.Type = binding.RawName;
 
             if (binding.ExpiresAfter.HasValue)
-                properties.Expiration = binding.ExpiresAfter
+                basicProperties.Expiration = binding.ExpiresAfter
                                                .GetValueOrDefault()
                                                .TotalMilliseconds
                                                .ToString(CultureInfo.InvariantCulture);
 
-            Headers.NonReservedHeaders().ForEach(_ => properties.Headers.Add(_.Key, _.Value));
+            Headers.NonReservedHeaders().ForEach(_ => basicProperties.Headers.Add(_.Key, _.Value));
 
-            return properties;
+            return basicProperties;
         }
     }
 }
