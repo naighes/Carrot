@@ -67,7 +67,8 @@ namespace Carrot
         {
             base.OnModelDisposing();
 
-            Model.WaitForConfirms(TimeSpan.FromSeconds(30d)); // TODO: timeout should not be hardcodeds
+            if(Model.IsOpen)
+                Model.WaitForConfirms(TimeSpan.FromSeconds(30d)); // TODO: timeout should not be hardcodeds
             Model.BasicAcks -= OnModelBasicAcks;
             Model.BasicNacks -= OnModelBasicNacks;
         }
