@@ -40,6 +40,9 @@ namespace Carrot
 
             OnModelDisposing();
             Model.ModelShutdown -= OnModelShutdown;
+            const string message = "ModelContext Disposed";
+            if(Model.IsOpen)
+                Model.Close(200, message);
             Model.Dispose();
         }
 
