@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;net461</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;netcoreapp3.1;net461</TargetFrameworks>
     <Description>Carrot is a .NET lightweight library that provides a couple of facilities over RabbitMQ.</Description>
 	<Title>Carrot</Title>
     <PackageId>Carrot</PackageId>
