@@ -13,17 +13,18 @@ namespace Carrot.Serialization
         {
             var e = encoding ?? new UTF8Encoding(true);
 #if NETCOREAPP3_1
-            return JsonConvert.DeserializeObject(e.GetString(body.Span),type.AsType(),Settings);
+            
+            var json = e.GetString(body.Span);
 #else
-            return JsonConvert.DeserializeObject(e.GetString(body.ToArray()),
-                    type.AsType(),
-                    Settings);
-#endif
+            var json = e.GetString(body);
+#endif      
+            return JsonConvert.DeserializeObject(json, type.AsType(), Settings);
         }
-        
+
         public String Serialize(Object obj)
         {
             return JsonConvert.SerializeObject(obj);
         }
+        
     }
 }
