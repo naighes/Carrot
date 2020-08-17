@@ -31,7 +31,7 @@ namespace Carrot
                                                                                 IOutboundChannel outboundChannel)
         {
             return base.ConsumeAsync(args, outboundChannel)
-                       .ContinueWith(_ => _.HandleErrorResult(_log));
+                       .ContinueWith(_ => _.HandleErrorResult(_log), TaskContinuationOptions.RunContinuationsAsynchronously);
         }
 
         protected override void OnUnhandledException(AggregateException exception)
@@ -45,7 +45,7 @@ namespace Carrot
         {
             base.OnConsumerCancelled(sender, args);
 
-            _log.Info($"consumer-model basic.cancel received (consumer-tag: '{args.ConsumerTag}')");
+            _log.Info($"consumer-model basic.cancel received (consumer-tags: '{String.Join(",", args.ConsumerTags)}')");
         }
     }
 }

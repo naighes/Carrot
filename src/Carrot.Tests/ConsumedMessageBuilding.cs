@@ -6,7 +6,6 @@ using Carrot.Messages;
 using Carrot.Serialization;
 using Moq;
 using RabbitMQ.Client.Events;
-using RabbitMQ.Client.Framing;
 using Xunit;
 
 namespace Carrot.Tests
@@ -23,9 +22,9 @@ namespace Carrot.Tests
                     .Returns(EmptyMessageBinding.Instance);
             var builder = new ConsumedMessageBuilder(serializationConfiguration, resolver.Object);
             var message = builder.Build(new BasicDeliverEventArgs
-                                            {
-                                                BasicProperties = new BasicProperties { Type = type }
-                                            });
+            {
+                BasicProperties = BasicPropertiesStubber.Stub(_ => _.Type = type)
+            });
             Assert.IsType<UnresolvedMessage>(message);
         }
 
@@ -40,7 +39,7 @@ namespace Carrot.Tests
             var builder = new ConsumedMessageBuilder(serializationConfiguration, resolver.Object);
             var message = builder.Build(new BasicDeliverEventArgs
                                             {
-                                                BasicProperties = new BasicProperties { Type = type }
+                                                BasicProperties = BasicPropertiesStubber.Stub(_ => _.Type = type)
                                             });
             Assert.IsType<UnresolvedMessage>(message);
         }
@@ -54,7 +53,7 @@ namespace Carrot.Tests
             var builder = new ConsumedMessageBuilder(serializationConfiguration, resolver.Object);
             var message = builder.Build(new BasicDeliverEventArgs
                                             {
-                                                BasicProperties = new BasicProperties { ContentType = contentType }
+                                                BasicProperties = BasicPropertiesStubber.Stub(_ => _.ContentType = contentType)
                                             });
             Assert.IsType<UnsupportedMessage>(message);
         }
@@ -68,11 +67,11 @@ namespace Carrot.Tests
             var args = new BasicDeliverEventArgs
                            {
                                Body = body,
-                               BasicProperties = new BasicProperties
+                               BasicProperties = BasicPropertiesStubber.Stub(_ =>
                                {
-                                   ContentType = contentType,
-                                   Type = type
-                               }
+                                   _.ContentType = contentType;
+                                   _.Type = type;
+                               })
                            };
             var context = ConsumedMessageContext.FromBasicDeliverEventArgs(args);
             var runtimeType = typeof(Foo).GetTypeInfo();
@@ -87,7 +86,7 @@ namespace Carrot.Tests
             Assert.IsType<CorruptedMessage>(message);
         }
 
-        internal class SerializationConfigurationWrapper : SerializationConfiguration
+        private class SerializationConfigurationWrapper : SerializationConfiguration
         {
             private readonly ISerializer _serializer;
 

@@ -1,5 +1,4 @@
-﻿using System;
-using Carrot.Messages;
+﻿using Carrot.Messages;
 
 namespace Carrot
 {

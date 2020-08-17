@@ -5,7 +5,6 @@ using Carrot.Configuration;
 using Carrot.Messages;
 using Moq;
 using RabbitMQ.Client.Events;
-using RabbitMQ.Client.Framing;
 using Xunit;
 
 namespace Carrot.Tests
@@ -87,7 +86,7 @@ namespace Carrot.Tests
             var args = new BasicDeliverEventArgs
             {
                 DeliveryTag = 1234L,
-                BasicProperties = new BasicProperties()
+                BasicProperties = BasicPropertiesStubber.Stub()
             };
 
             var realConsumer = new Mock<Consumer<FakeConsumedMessage>>();
@@ -113,7 +112,7 @@ namespace Carrot.Tests
             var args = new BasicDeliverEventArgs
                            {
                                DeliveryTag = deliveryTag,
-                               BasicProperties = new BasicProperties()
+                               BasicProperties = BasicPropertiesStubber.Stub()
                            };
             var builder = new Mock<IConsumedMessageBuilder>();
             var message = new FakeConsumedMessage(args, func);
@@ -139,10 +138,7 @@ namespace Carrot.Tests
                 _result = result;
             }
 
-            internal override Object Content
-            {
-                get { throw new NotImplementedException(); }
-            }
+            internal override Object Content => throw new NotImplementedException();
 
             internal override Task<AggregateConsumingResult> ConsumeAsync(IEnumerable<IConsumer> subscriptions,
                                                                           IOutboundChannel outboundChannel)

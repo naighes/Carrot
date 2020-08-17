@@ -29,7 +29,7 @@ namespace Carrot.Messages
         {
             return Task.WhenAll(subscriptions.Select(_ => _.SafeConsumeAsync(this,
                                                                              outboundChannel)))
-                       .ContinueWith(AggregateResult);
+                       .ContinueWith(AggregateResult, TaskContinuationOptions.RunContinuationsAsynchronously);
         }
 
         private AggregateConsumingResult BuildErrorResult(IEnumerable<ConsumingResult> results)

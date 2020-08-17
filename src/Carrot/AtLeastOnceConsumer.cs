@@ -32,7 +32,7 @@ namespace Carrot
                                                                   }
                                                                   catch (Exception e) { result.NotifyConsumingFault(e); }
                                                                   return result;
-                                                              });
+                                                              }, TaskContinuationOptions.RunContinuationsAsynchronously);
         }
     }
 }

@@ -37,7 +37,7 @@ namespace Carrot
                                                 String exchange,
                                                 String routingKey,
                                                 IBasicProperties properties,
-                                                Byte[] body)
+                                                ReadOnlyMemory<Byte> body)
         {
             base.HandleBasicDeliver(consumerTag,
                                     deliveryTag,
@@ -62,7 +62,7 @@ namespace Carrot
                                                     {
                                                         if (_.IsFaulted)
                                                             OnUnhandledException(_.Exception);
-                                                    });
+                                                    }, TaskContinuationOptions.RunContinuationsAsynchronously);
         }
 
         public void Dispose()

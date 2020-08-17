@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Reflection;
 using System.Text;
 using Newtonsoft.Json;
@@ -9,17 +9,22 @@ namespace Carrot.Serialization
     {
         public JsonSerializerSettings Settings { get; } = new JsonSerializerSettings();
 
-        public Object Deserialize(Byte[] body, TypeInfo type, Encoding encoding = null)
+        public object Deserialize(ReadOnlyMemory<Byte> body, TypeInfo type, Encoding encoding = null)
         {
             var e = encoding ?? new UTF8Encoding(true);
-            return JsonConvert.DeserializeObject(e.GetString(body),
-                                                 type.AsType(),
-                                                 Settings);
+#if NETCOREAPP3_1
+            
+            var json = e.GetString(body.Span);
+#else
+            var json = e.GetString(body);
+#endif      
+            return JsonConvert.DeserializeObject(json, type.AsType(), Settings);
         }
 
         public String Serialize(Object obj)
         {
             return JsonConvert.SerializeObject(obj);
         }
+        
     }
 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Carrot.Configuration;
 using Carrot.Messages;
+using RabbitMQ.Client;
 
 namespace Carrot
 {
@@ -20,6 +21,7 @@ namespace Carrot
                             EnvironmentConfiguration configuration)
         {
             _connection = connection;
+            _connection.ConnectionShutdown += OnConnectionShutdown;
             _consumers = consumers;
             _outboundChannel = outboundChannel;
             Configuration = configuration;
@@ -39,7 +41,27 @@ namespace Carrot
                 consumer.Dispose();
 
             _outboundChannel?.Dispose();
+            Cleanup(_connection, 200, "Connection Disposed");
+            _connection.ConnectionShutdown -= OnConnectionShutdown;
             _connection?.Dispose();
+        }
+
+        void OnConnectionShutdown(object connection, ShutdownEventArgs reason)
+        {
+            Cleanup(_connection, reason.ReplyCode, reason.ReplyText);
+        }
+
+        private void Cleanup(RabbitMQ.Client.IConnection connection, ushort replyCode = 200, string message = "Unknown")
+        {
+            if (connection == null) return;
+            try
+            {
+                if (connection.IsOpen)
+                    connection.Close(replyCode, message);
+            }
+            catch
+            {
+            }
         }
     }
 }

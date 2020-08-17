@@ -27,7 +27,7 @@ namespace Carrot
             Model.BasicAcks += OnModelBasicAcks;
             Model.BasicNacks += OnModelBasicNacks;
         }
-
+        
         public override Task<IPublishResult> PublishAsync<TMessage>(OutboundMessage<TMessage> source,
                                                                     Exchange exchange,
                                                                     String routingKey)
@@ -41,7 +41,7 @@ namespace Carrot
         {
             var properties = BuildBasicProperties(source);
             var body = BuildBody(source, properties);
-            var tcs = new TaskCompletionSource<Boolean>(properties);
+            var tcs = new TaskCompletionSource<Boolean>(properties, TaskCreationOptions.RunContinuationsAsynchronously);
             var tag = Model.NextPublishSeqNo;
             _confirms.TryAdd(tag, new Tuple<TaskCompletionSource<Boolean>, IMessage>(tcs, source));
 
@@ -60,14 +60,15 @@ namespace Carrot
                 tcs.TrySetException(exception);
             }
 
-            return tcs.Task.ContinueWith(Result);
+            return tcs.Task.ContinueWith(Result, TaskContinuationOptions.RunContinuationsAsynchronously);
         }
 
         protected override void OnModelDisposing()
         {
             base.OnModelDisposing();
 
-            Model.WaitForConfirms(TimeSpan.FromSeconds(30d)); // TODO: timeout should not be hardcodeds
+            if(Model.IsOpen)
+                Model.WaitForConfirms(TimeSpan.FromSeconds(30d)); // TODO: timeout should not be hardcodeds
             Model.BasicAcks -= OnModelBasicAcks;
             Model.BasicNacks -= OnModelBasicNacks;
         }

@@ -11,7 +11,7 @@ namespace Carrot.BasicSample
         private static void Main()
         {
             const String routingKey = "routing_key";
-            const String endpointUrl = "amqp://guest:guest@localhost:5674/";
+            const String endpointUrl = "amqp://guest:guest@localhost:5672/";
             IMessageTypeResolver resolver = new MessageBindingResolver(typeof(Foo).GetTypeInfo().Assembly);
 
             var broker = Broker.New(_ =>

@@ -6,7 +6,6 @@ using Carrot.Configuration;
 using Carrot.Messages;
 using Moq;
 using RabbitMQ.Client.Events;
-using RabbitMQ.Client.Framing;
 using Xunit;
 
 namespace Carrot.Tests
@@ -54,7 +53,7 @@ namespace Carrot.Tests
                                              new BasicDeliverEventArgs
                                                  {
                                                      Redelivered = true,
-                                                     BasicProperties = new BasicProperties()
+                                                     BasicProperties = BasicPropertiesStubber.Stub()
                                                  }).ConsumeAsync(new[] { consumer },
                                                                  outboundChannel)
                                                    .Result;
@@ -102,7 +101,7 @@ namespace Carrot.Tests
         {
             return new BasicDeliverEventArgs
                        {
-                           BasicProperties = new BasicProperties()
+                           BasicProperties = BasicPropertiesStubber.Stub()
                        };
         }
     }

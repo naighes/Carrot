@@ -1,29 +1,25 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>netstandard1.5;net452</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;netcoreapp3.1;net461</TargetFrameworks>
     <Description>Carrot is a .NET lightweight library that provides a couple of facilities over RabbitMQ.</Description>
-    <PackageTargetFallback>$(PackageTargetFallback);dotnet</PackageTargetFallback>
-    <Title>Carrot</Title>
+	<Title>Carrot</Title>
     <PackageId>Carrot</PackageId>
     <VersionPrefix>1.1.1</VersionPrefix>
     <VersionSuffix></VersionSuffix>
-    <AssemblyVersion>1.1.1</AssemblyVersion>
-    <FileVersion>1.1.1</FileVersion>
+    <AssemblyVersion>1.2.0</AssemblyVersion>
+    <FileVersion>1.2.0</FileVersion>
     <NeutralLanguage>en</NeutralLanguage>
     <Copyright>copyright © Nicola Baldi (naighes) 2019</Copyright>
     <RepositoryUrl>https://github.com/naighes/Carrot.git</RepositoryUrl>
     <PackageTags>rabbitmq</PackageTags>
     <PackageReleaseNotes>
-      PublishAsync now supports exchange parameter as String.
-    </PackageReleaseNotes>
+      Updated rabbimq driver to major version 6 
+</PackageReleaseNotes>
     <PackageLicenseUrl>https://raw.githubusercontent.com/naighes/Carrot/master/LICENSE.txt</PackageLicenseUrl>
+    <Version>1.2.0</Version>
   </PropertyGroup>
-  <ItemGroup Condition="'$(TargetFramework)'=='netstandard1.5'">
-    <PackageReference Include="System.AppDomain" Version="2.0.11" />
-    <PackageReference Include="System.Diagnostics.Process" Version="4.3.0" />
-  </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
-    <PackageReference Include="RabbitMQ.Client" Version="5.0.1" />
+    <PackageReference Include="RabbitMQ.Client" Version="6.1.0" />
   </ItemGroup>
 </Project>
