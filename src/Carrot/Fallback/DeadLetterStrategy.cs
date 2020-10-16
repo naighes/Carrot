@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using Carrot.Messages;
 
 namespace Carrot.Fallback
@@ -19,14 +20,19 @@ namespace Carrot.Fallback
 
         public static IFallbackStrategy New(IBroker broker,
                                             Queue queue,
-                                            Func<String, String> exchangeNameBuilder)
+                                            Func<string, string> exchangeNameBuilder)
         {
             return new DeadLetterStrategy(broker.DeclareDurableDirectExchange(exchangeNameBuilder(queue.Name)));
         }
 
-        public void Apply(IOutboundChannel channel, ConsumedMessageBase message)
+        public async Task<IFallbackApplied> Apply(IOutboundChannel channel, ConsumedMessageBase message)
         {
-            channel.ForwardAsync(message, _exchange, String.Empty);
+            var published = await channel.ForwardAsync(message, _exchange, string.Empty);
+            
+            if (published is FailurePublishing result)
+                return new FallbackAppliedFailure(result.Exception);
+
+            return new FallbackAppliedSuccessful();
         }
     }
 }

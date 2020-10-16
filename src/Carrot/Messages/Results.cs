@@ -113,8 +113,15 @@ namespace Carrot.Messages
                                                          IOutboundChannel outboundChannel,
                                                          IFallbackStrategy fallbackStrategy)
         {
-            fallbackStrategy.Apply(outboundChannel, Message);
-            return base.Reply(inboundChannel, outboundChannel, fallbackStrategy);
+            var fallbackApplied = fallbackStrategy.Apply(outboundChannel, Message)
+                .GetAwaiter()
+                .GetResult();
+
+            if(fallbackApplied.Success)
+                return base.Reply(inboundChannel, outboundChannel, fallbackStrategy);
+            
+            Message.Requeue(inboundChannel);
+            return this;
         }
     }
 
