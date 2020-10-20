@@ -23,16 +23,51 @@ namespace Carrot
                                 OutboundChannel).ContinueWith(_ =>
                                                               {
                                                                   var result = _.Result;
+                                                              
                                                                   try
                                                                   {
-                                                                      result.Reply(InboundChannel,
-                                                                                   OutboundChannel,
-                                                                                   Configuration.FallbackStrategy);
+                                                                      var consumingResult = result.Reply(InboundChannel, OutboundChannel);
+
+                                                                      if (consumingResult is ReiteratedConsumingFailure)
+                                                                          return Fallback(consumingResult);
+
                                                                       result.NotifyConsumingCompletion();
                                                                   }
-                                                                  catch (Exception e) { result.NotifyConsumingFault(e); }
-                                                                  return result;
-                                                              }, TaskContinuationOptions.RunContinuationsAsynchronously);
+                                                                  catch (Exception e)
+                                                                  {
+                                                                      result.NotifyConsumingFault(e);
+                                                                  }
+                                                                  return Task.FromResult(result);
+                                                              }).Unwrap();
+        }
+
+        Task<AggregateConsumingResult> Fallback(AggregateConsumingResult failureResult)
+        {
+            return Configuration.FallbackStrategy
+                                .Apply(OutboundChannel, 
+                                       failureResult.Message)
+                                .ContinueWith(t =>
+                                              {
+                                                  if (t.Result.Success)
+                                                      failureResult.Message.Acknowledge(InboundChannel);
+                                                  else
+                                                      failureResult.Message.Requeue(InboundChannel);
+
+                                                  return failureResult;
+                                              },
+                                              TaskContinuationOptions.RunContinuationsAsynchronously)
+                                .ContinueWith(t =>
+                                              {
+                                                  var exception = t.Exception?.GetBaseException();
+
+                                                  if (exception != null)
+                                                      failureResult.NotifyConsumingFault(exception);
+                                                  else
+                                                      failureResult.NotifyConsumingCompletion();
+
+                                                  return failureResult;
+                                              },
+                                              TaskContinuationOptions.RunContinuationsAsynchronously);
         }
     }
 }

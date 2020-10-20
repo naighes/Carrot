@@ -40,7 +40,7 @@ namespace Carrot.Messages
 
     public abstract class AggregateConsumingResult
     {
-        protected readonly ConsumedMessageBase Message;
+        internal readonly ConsumedMessageBase Message;
         protected readonly ConsumedMessage.ConsumingResult[] Results;
 
         protected AggregateConsumingResult(ConsumedMessageBase message, ConsumedMessage.ConsumingResult[] results)
@@ -50,8 +50,7 @@ namespace Carrot.Messages
         }
 
         internal virtual AggregateConsumingResult Reply(IInboundChannel inboundChannel,
-                                                        IOutboundChannel outboundChannel,
-                                                        IFallbackStrategy fallbackStrategy)
+                                                        IOutboundChannel outboundChannel)
         {
             Message.Acknowledge(inboundChannel);
             return this;
@@ -110,17 +109,8 @@ namespace Carrot.Messages
         }
 
         internal override AggregateConsumingResult Reply(IInboundChannel inboundChannel,
-                                                         IOutboundChannel outboundChannel,
-                                                         IFallbackStrategy fallbackStrategy)
+                                                         IOutboundChannel outboundChannel)
         {
-            var fallbackApplied = fallbackStrategy.Apply(outboundChannel, Message)
-                .GetAwaiter()
-                .GetResult();
-
-            if(fallbackApplied.Success)
-                return base.Reply(inboundChannel, outboundChannel, fallbackStrategy);
-            
-            Message.Requeue(inboundChannel);
             return this;
         }
     }
@@ -135,8 +125,7 @@ namespace Carrot.Messages
         }
 
         internal override AggregateConsumingResult Reply(IInboundChannel inboundChannel,
-                                                         IOutboundChannel outboundChannel,
-                                                         IFallbackStrategy fallbackStrategy)
+                                                         IOutboundChannel outboundChannel)
         {
             Message.Requeue(inboundChannel);
             return this;

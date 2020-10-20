@@ -25,14 +25,13 @@ namespace Carrot.Fallback
             return new DeadLetterStrategy(broker.DeclareDurableDirectExchange(exchangeNameBuilder(queue.Name)));
         }
 
-        public async Task<IFallbackApplied> Apply(IOutboundChannel channel, ConsumedMessageBase message)
+        public Task<IFallbackApplied> Apply(IOutboundChannel channel, ConsumedMessageBase message)
         {
-            var published = await channel.ForwardAsync(message, _exchange, string.Empty);
-            
-            if (published is FailurePublishing result)
-                return new FallbackAppliedFailure(result.Exception);
-
-            return new FallbackAppliedSuccessful();
+            return channel.ForwardAsync(message, _exchange, string.Empty)
+                .ContinueWith(_ =>
+                    _.Result is FailurePublishing
+                        ? new FallbackAppliedFailure(_.Exception?.GetBaseException()) as IFallbackApplied
+                        : new FallbackAppliedSuccessful(), TaskContinuationOptions.RunContinuationsAsynchronously);
         }
     }
 }
