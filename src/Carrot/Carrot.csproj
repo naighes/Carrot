@@ -6,17 +6,17 @@
     <PackageId>Carrot</PackageId>
     <VersionPrefix>1.1.1</VersionPrefix>
     <VersionSuffix></VersionSuffix>
-    <AssemblyVersion>1.2.0</AssemblyVersion>
-    <FileVersion>1.2.0</FileVersion>
+    <AssemblyVersion>1.2.1</AssemblyVersion>
+    <FileVersion>1.2.1</FileVersion>
     <NeutralLanguage>en</NeutralLanguage>
     <Copyright>copyright © Nicola Baldi (naighes) 2019</Copyright>
     <RepositoryUrl>https://github.com/naighes/Carrot.git</RepositoryUrl>
     <PackageTags>rabbitmq</PackageTags>
     <PackageReleaseNotes>
-      Updated rabbimq driver to major version 6 
+      Requeue message if fallback fails.
 </PackageReleaseNotes>
     <PackageLicenseUrl>https://raw.githubusercontent.com/naighes/Carrot/master/LICENSE.txt</PackageLicenseUrl>
-    <Version>1.2.0</Version>
+    <Version>1.2.1</Version>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
