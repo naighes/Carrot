@@ -69,7 +69,8 @@ Task("Publish").IsDependentOn("Release").Does(() => {
         if (file!= null) {
             var settings = new DotNetCoreNuGetPushSettings {
                 Source = "https://www.nuget.org/api/v2/package",
-                ApiKey = nugetapikey
+                ApiKey = nugetapikey,
+                SkipDuplicate = true
             };
             DotNetCoreNuGetPush(file.FullName, settings);
         }

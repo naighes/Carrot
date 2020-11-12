@@ -20,8 +20,7 @@ if (!$PSScriptRoot) {
 }
 
 $TOOLS_DIR = Join-Path $PSScriptRoot "tools"
-$CAKE_VERSION = "0.22.2"
-$CAKE_FEED = "https://www.myget.org/F/cake/api/v3/index.json"
+$CAKE_VERSION = "0.38.5"
 $CAKE_DLL = "$TOOLS_DIR/cake.coreclr/$CAKE_VERSION/Cake.dll"
 
 if ((Test-Path $PSScriptRoot) -and !(Test-Path $TOOLS_DIR)) {
@@ -35,7 +34,7 @@ if (!(Test-Path $CAKE_DLL)) {
         echo '<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup><TargetFramework>netstandard1.5</TargetFramework></PropertyGroup><ItemGroup><PackageReference Include="Cake.CoreCLR" Version="'$CAKE_VERSION'" /></ItemGroup></Project>' > "$TOOLS_DIR\project.csproj"
     }
 
-    $Exp = "dotnet restore `"$TOOLS_DIR\project.csproj`" --packages `"$TOOLS_DIR`" --source `"$CAKE_FEED`""
+    $Exp = "dotnet restore `"$TOOLS_DIR\project.csproj`" --packages `"$TOOLS_DIR`""
     $NuGetOutput = Invoke-Expression "& $Exp" | Out-String
     Write-Verbose -Message $NuGetOutput
 
