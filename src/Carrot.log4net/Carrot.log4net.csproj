@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;net461</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;net461;net5.0</TargetFrameworks>
     <Description>a facility which enables log4net capabilities.</Description>
     <Title>Carrot.log4net</Title>
     <PackageId>Carrot.log4net</PackageId>
