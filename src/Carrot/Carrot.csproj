@@ -2,21 +2,21 @@
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;netcoreapp3.1;net461;net5.0</TargetFrameworks>
     <Description>Carrot is a .NET lightweight library that provides a couple of facilities over RabbitMQ.</Description>
-	<Title>Carrot</Title>
+    <Title>Carrot</Title>
     <PackageId>Carrot</PackageId>
     <VersionPrefix>1.1.1</VersionPrefix>
     <VersionSuffix></VersionSuffix>
-    <AssemblyVersion>1.2.1</AssemblyVersion>
-    <FileVersion>1.2.1</FileVersion>
+    <AssemblyVersion>1.2.2</AssemblyVersion>
+    <FileVersion>1.2.2</FileVersion>
     <NeutralLanguage>en</NeutralLanguage>
     <Copyright>copyright © Nicola Baldi (naighes) 2019</Copyright>
     <RepositoryUrl>https://github.com/naighes/Carrot.git</RepositoryUrl>
     <PackageTags>rabbitmq</PackageTags>
     <PackageReleaseNotes>
-      Requeue message if fallback fails.
-</PackageReleaseNotes>
+      Enable graceful connection shutdown
+    </PackageReleaseNotes>
     <PackageLicenseUrl>https://raw.githubusercontent.com/naighes/Carrot/master/LICENSE.txt</PackageLicenseUrl>
-    <Version>1.2.1</Version>
+    <Version>1.2.2</Version>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
