@@ -41,8 +41,8 @@ namespace Carrot
                 consumer.Dispose();
 
             _outboundChannel?.Dispose();
-            Cleanup(_connection, 200, "Connection Disposed");
             _connection.ConnectionShutdown -= OnConnectionShutdown;
+            Cleanup(_connection, 200, "Connection Disposed");
             _connection?.Dispose();
         }
 
