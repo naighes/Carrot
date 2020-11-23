@@ -12,7 +12,7 @@ namespace Carrot.Serialization
         public object Deserialize(ReadOnlyMemory<Byte> body, TypeInfo type, Encoding encoding = null)
         {
             var e = encoding ?? new UTF8Encoding(true);
-#if NETCOREAPP3_1
+#if (NETCOREAPP3_1 || NET5_0)
             
             var json = e.GetString(body.Span);
 #else
